@@ -12,7 +12,7 @@ services:
       - db_estoque:/var/lib/postgresql/data
 
   pgbackups:
-    container_name: Backup
+    container_name: Backup-stock-rp
     image: prodrigestivill/postgres-backup-local
     restart: always
     volumes:

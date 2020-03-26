@@ -38,6 +38,9 @@ const pause = require("./labtec/analyze/pause");
 const process = require("./labtec/process");
 const time = require("./labtec/process/time");
 
+const supProduct = require("./estoque/suprimentos/supProduct");
+const manufacturer = require("./estoque/suprimentos/supProduct/manufacturer");
+
 module.exports = [
   login,
   resources,
@@ -77,5 +80,8 @@ module.exports = [
   entryEquipment,
   pause,
   process,
-  time
+  time,
+
+  supProduct,
+  manufacturer
 ];
