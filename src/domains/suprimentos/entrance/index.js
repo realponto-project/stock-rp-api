@@ -5,7 +5,7 @@ const SubEntrance = database.model("subEntrance");
 const SupProduct = database.model("supProduct");
 const SupProvider = database.model("supProvider");
 
-module.exports = class SubEntranceDomain {
+module.exports = class SupEntranceDomain {
   async create(body, options = {}) {
     const { transaction = null } = options;
 

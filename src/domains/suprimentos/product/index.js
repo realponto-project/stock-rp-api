@@ -5,7 +5,7 @@ const formatQuery = require("../../../helpers/lazyLoad");
 const SupProduct = database.model("supProduct");
 const Manufacturer = database.model("manufacturer");
 
-module.exports = class SubProductDomain {
+module.exports = class SupProductDomain {
   async create(body, options = {}) {
     const { transaction = null } = options;
 

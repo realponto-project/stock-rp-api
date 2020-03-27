@@ -41,6 +41,7 @@ const time = require("./labtec/process/time");
 const supProduct = require("./estoque/suprimentos/supProduct");
 const supProvider = require("./estoque/suprimentos/supProvider");
 const supContact = require("./estoque/suprimentos/supProvider/supContact");
+const supOut = require("./estoque/suprimentos/supOut");
 const manufacturer = require("./estoque/suprimentos/supProduct/manufacturer");
 
 module.exports = [
@@ -87,5 +88,6 @@ module.exports = [
   supProduct,
   manufacturer,
   supProvider,
+  supOut,
   supContact
 ];
