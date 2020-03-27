@@ -36,7 +36,7 @@ module.exports = {
         type: Sequelize.DATE
       },
       manufacturerId: {
-        type: Sequelize.UUID,
+        type: Sequelize.STRING,
         references: {
           model: "manufacturer",
           key: "id"
