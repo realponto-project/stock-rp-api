@@ -7,7 +7,8 @@ const database = require("../../../database");
 const SupContactDomain = require("../contact");
 
 const SupProvider = database.model("supProvider");
-const SubContact = database.model("subContact");
+const SupContact = database.model("supContact");
+
 const supContactDomain = new SupContactDomain();
 
 module.exports = class SupProviderDomain {
@@ -169,7 +170,7 @@ module.exports = class SupProviderDomain {
     );
 
     return await findByPk(supProviderCreated.id, {
-      include: [{ model: SubContact }],
+      include: [{ model: SupContact }],
       transaction
     });
   }

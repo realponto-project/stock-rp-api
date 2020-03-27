@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 
 module.exports = sequelize => {
-  const supProduct = sequelize.define("supProduct", {
+  const supProvider = sequelize.define("supProvider", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
@@ -65,13 +65,13 @@ module.exports = sequelize => {
     }
   });
 
-  supProduct.associate = models => {
-    supProduct.hasMany(models.supContact, {
+  supProvider.associate = models => {
+    supProvider.hasMany(models.supContact, {
       foreignKey: {
         allowNull: false
       }
     });
   };
 
-  return supProduct;
+  return supProvider;
 };

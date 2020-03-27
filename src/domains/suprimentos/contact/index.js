@@ -8,9 +8,9 @@ module.exports = class SupContactDomain {
   async create(body, options = {}) {
     const { transaction = null } = options;
 
-    const SupContact = body;
+    const supContact = body;
 
-    const notHasProp = prop => R.not(R.has(prop, SupContact));
+    const notHasProp = prop => R.not(R.has(prop, supContact));
 
     let errors = false;
 
@@ -28,36 +28,36 @@ module.exports = class SupContactDomain {
       supProviderId: ""
     };
 
-    if (notHasProp("name") || !SupContact.name) {
+    if (notHasProp("name") || !supContact.name) {
       errors = true;
       field.name = true;
       message.name = "name cannot null";
     }
 
-    if (notHasProp("telphone") || !SupContact.telphone) {
+    if (notHasProp("telphone") || !supContact.telphone) {
       errors = true;
       field.telphone = true;
       message.telphone = "telphone cannot null";
     }
 
-    if (notHasProp("email") || !SupContact.email) {
+    if (notHasProp("email") || !supContact.email) {
       errors = true;
       field.email = true;
       message.email = "email cannot null";
     } else if (
-      !/^[\w_\-\.]+@[\w_\-\.]{2,}\.[\w]{2,}(\.[\w])?/.test(SupContact.email)
+      !/^[\w_\-\.]+@[\w_\-\.]{2,}\.[\w]{2,}(\.[\w])?/.test(supContact.email)
     ) {
       errors = true;
       field.email = true;
       message.email = "email invalid";
     }
 
-    if (notHasProp("supProviderId") || !SupContact.supProviderId) {
+    if (notHasProp("supProviderId") || !supContact.supProviderId) {
       errors = true;
       field.supProviderId = true;
       message.supProviderId = "supProviderId cannot null";
     } else if (
-      !(await SupProvider.findByPk(SupContact.supProviderId, { transaction }))
+      !(await SupProvider.findByPk(supContact.supProviderId, { transaction }))
     ) {
       errors = true;
       field.supProviderId = true;
