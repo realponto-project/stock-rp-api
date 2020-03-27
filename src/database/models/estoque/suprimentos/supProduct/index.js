@@ -18,6 +18,11 @@ module.exports = sequelize => {
     unit: {
       type: Sequelize.ENUM(["UNID", "PÇ", "CX", "LT"]),
       allowNull: false
+    },
+
+    amount: {
+      type: Sequelize.INTEGER,
+      defaultValue: 0
     }
   });
 

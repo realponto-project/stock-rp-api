@@ -18,6 +18,46 @@ const create = async (req, res, next) => {
   }
 };
 
+const getAll = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    let query;
+    if (R.has("query", req)) {
+      if (R.has("query", req.query)) {
+        query = JSON.parse(req.query.query);
+      }
+    }
+
+    const providers = await supProviderDomain.getAll({
+      query,
+      transaction
+    });
+
+    await transaction.commit();
+    res.json(providers);
+  } catch (error) {
+    await transaction.rollback();
+    next();
+  }
+};
+
+const update = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    const provider = await supProviderDomain.update(req.body, {
+      transaction
+    });
+
+    await transaction.commit();
+    res.json(provider);
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
+};
+
 module.exports = {
-  create
+  create,
+  getAll,
+  update
 };

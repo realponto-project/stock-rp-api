@@ -21,6 +21,11 @@ module.exports = {
         allowNull: false
       },
 
+      amount: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
+      },
+
       createdAt: {
         defaultValue: Sequelize.NOW,
         type: Sequelize.DATE

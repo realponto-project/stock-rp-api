@@ -73,16 +73,21 @@ module.exports = class SubEntranceDomain {
       message.supProviderId = "SupProvider not found";
     }
 
+    let supProduct = null;
+
     if (notHasProp("supProductId") || !subEntrance.supProductId) {
       errors = true;
       field.supProductId = true;
       message.supProductId = "supProductId cannot null";
-    } else if (
-      !(await SupProduct.findByPk(subEntrance.supProductId, { transaction }))
-    ) {
-      errors = true;
-      field.supProductId = true;
-      message.supProductId = "SupProvider not found";
+    } else {
+      csupProduct = await SupProduct.findByPk(subEntrance.supProductId, {
+        transaction
+      });
+      if (!supProduct) {
+        errors = true;
+        field.supProductId = true;
+        message.supProductId = "SupProvider not found";
+      }
     }
 
     if (errors) {
@@ -91,6 +96,8 @@ module.exports = class SubEntranceDomain {
     const { amount, priceUnit, discount } = subEntrance;
 
     const total = amount * priceUnit - discount;
+
+    await supProduct.update({ amount }, { transaction });
 
     return await SubEntrance.create({ ...subEntrance, total }, { transaction });
   }
