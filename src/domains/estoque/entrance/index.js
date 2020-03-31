@@ -145,7 +145,7 @@ module.exports = class TechnicianDomain {
       message.stockBase = "deve conter numero de serie";
     }
 
-    if (product.serial && !entrance.analysis) {
+    if (product.serial && entrance.analysis === "0") {
       if (
         entranceNotHasProp("serialNumbers") ||
         entrance.serialNumbers.length === 0
@@ -240,7 +240,7 @@ module.exports = class TechnicianDomain {
       transaction
     });
 
-    if (product.serial && entrance.serialNumber) {
+    if (product.serial && entrance.analysis === "0") {
       const { serialNumbers } = entrance;
 
       const serialNumbersFindPromises = serialNumbers.map(async item => {

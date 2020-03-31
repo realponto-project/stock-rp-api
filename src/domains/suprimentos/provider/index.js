@@ -18,6 +18,8 @@ module.exports = class SupProviderDomain {
 
     const supProvider = body;
 
+    console.log(body);
+
     const notHasProp = prop => R.not(R.has(prop, supProvider));
 
     let errors = false;
@@ -31,7 +33,6 @@ module.exports = class SupProviderDomain {
       city: false,
       state: false,
       neighborhood: false,
-      referencePoint: false,
       complement: false,
       contacts: false
     };
@@ -45,7 +46,6 @@ module.exports = class SupProviderDomain {
       city: "",
       state: "",
       neighborhood: "",
-      referencePoint: "",
       complement: "",
       contacts: ""
     };
@@ -55,7 +55,7 @@ module.exports = class SupProviderDomain {
       field.razaoSocial = true;
       message.razaoSocial = "razaoSocial cannot null";
     } else if (
-      await supProvider.findOne({
+      await SupProvider.findOne({
         where: { razaoSocial: supProvider.razaoSocial },
         transaction
       })
@@ -94,10 +94,6 @@ module.exports = class SupProviderDomain {
       errors = true;
       field.number = true;
       message.number = "number cannot null";
-    } else if (!/\D/.test(supProvider.number)) {
-      errors = true;
-      field.number = true;
-      message.number = "number invalid";
     }
 
     if (notHasProp("zipCode") || !supProvider.zipCode) {
@@ -138,11 +134,6 @@ module.exports = class SupProviderDomain {
       errors = true;
       field.contacts = true;
       message.contacts = "contacts cannot null";
-    }
-    if (notHasProp("referencePoint")) {
-      errors = true;
-      field.referencePoint = true;
-      message.referencePoint = "referencePoint cannot undefined";
     }
     if (notHasProp("complement")) {
       errors = true;
@@ -237,7 +228,6 @@ module.exports = class SupProviderDomain {
       city: false,
       state: false,
       neighborhood: false,
-      referencePoint: false,
       complement: false
       // contacts: false
     };
@@ -251,7 +241,6 @@ module.exports = class SupProviderDomain {
       city: "",
       state: "",
       neighborhood: "",
-      referencePoint: "",
       complement: ""
       // contacts: ""
     };
@@ -302,10 +291,6 @@ module.exports = class SupProviderDomain {
       errors = true;
       field.number = true;
       message.number = "number cannot null";
-    } else if (!/\D/.test(supProvider.number)) {
-      errors = true;
-      field.number = true;
-      message.number = "number invalid";
     }
 
     if (notHasProp("zipCode") || !supProvider.zipCode) {
@@ -348,11 +333,6 @@ module.exports = class SupProviderDomain {
     //   message.contacts = "contacts cannot null";
     // }
 
-    if (notHasProp("referencePoint")) {
-      errors = true;
-      field.referencePoint = true;
-      message.referencePoint = "referencePoint cannot undefined";
-    }
     if (notHasProp("complement")) {
       errors = true;
       field.complement = true;

@@ -72,7 +72,7 @@ module.exports = class SupProductDomain {
       throw new FieldValidationError([{ field, message }]);
     }
 
-    return await SubProduct.create(supProduct, { transaction });
+    return await SupProduct.create(supProduct, { transaction });
   }
 
   async getAll(options = {}) {

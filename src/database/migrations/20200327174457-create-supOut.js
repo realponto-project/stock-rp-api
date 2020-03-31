@@ -9,7 +9,13 @@ module.exports = {
         primaryKey: true
       },
 
-      amount: { type: Sequelize.INTEGER, allowNull: false },
+      amount: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        validate: {
+          min: 0
+        }
+      },
 
       solicitante: {
         type: Sequelize.STRING,
@@ -26,10 +32,7 @@ module.exports = {
 
       emailResp: {
         type: Sequelize.STRING,
-        allowNull: true,
-        validate: {
-          isEmail: true
-        }
+        allowNull: true
       },
 
       supProductId: {

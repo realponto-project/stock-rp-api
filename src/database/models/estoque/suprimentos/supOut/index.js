@@ -1,14 +1,20 @@
 const Sequelize = require("sequelize");
 
 module.exports = sequelize => {
-  const supEntrance = sequelize.define("supEntrance", {
+  const supOut = sequelize.define("supOut", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
       primaryKey: true
     },
 
-    amount: { type: Sequelize.INTEGER, allowNull: false },
+    amount: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      validate: {
+        min: 0
+      }
+    },
 
     solicitante: {
       type: Sequelize.STRING,
@@ -25,20 +31,17 @@ module.exports = sequelize => {
 
     emailResp: {
       type: Sequelize.STRING,
-      allowNull: true,
-      validate: {
-        isEmail: true
-      }
+      allowNull: true
     }
   });
 
-  supEntrance.associate = models => {
-    supEntrance.belongsTo(models.supProduct, {
+  supOut.associate = models => {
+    supOut.belongsTo(models.supProduct, {
       foreignKey: {
         allowNull: false
       }
     });
   };
 
-  return supEntrance;
+  return supOut;
 };

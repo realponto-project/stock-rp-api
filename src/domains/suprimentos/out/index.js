@@ -1,4 +1,5 @@
 const R = require("ramda");
+const sgMail = require("@sendgrid/mail");
 const { FieldValidationError } = require("../../../helpers/errors");
 const database = require("../../../database");
 const formatQuery = require("../../../helpers/lazyLoad");
@@ -52,7 +53,7 @@ module.exports = class SupOutDomain {
       field.emailResp = true;
       message.emailResp = "emailResp cannot undefined";
     } else if (
-      supOut.emailResp !== null &&
+      supOut.emailResp !== "" &&
       !/^[\w_\-\.]+@[\w_\-\.]{2,}\.[\w]{2,}(\.[\w])?/.test(supOut.emailResp)
     ) {
       errors = true;
@@ -72,27 +73,39 @@ module.exports = class SupOutDomain {
       message.emailSolic = "emailSolic invalid";
     }
 
+    let supProduct = null;
+
     if (notHasProp("supProductId") || !supOut.supProductId) {
       errors = true;
       field.supProductId = true;
       message.supProductId = "supProductId cannot null";
-    } else if (
-      !(await SupProduct.findByPk(supOut.supProductId, { transaction }))
-    ) {
-      errors = true;
-      field.supProductId = true;
-      message.supProductId = "SupProduct not found";
+    } else {
+      supProduct = await SupProduct.findByPk(supOut.supProductId, {
+        transaction
+      });
+      if (!supProduct || supProduct.amount - supOut.amount < 0) {
+        errors = true;
+        field.supProductId = true;
+        message.supProductId = "SupProduct not found";
+      }
     }
 
     if (errors) {
       throw new FieldValidationError([{ field, message }]);
     }
 
+    if (supOut.emailResp !== "") supOut.emailResp = null;
+
+    await supProduct.update(
+      { amount: supProduct.amount - supOut.amount },
+      { transaction }
+    );
+
     await sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
     const msg = {
-      to: user.email,
-      from: supOut.emailSolic,
+      to: supOut.emailSolic,
+      from: "sistema_estoque@realponto.com",
       subject: "Sending with Twilio SendGrid is Fun",
       text: "and easy to do anywhere, even with Node.js",
       html: `
@@ -108,18 +121,18 @@ module.exports = class SupOutDomain {
         console.log("error: ", err);
       });
 
-    if (supOut.emailResp) {
-      msg.from = supOut.emailResp;
+    // if (supOut.emailResp) {
+    //   msg.to = supOut.emailResp;
 
-      await sgMail
-        .send(msg)
-        .then(function(resp) {
-          console.log("resposta :");
-        })
-        .catch(function(err) {
-          console.log("error: ", err);
-        });
-    }
+    //   await sgMail
+    //     .send(msg)
+    //     .then(function(resp) {
+    //       console.log("resposta :");
+    //     })
+    //     .catch(function(err) {
+    //       console.log("error: ", err);
+    //     });
+    // }
 
     return await SupOut.create(supOut, { transaction });
   }

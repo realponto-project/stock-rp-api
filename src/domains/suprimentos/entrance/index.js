@@ -1,7 +1,7 @@
 const R = require("ramda");
 const { FieldValidationError } = require("../../../helpers/errors");
 const database = require("../../../database");
-const SubEntrance = database.model("subEntrance");
+const SupEntrance = database.model("supEntrance");
 const SupProduct = database.model("supProduct");
 const SupProvider = database.model("supProvider");
 
@@ -9,9 +9,9 @@ module.exports = class SupEntranceDomain {
   async create(body, options = {}) {
     const { transaction = null } = options;
 
-    const subEntrance = R.omit(["total"], body);
+    const supEntrance = R.omit(["total"], body);
 
-    const notHasProp = prop => R.not(R.has(prop, subEntrance));
+    const notHasProp = prop => R.not(R.has(prop, supEntrance));
 
     let errors = false;
 
@@ -35,38 +35,38 @@ module.exports = class SupEntranceDomain {
       errors = true;
       field.amount = true;
       message.amount = "amount cannot undefined";
-    } else if (typeof subEntrance.amount !== "number") {
+    } else if (typeof supEntrance.amount !== "number") {
       errors = true;
       field.amount = true;
-      message.amount = "amount already registered";
+      message.amount = "amount invalid";
     }
 
     if (notHasProp("priceUnit")) {
       errors = true;
       field.priceUnit = true;
       message.priceUnit = "priceUnit cannot undefined";
-    } else if (typeof subEntrance.priceUnit !== "number") {
+    } else if (typeof supEntrance.priceUnit !== "number") {
       errors = true;
       field.priceUnit = true;
-      message.priceUnit = "priceUnit already registered";
+      message.priceUnit = "priceUnit invalid";
     }
 
     if (notHasProp("discount")) {
       errors = true;
       field.discount = true;
       message.discount = "discount cannot undefined";
-    } else if (typeof subEntrance.discount !== "number") {
+    } else if (typeof supEntrance.discount !== "number") {
       errors = true;
       field.discount = true;
-      message.discount = "discount already registered";
+      message.discount = "discount invalid";
     }
 
-    if (notHasProp("supProviderId") || !subEntrance.supProviderId) {
+    if (notHasProp("supProviderId") || !supEntrance.supProviderId) {
       errors = true;
       field.supProviderId = true;
       message.supProviderId = "supProviderId cannot null";
     } else if (
-      !(await SupProvider.findByPk(subEntrance.supProviderId, { transaction }))
+      !(await SupProvider.findByPk(supEntrance.supProviderId, { transaction }))
     ) {
       errors = true;
       field.supProviderId = true;
@@ -75,12 +75,12 @@ module.exports = class SupEntranceDomain {
 
     let supProduct = null;
 
-    if (notHasProp("supProductId") || !subEntrance.supProductId) {
+    if (notHasProp("supProductId") || !supEntrance.supProductId) {
       errors = true;
       field.supProductId = true;
       message.supProductId = "supProductId cannot null";
     } else {
-      csupProduct = await SupProduct.findByPk(subEntrance.supProductId, {
+      supProduct = await SupProduct.findByPk(supEntrance.supProductId, {
         transaction
       });
       if (!supProduct) {
@@ -93,12 +93,12 @@ module.exports = class SupEntranceDomain {
     if (errors) {
       throw new FieldValidationError([{ field, message }]);
     }
-    const { amount, priceUnit, discount } = subEntrance;
+    const { amount, priceUnit, discount } = supEntrance;
 
     const total = amount * priceUnit - discount;
 
     await supProduct.update({ amount }, { transaction });
 
-    return await SubEntrance.create({ ...subEntrance, total }, { transaction });
+    return await SupEntrance.create({ ...supEntrance, total }, { transaction });
   }
 };

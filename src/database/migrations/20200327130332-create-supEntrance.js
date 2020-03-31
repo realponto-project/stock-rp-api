@@ -9,13 +9,37 @@ module.exports = {
         primaryKey: true
       },
 
-      amount: { type: Sequelize.INTEGER, allowNull: false },
+      amount: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        validate: {
+          min: 0
+        }
+      },
 
-      priceUnit: { type: Sequelize.FLOAT, allowNull: false },
+      priceUnit: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+        validate: {
+          min: 0
+        }
+      },
 
-      discount: { type: Sequelize.FLOAT, allowNull: false },
+      discount: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+        validate: {
+          min: 0
+        }
+      },
 
-      total: { type: Sequelize.FLOAT, allowNull: false },
+      total: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+        validate: {
+          min: 0
+        }
+      },
 
       supProviderId: {
         type: Sequelize.UUID,

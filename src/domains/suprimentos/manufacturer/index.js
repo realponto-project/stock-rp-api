@@ -10,7 +10,7 @@ module.exports = class ManufacturerDomain {
 
     const manufacturer = body;
 
-    const notHasProp = prop => R.not(R.has(prop, supProduct));
+    const notHasProp = prop => R.not(R.has(prop, manufacturer));
 
     let errors = false;
 
@@ -93,7 +93,7 @@ module.exports = class ManufacturerDomain {
       });
     }
 
-    const notHasProp = prop => R.not(R.has(prop, supProduct));
+    const notHasProp = prop => R.not(R.has(prop, manufacturer));
 
     let errors = false;
 

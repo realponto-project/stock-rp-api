@@ -31,13 +31,7 @@ const statusExpedition = require("./estoque/reserve/statusExpedition");
 const emprestimo = require("./estoque/emprestimo");
 const conserto = require("./estoque/conserto");
 
-const analyze = require("./labtec/analyze");
-const analysisPart = require("./labtec/analyze/analysisPart");
-const entryEquipment = require("./labtec/entryEquipment");
-const pause = require("./labtec/analyze/pause");
-const process = require("./labtec/process");
-const time = require("./labtec/process/time");
-
+const supEntrance = require("./estoque/suprimentos/supEntrance");
 const supProduct = require("./estoque/suprimentos/supProduct");
 const supProvider = require("./estoque/suprimentos/supProvider");
 const supContact = require("./estoque/suprimentos/supProvider/supContact");
@@ -78,13 +72,7 @@ module.exports = [
   emprestimo,
   conserto,
 
-  analyze,
-  analysisPart,
-  entryEquipment,
-  pause,
-  process,
-  time,
-
+  supEntrance,
   supProduct,
   manufacturer,
   supProvider,

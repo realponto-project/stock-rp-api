@@ -22,7 +22,10 @@ module.exports = sequelize => {
 
     amount: {
       type: Sequelize.INTEGER,
-      defaultValue: 0
+      defaultValue: 0,
+      validate: {
+        min: 0
+      }
     }
   });
 
