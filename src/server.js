@@ -17,7 +17,7 @@ console.log(process.env.ORIGIN);
 app.use(logger("dev"));
 app.use(
   cors({
-    origin: process.env.ORIGIN,
+    origin: process.env.ORIGIN || "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     preflightContinue: false,
     optionsSuccessStatus: 204

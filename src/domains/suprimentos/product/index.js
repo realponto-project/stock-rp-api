@@ -9,7 +9,7 @@ module.exports = class SupProductDomain {
   async create(body, options = {}) {
     const { transaction = null } = options;
 
-    const supProduct = R.omit(["amount"], body);
+    const supProduct = R.omit(["amount", "code"], body);
 
     const notHasProp = prop => R.not(R.has(prop, supProduct));
 
@@ -72,7 +72,14 @@ module.exports = class SupProductDomain {
       throw new FieldValidationError([{ field, message }]);
     }
 
-    return await SupProduct.create(supProduct, { transaction });
+    const supProductCreated = await SupProduct.create(supProduct, {
+      transaction
+    });
+
+    return await supProductCreated.update(
+      { code: supProductCreated.id.toString() },
+      { transaction }
+    );
   }
 
   async getAll(options = {}) {
@@ -84,7 +91,12 @@ module.exports = class SupProductDomain {
 
     const supProducts = await SupProduct.findAndCountAll({
       where: getWhere("supProduct"),
-      include: [{ model: Manufacturer }],
+      include: [
+        {
+          model: Manufacturer,
+          where: getWhere("manufacturer")
+        }
+      ],
       order: [["createdAt", "ASC"]],
       limit,
       offset,

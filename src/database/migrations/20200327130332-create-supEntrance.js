@@ -41,6 +41,11 @@ module.exports = {
         }
       },
 
+      responsibleUser: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+
       supProviderId: {
         type: Sequelize.UUID,
         references: {

@@ -10,6 +10,11 @@ module.exports = {
         allowNull: false
       },
 
+      code: {
+        type: Sequelize.STRING,
+        unique: true
+      },
+
       name: {
         type: Sequelize.STRING,
         unique: true,
@@ -44,7 +49,7 @@ module.exports = {
         type: Sequelize.DATE
       },
       manufacturerId: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
         references: {
           model: "manufacturer",
           key: "id"

@@ -4,10 +4,14 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     const manufacturer = queryInterface.createTable("manufacturer", {
       id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true
+      },
+
+      name: {
         type: Sequelize.STRING,
-        primaryKey: true,
-        allowNull: false,
-        unique: true
+        allowNull: false
       },
 
       createdAt: {

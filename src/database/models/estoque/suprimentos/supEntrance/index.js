@@ -38,6 +38,11 @@ module.exports = sequelize => {
       validate: {
         min: 0
       }
+    },
+
+    responsibleUser: {
+      type: Sequelize.STRING,
+      allowNull: false
     }
   });
 

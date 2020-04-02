@@ -5,6 +5,7 @@ const database = require("../../../database");
 const formatQuery = require("../../../helpers/lazyLoad");
 const SupProduct = database.model("supProduct");
 const SupOut = database.model("supOut");
+const User = database.model("user");
 
 module.exports = class SupOutDomain {
   async create(body, options = {}) {
@@ -21,7 +22,8 @@ module.exports = class SupOutDomain {
       solicitante: false,
       emailResp: false,
       emailSolic: false,
-      supProductId: false
+      supProductId: false,
+      responsibleUser: false
     };
 
     const message = {
@@ -29,7 +31,8 @@ module.exports = class SupOutDomain {
       solicitante: "",
       emailResp: "",
       emailSolic: "",
-      supProductId: ""
+      supProductId: "",
+      responsibleUser: ""
     };
 
     if (notHasProp("amount")) {
@@ -90,6 +93,21 @@ module.exports = class SupOutDomain {
       }
     }
 
+    if (notHasProp("responsibleUser") || !supOut.responsibleUser) {
+      errors = true;
+      field.responsibleUser = true;
+      message.responsibleUser = "responsibleUser cannot null.";
+    } else if (
+      !(await User.findOne({
+        where: { username: supOut.responsibleUser },
+        transaction
+      }))
+    ) {
+      errors = true;
+      field.responsibleUser = true;
+      message.responsibleUser = "responsibleUser invalid.";
+    }
+
     if (errors) {
       throw new FieldValidationError([{ field, message }]);
     }
@@ -144,9 +162,12 @@ module.exports = class SupOutDomain {
 
     const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
 
+    console.log(getWhere("supOut"));
+    console.log(getWhere("supProduct"));
+
     const supOuts = await SupOut.findAndCountAll({
       where: getWhere("supOut"),
-      // include: [{ model: Manufacturer }],
+      include: [{ model: SupProduct, where: getWhere("supProduct") }],
       order: [["createdAt", "ASC"]],
       limit,
       offset,

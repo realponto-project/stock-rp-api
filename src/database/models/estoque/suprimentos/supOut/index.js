@@ -32,6 +32,11 @@ module.exports = sequelize => {
     emailResp: {
       type: Sequelize.STRING,
       allowNull: true
+    },
+
+    responsibleUser: {
+      type: Sequelize.STRING,
+      allowNull: false
     }
   });
 

@@ -35,6 +35,11 @@ module.exports = {
         allowNull: true
       },
 
+      responsibleUser: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+
       supProductId: {
         type: Sequelize.INTEGER,
         references: {

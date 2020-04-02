@@ -206,7 +206,10 @@ module.exports = class SupProviderDomain {
     const { transaction = null } = options;
     const supProvider = R.omit(["id"], body);
 
-    const oldSupProvider = await SupProvider.findByPk(body.id, { transaction });
+    const oldSupProvider = await SupProvider.findByPk(body.id, {
+      include: [{ model: SupContact }],
+      transaction
+    });
 
     if (!oldSupProvider) {
       throw new FieldValidationError({
@@ -228,8 +231,8 @@ module.exports = class SupProviderDomain {
       city: false,
       state: false,
       neighborhood: false,
-      complement: false
-      // contacts: false
+      complement: false,
+      contacts: false
     };
 
     const message = {
@@ -241,8 +244,8 @@ module.exports = class SupProviderDomain {
       city: "",
       state: "",
       neighborhood: "",
-      complement: ""
-      // contacts: ""
+      complement: "",
+      contacts: ""
     };
 
     if (notHasProp("razaoSocial") || !supProvider.razaoSocial) {
@@ -250,7 +253,7 @@ module.exports = class SupProviderDomain {
       field.razaoSocial = true;
       message.razaoSocial = "razaoSocial cannot null";
     } else if (
-      (await supProvider.findOne({
+      (await SupProvider.findOne({
         where: { razaoSocial: supProvider.razaoSocial },
         transaction
       })) &&
@@ -323,15 +326,15 @@ module.exports = class SupProviderDomain {
       message.neighborhood = "neighborhood cannot null";
     }
 
-    // if (
-    //   notHasProp("contacts") ||
-    //   !supProvider.contacts ||
-    //   supProvider.contacts.length === 0
-    // ) {
-    //   errors = true;
-    //   field.contacts = true;
-    //   message.contacts = "contacts cannot null";
-    // }
+    if (
+      notHasProp("contacts") ||
+      !supProvider.contacts ||
+      supProvider.contacts.length === 0
+    ) {
+      errors = true;
+      field.contacts = true;
+      message.contacts = "contacts cannot null";
+    }
 
     if (notHasProp("complement")) {
       errors = true;
@@ -343,17 +346,31 @@ module.exports = class SupProviderDomain {
       throw new FieldValidationError([{ field, message }]);
     }
 
-    // const { contacts } = supProvider;
+    let supContacts = oldSupProvider.supContacts;
+    const { contacts } = supProvider;
 
-    // await Promise.all(
-    //   contacts.map(
-    //     async contact =>
-    //       await supContactDomain.create(
-    //         { ...contact, supProviderId: supProviderCreated.id },
-    //         { transaction }
-    //       )
-    //   )
-    // );
+    await Promise.all(
+      contacts.map(async contact => {
+        if (R.has("id", contact)) {
+          supContacts = supContacts.filter(
+            supContact => supContact.id !== contact.id
+          );
+
+          await supContactDomain.update(contact, { transaction });
+        } else {
+          await supContactDomain.create(
+            { ...contact, supProviderId: oldSupProvider.id },
+            { transaction }
+          );
+        }
+      })
+    );
+
+    await Promise.all(
+      supContacts.map(
+        async supContact => await supContact.destroy({ transaction })
+      )
+    );
 
     return await oldSupProvider.update(supProvider, {
       // include: [{ model: SupContact }],

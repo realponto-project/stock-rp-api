@@ -15,26 +15,26 @@ module.exports = class ManufacturerDomain {
     let errors = false;
 
     const field = {
-      id: false
+      name: false
     };
 
     const message = {
-      id: ""
+      name: ""
     };
 
-    if (notHasProp("id") || !manufacturer.id) {
+    if (notHasProp("name") || !manufacturer.name) {
       errors = true;
-      field.id = true;
-      message.id = "id cannot null";
+      field.name = true;
+      message.name = "name cannot null";
     } else if (
       await Manufacturer.findOne({
-        where: { id: manufacturer.id },
+        where: { name: manufacturer.name },
         transaction
       })
     ) {
       errors = true;
-      field.id = true;
-      message.id = "id already registered";
+      field.name = true;
+      message.name = "name already registered";
     }
 
     if (errors) {
@@ -98,27 +98,27 @@ module.exports = class ManufacturerDomain {
     let errors = false;
 
     const field = {
-      id: false
+      name: false
     };
 
     const message = {
-      id: ""
+      name: ""
     };
 
-    if (notHasProp("id") || !manufacturer.id) {
+    if (notHasProp("name") || !manufacturer.name) {
       errors = true;
-      field.id = true;
-      message.id = "id cannot null";
+      field.name = true;
+      message.name = "name cannot null";
     } else if (
       (await Manufacturer.findOne({
-        where: { id: manufacturer.id },
+        where: { name: manufacturer.name },
         transaction
       })) &&
-      oldManufacturer.id !== manufacturer.id
+      oldManufacturer.name !== manufacturer.name
     ) {
       errors = true;
-      field.id = true;
-      message.id = "id already registered";
+      field.name = true;
+      message.name = "name already registered";
     }
 
     if (errors) {

@@ -1,9 +1,11 @@
 const R = require("ramda");
 const { FieldValidationError } = require("../../../helpers/errors");
+const formatQuery = require("../../../helpers/lazyLoad");
 const database = require("../../../database");
 const SupEntrance = database.model("supEntrance");
 const SupProduct = database.model("supProduct");
 const SupProvider = database.model("supProvider");
+const User = database.model("user");
 
 module.exports = class SupEntranceDomain {
   async create(body, options = {}) {
@@ -20,7 +22,8 @@ module.exports = class SupEntranceDomain {
       priceUnit: false,
       discount: false,
       supProviderId: false,
-      supProductId: false
+      supProductId: false,
+      responsibleUser: false
     };
 
     const message = {
@@ -28,7 +31,8 @@ module.exports = class SupEntranceDomain {
       priceUnit: "",
       discount: "",
       supProviderId: "",
-      supProductId: ""
+      supProductId: "",
+      responsibleUser: ""
     };
 
     if (notHasProp("amount")) {
@@ -90,6 +94,21 @@ module.exports = class SupEntranceDomain {
       }
     }
 
+    if (notHasProp("responsibleUser") || !supEntrance.responsibleUser) {
+      errors = true;
+      field.responsibleUser = true;
+      message.responsibleUser = "responsibleUser cannot null.";
+    } else if (
+      !(await User.findOne({
+        where: { username: supEntrance.responsibleUser },
+        transaction
+      }))
+    ) {
+      errors = true;
+      field.responsibleUser = true;
+      message.responsibleUser = "responsibleUser invalid.";
+    }
+
     if (errors) {
       throw new FieldValidationError([{ field, message }]);
     }
@@ -100,5 +119,40 @@ module.exports = class SupEntranceDomain {
     await supProduct.update({ amount }, { transaction });
 
     return await SupEntrance.create({ ...supEntrance, total }, { transaction });
+  }
+
+  async getAll(options = {}) {
+    const { query = null, transaction = null } = options;
+
+    const newQuery = Object.assign({}, query);
+
+    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
+
+    const supEntrances = await SupEntrance.findAndCountAll({
+      where: getWhere("supEntrance"),
+      include: [{ model: SupProduct, where: getWhere("supProduct") }],
+      order: [["createdAt", "ASC"]],
+      limit,
+      offset,
+      transaction
+    });
+
+    const { rows, count } = supEntrances;
+
+    if (rows.length === 0) {
+      return {
+        page: null,
+        show: 0,
+        count,
+        rows: []
+      };
+    }
+
+    return {
+      page: pageResponse,
+      show: R.min(count, limit),
+      count,
+      rows
+    };
   }
 };
