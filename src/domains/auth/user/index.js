@@ -3,7 +3,7 @@ const Sequelize = require("sequelize");
 
 const {
   FieldValidationError,
-  UnauthorizedError
+  UnauthorizedError,
 } = require("../../../helpers/errors");
 
 const database = require("../../../database");
@@ -50,20 +50,20 @@ class UserDomain {
       "delROs",
       "updateRos",
       "addStatus",
-      "suprimento"
+      "suprimento",
     ];
 
     const userNotFormatted = R.omit(omitArray, bodyData);
 
-    const notHasProps = props => R.not(R.has(props, userNotFormatted));
-    const bodyNotHasProps = props => R.not(R.has(props, bodyData));
+    const notHasProps = (props) => R.not(R.has(props, userNotFormatted));
+    const bodyNotHasProps = (props) => R.not(R.has(props, bodyData));
 
     if (notHasProps("username") || !userNotFormatted.username) {
       throw new FieldValidationError([
         {
           field: "username",
-          message: "username cannot be null"
-        }
+          message: "username cannot be null",
+        },
       ]);
     }
 
@@ -71,8 +71,8 @@ class UserDomain {
       throw new FieldValidationError([
         {
           field: "typeName",
-          message: "typeName undefined"
-        }
+          message: "typeName undefined",
+        },
       ]);
     }
 
@@ -82,18 +82,18 @@ class UserDomain {
       where: { typeName },
       include: [
         {
-          model: Resources
-        }
+          model: Resources,
+        },
       ],
-      transaction
+      transaction,
     });
 
     if (!typeAccountRetorned) {
       throw new FieldValidationError([
         {
           field: "typeName",
-          message: "typeName invalid"
-        }
+          message: "typeName invalid",
+        },
       ]);
     }
 
@@ -103,8 +103,8 @@ class UserDomain {
       throw new FieldValidationError([
         {
           field: "customized",
-          message: "customized undefined"
-        }
+          message: "customized undefined",
+        },
       ]);
     }
 
@@ -133,7 +133,7 @@ class UserDomain {
       delROs: false,
       updateRos: false,
       addStatus: false,
-      suprimento: false
+      suprimento: false,
     };
     const message = {
       typeName: "",
@@ -160,7 +160,7 @@ class UserDomain {
       delROs: "",
       updateRos: "",
       addStatus: "",
-      suprimento: ""
+      suprimento: "",
     };
 
     let errors = null;
@@ -362,7 +362,7 @@ class UserDomain {
 
       const user = await User.findOne({
         where: { username: responsibleUser },
-        transaction
+        transaction,
       });
 
       if (!user && bodyData.responsibleUser !== "modrp") {
@@ -407,7 +407,7 @@ class UserDomain {
       delROs: bodyData.delROs,
       updateRos: bodyData.updateRos,
       addStatus: bodyData.addStatus,
-      suprimento: bodyData.suprimento
+      suprimento: bodyData.suprimento,
     };
 
     if (userNotFormatted.customized) {
@@ -417,7 +417,7 @@ class UserDomain {
     }
 
     const formatBody = R.evolve({
-      username: R.pipe(R.toLower(), R.trim())
+      username: R.pipe(R.toLower(), R.trim()),
     });
 
     const user = formatBody(userNotFormatted);
@@ -427,8 +427,8 @@ class UserDomain {
     const userFormatted = {
       ...user,
       login: {
-        password
-      }
+        password,
+      },
     };
 
     // if (user) {
@@ -437,7 +437,7 @@ class UserDomain {
 
     const userCreated = await User.create(userFormatted, {
       include: [Login],
-      transaction
+      transaction,
     });
 
     let userReturned = null;
@@ -445,7 +445,7 @@ class UserDomain {
     if (userNotFormatted.customized) {
       userReturned = await User.findByPk(userCreated.id, {
         attributes: { exclude: ["loginId"] },
-        include: [{ model: TypeAccount }, { model: Resources }]
+        include: [{ model: TypeAccount }, { model: Resources }],
       });
     } else {
       userReturned = await User.findByPk(userCreated.id, {
@@ -455,11 +455,11 @@ class UserDomain {
             model: TypeAccount,
             include: [
               {
-                model: Resources
-              }
-            ]
-          }
-        ]
+                model: Resources,
+              },
+            ],
+          },
+        ],
       });
     }
 
@@ -480,8 +480,8 @@ class UserDomain {
       throw new FieldValidationError([
         {
           name: "username",
-          message: "username cannot to be null"
-        }
+          message: "username cannot to be null",
+        },
       ]);
     }
 
@@ -489,8 +489,8 @@ class UserDomain {
       throw new FieldValidationError([
         {
           name: "oldPassword",
-          message: "oldPassword cannot to be null"
-        }
+          message: "oldPassword cannot to be null",
+        },
       ]);
     }
 
@@ -498,15 +498,15 @@ class UserDomain {
       throw new FieldValidationError([
         {
           name: "newPassword",
-          message: "newPassword cannot to be null"
-        }
+          message: "newPassword cannot to be null",
+        },
       ]);
     }
 
     const getBody = R.applySpec({
       username: R.prop("username"),
       oldPassword: R.prop("oldPassword"),
-      newPassword: R.prop("newPassword")
+      newPassword: R.prop("newPassword"),
     });
 
     const body = getBody(bodyData);
@@ -515,10 +515,10 @@ class UserDomain {
       include: [
         {
           model: User,
-          where: { username: body.username }
-        }
+          where: { username: body.username },
+        },
       ],
-      transaction
+      transaction,
     });
 
     if (!login) {
@@ -533,16 +533,16 @@ class UserDomain {
 
     if (checkPwd) {
       await login.update({
-        password: body.newPassword
+        password: body.newPassword,
       });
       const loginUpdated = await Login.findOne({
         include: [
           {
             model: User,
-            where: { username: body.username }
-          }
+            where: { username: body.username },
+          },
         ],
-        transaction
+        transaction,
       });
       return loginUpdated;
     }
@@ -564,31 +564,31 @@ class UserDomain {
     if (hasEmail) {
       newUser = {
         ...newUser,
-        email: R.prop("email", user)
+        email: R.prop("email", user),
       };
 
       if (!user.email) {
         throw new FieldValidationError([
           {
             name: "email",
-            message: "email cannot be null"
-          }
+            message: "email cannot be null",
+          },
         ]);
       }
 
       const email = await User.findOne({
         where: {
-          email: user.email
+          email: user.email,
         },
-        transaction
+        transaction,
       });
 
       if (email) {
         throw new FieldValidationError([
           {
             field: "email",
-            message: "email already exist"
-          }
+            message: "email already exist",
+          },
         ]);
       }
     }
@@ -596,27 +596,27 @@ class UserDomain {
     if (hasName) {
       newUser = {
         ...newUser,
-        name: R.prop("name", user)
+        name: R.prop("name", user),
       };
 
       if (!user.name) {
         throw new FieldValidationError([
           {
             name: "name",
-            message: "name cannot be null"
-          }
+            message: "name cannot be null",
+          },
         ]);
       }
     }
 
     const userInstance = await User.findByPk(id, {
-      transaction
+      transaction,
     });
 
     await userInstance.update(newUser);
 
     const userUpdated = await User.findByPk(id, {
-      transaction
+      transaction,
     });
 
     return userUpdated;
@@ -630,10 +630,10 @@ class UserDomain {
       include: [
         {
           model: User,
-          where: { id }
-        }
+          where: { id },
+        },
       ],
-      transaction
+      transaction,
     });
 
     if (!login) {
@@ -648,7 +648,7 @@ class UserDomain {
 
     const user = await User.findOne({
       where: { username },
-      transaction
+      transaction,
     });
 
     let userResources = null;
@@ -660,10 +660,10 @@ class UserDomain {
       userResources = await User.findByPk(user.id, {
         include: [
           {
-            model: Resources
-          }
+            model: Resources,
+          },
         ],
-        transaction
+        transaction,
       });
 
       response = {
@@ -693,7 +693,7 @@ class UserDomain {
         delROs: userResources.resource.delROs,
         updateRos: userResources.resource.updateRos,
         addStatus: userResources.resource.addStatus,
-        suprimento: userResources.resource.suprimento
+        suprimento: userResources.resource.suprimento,
       };
     } else {
       userResources = await User.findByPk(user.id, {
@@ -702,12 +702,12 @@ class UserDomain {
             model: TypeAccount,
             include: [
               {
-                model: Resources
-              }
-            ]
-          }
+                model: Resources,
+              },
+            ],
+          },
         ],
-        transaction
+        transaction,
       });
 
       response = {
@@ -737,7 +737,7 @@ class UserDomain {
         delROs: userResources.typeAccount.resource.delROs,
         updateRos: userResources.typeAccount.resource.updateRos,
         addStatus: userResources.typeAccount.resource.addStatus,
-        suprimento: userResources.typeAccount.resource.suprimento
+        suprimento: userResources.typeAccount.resource.suprimento,
       };
     }
 
@@ -747,6 +747,8 @@ class UserDomain {
   // eslint-disable-next-line camelcase
   async user_Update(bodyData, options = {}) {
     const { transaction = null } = options;
+
+    console.log(bodyData);
 
     const omitArray = [
       "id",
@@ -778,7 +780,7 @@ class UserDomain {
       "delROs",
       "updateRos",
       "addStatus",
-      "suprimento"
+      "suprimento",
     ];
 
     const userNotFormatted = R.omit(omitArray, bodyData);
@@ -786,21 +788,21 @@ class UserDomain {
     const oldUser = await User.findByPk(bodyData.id, {
       include: [
         {
-          model: Resources
-        }
+          model: Resources,
+        },
       ],
-      transaction
+      transaction,
     });
 
-    const notHasProps = props => R.not(R.has(props, userNotFormatted));
-    const bodyNotHasProps = props => R.not(R.has(props, bodyData));
+    const notHasProps = (props) => R.not(R.has(props, userNotFormatted));
+    const bodyNotHasProps = (props) => R.not(R.has(props, bodyData));
 
     if (notHasProps("typeName")) {
       throw new FieldValidationError([
         {
           field: "typeName",
-          message: "typeName undefined"
-        }
+          message: "typeName undefined",
+        },
       ]);
     }
 
@@ -810,18 +812,18 @@ class UserDomain {
       where: { typeName },
       include: [
         {
-          model: Resources
-        }
+          model: Resources,
+        },
       ],
-      transaction
+      transaction,
     });
 
     if (!typeAccountRetorned) {
       throw new FieldValidationError([
         {
           field: "typeName",
-          message: "typeName invalid"
-        }
+          message: "typeName invalid",
+        },
       ]);
     }
 
@@ -831,18 +833,13 @@ class UserDomain {
       throw new FieldValidationError([
         {
           field: "customized",
-          message: "customized undefined"
-        }
+          message: "customized undefined",
+        },
       ]);
     }
 
     const field = {
       typeName: false,
-      addCompany: false,
-      addPart: false,
-      addAnalyze: false,
-      addEquip: false,
-      addEntry: false,
       responsibleUser: false,
 
       addTec: false,
@@ -860,16 +857,10 @@ class UserDomain {
       gerROs: false,
       delROs: false,
       updateRos: false,
-      addStatus: false,
-      suprimento: false
+      suprimento: false,
     };
     const message = {
       typeName: "",
-      addCompany: "",
-      addPart: "",
-      addAnalyze: "",
-      addEquip: "",
-      addEntry: "",
       responsibleUser: "",
 
       addTec: "",
@@ -887,70 +878,15 @@ class UserDomain {
       gerROs: "",
       delROs: "",
       updateRos: "",
-      addStatus: "",
-      suprimento: ""
+      suprimento: "",
     };
 
     let errors = null;
-
-    if (
-      bodyNotHasProps("addCompany") ||
-      typeof bodyData.addCompany !== "boolean"
-    ) {
-      errors = true;
-      field.addCompany = true;
-      message.addCompany = "addCompany não é um booleano";
-    }
-
-    if (bodyNotHasProps("addPart") || typeof bodyData.addPart !== "boolean") {
-      errors = true;
-      field.addPart = true;
-      message.addPart = "addPart não é um booleano";
-    }
-
-    if (
-      bodyNotHasProps("addAnalyze") ||
-      typeof bodyData.addAnalyze !== "boolean"
-    ) {
-      errors = true;
-      field.addAnalyze = true;
-      message.addAnalyze = "addAnalyze não é um booleano";
-    }
-
-    if (bodyNotHasProps("addEquip") || typeof bodyData.addEquip !== "boolean") {
-      errors = true;
-      field.addEquip = true;
-      message.addEquip = "addEquip não é um booleano";
-    }
-
-    if (bodyNotHasProps("addEntry") || typeof bodyData.addEntry !== "boolean") {
-      errors = true;
-      field.addEntry = true;
-      message.addEntry = "addEntry não é um booleano";
-    }
-
-    if (
-      bodyNotHasProps("addEquipType") ||
-      typeof bodyData.addEquipType !== "boolean"
-    ) {
-      errors = true;
-      field.addEquipType = true;
-      message.addEquipType = "addEquipType não é um booleano";
-    }
 
     if (bodyNotHasProps("tecnico") || typeof bodyData.tecnico !== "boolean") {
       errors = true;
       field.tecnico = true;
       message.tecnico = "tecnico não é um booleano";
-    }
-
-    if (
-      bodyNotHasProps("addAccessories") ||
-      typeof bodyData.addAccessories !== "boolean"
-    ) {
-      errors = true;
-      field.addAccessories = true;
-      message.addAccessories = "addAccessories não é um booleano";
     }
 
     if (bodyNotHasProps("addUser") || typeof bodyData.addUser !== "boolean") {
@@ -1067,15 +1003,6 @@ class UserDomain {
     }
 
     if (
-      bodyNotHasProps("addStatus") ||
-      typeof bodyData.addStatus !== "boolean"
-    ) {
-      errors = true;
-      field.addStatus = true;
-      message.addStatus = "addStatus não é um booleano";
-    }
-
-    if (
       bodyNotHasProps("suprimento") ||
       typeof bodyData.suprimento !== "boolean"
     ) {
@@ -1093,7 +1020,7 @@ class UserDomain {
 
       const user = await User.findOne({
         where: { username: responsibleUser },
-        transaction
+        transaction,
       });
 
       if (!user && bodyData.responsibleUser !== "modrp") {
@@ -1138,14 +1065,14 @@ class UserDomain {
       delROs: bodyData.delROs,
       updateRos: bodyData.updateRos,
       addStatus: bodyData.addStatus,
-      suprimento: bodyData.suprimento
+      suprimento: bodyData.suprimento,
     };
 
     if (userNotFormatted.customized) {
       if (oldUser.customized) {
         const resourceUpdate = {
           ...oldUser.resource,
-          ...resources
+          ...resources,
         };
         const resourcesRenorned = await oldUser.resource.update(
           resourceUpdate,
@@ -1155,7 +1082,7 @@ class UserDomain {
         userNotFormatted.resourceId = resourcesRenorned.id;
       } else {
         const resourcesRenorned = await Resources.create(resources, {
-          transaction
+          transaction,
         });
 
         userNotFormatted.resourceId = resourcesRenorned.id;
@@ -1166,7 +1093,7 @@ class UserDomain {
 
     const newUser = {
       ...oldUser,
-      ...userNotFormatted
+      ...userNotFormatted,
     };
 
     await oldUser.update(newUser, { transaction });
@@ -1180,7 +1107,7 @@ class UserDomain {
     if (userNotFormatted.customized) {
       userReturned = await User.findByPk(bodyData.id, {
         attributes: { exclude: ["loginId"] },
-        include: [{ model: TypeAccount }, { model: Resources }]
+        include: [{ model: TypeAccount }, { model: Resources }],
       });
     } else {
       userReturned = await User.findByPk(bodyData.id, {
@@ -1190,11 +1117,11 @@ class UserDomain {
             model: TypeAccount,
             include: [
               {
-                model: Resources
-              }
-            ]
-          }
-        ]
+                model: Resources,
+              },
+            ],
+          },
+        ],
       });
     }
 
@@ -1220,7 +1147,7 @@ class UserDomain {
     const inicialOrder = {
       field: "username",
       acendent: false,
-      direction: "DESC"
+      direction: "DESC",
     };
 
     const { query = null, transaction = null } = options;
@@ -1239,20 +1166,20 @@ class UserDomain {
     const users = await User.findAndCountAll({
       where: {
         ...getWhere("user"),
-        username: { [operators.ne]: "modrp" }
+        username: { [operators.ne]: "modrp" },
       },
       include: [
         {
           model: TypeAccount,
           where: getWhere("typeAccount"),
-          include: { model: Resources }
+          include: { model: Resources },
         },
-        { model: Resources }
+        { model: Resources },
       ],
       order: [[newOrder.field, newOrder.direction]],
       limit,
       offset,
-      transaction
+      transaction,
     });
 
     const { rows } = users;
@@ -1262,17 +1189,17 @@ class UserDomain {
         page: null,
         show: 0,
         count: users.count,
-        rows: []
+        rows: [],
       };
     }
 
-    const formatData = R.map(user => {
+    const formatData = R.map((user) => {
       const resp = {
         id: user.id,
         username: user.username,
         customized: user.customized,
         typeName: user.typeAccount.typeName,
-        resource: user.customized ? user.resource : user.typeAccount.resource
+        resource: user.customized ? user.resource : user.typeAccount.resource,
       };
       return resp;
     });
@@ -1288,7 +1215,7 @@ class UserDomain {
       page: pageResponse,
       show,
       count: users.count,
-      rows: usersList
+      rows: usersList,
     };
     return response;
   }
