@@ -4,6 +4,8 @@ const database = require("../../../database");
 const formatQuery = require("../../../helpers/lazyLoad");
 const SupProduct = database.model("supProduct");
 const Manufacturer = database.model("manufacturer");
+const SupEntrance = database.model("supEntrance");
+const SupProvider = database.model("supProvider");
 
 module.exports = class SupProductDomain {
   async create(body, options = {}) {
@@ -11,20 +13,20 @@ module.exports = class SupProductDomain {
 
     const supProduct = R.omit(["amount", "code"], body);
 
-    const notHasProp = prop => R.not(R.has(prop, supProduct));
+    const notHasProp = (prop) => R.not(R.has(prop, supProduct));
 
     let errors = false;
 
     const field = {
       name: false,
       unit: false,
-      manufacturerId: false
+      manufacturerId: false,
     };
 
     const message = {
       name: false,
       unit: false,
-      manufacturerId: false
+      manufacturerId: false,
     };
 
     if (notHasProp("name") || !supProduct.name) {
@@ -34,7 +36,7 @@ module.exports = class SupProductDomain {
     } else if (
       await SupProduct.findOne({
         where: { name: supProduct.name },
-        transaction
+        transaction,
       })
     ) {
       errors = true;
@@ -49,7 +51,7 @@ module.exports = class SupProductDomain {
       field.unit = true;
       message.unit = "unit cannot null";
     } else if (
-      unitArray.filter(item => item === supProduct.unit).length === 0
+      unitArray.filter((item) => item === supProduct.unit).length === 0
     ) {
       errors = true;
       field.unit = true;
@@ -73,7 +75,7 @@ module.exports = class SupProductDomain {
     }
 
     const supProductCreated = await SupProduct.create(supProduct, {
-      transaction
+      transaction,
     });
 
     return await supProductCreated.update(
@@ -94,13 +96,19 @@ module.exports = class SupProductDomain {
       include: [
         {
           model: Manufacturer,
-          where: getWhere("manufacturer")
-        }
+          where: getWhere("manufacturer"),
+        },
+        {
+          model: SupEntrance,
+          limit: 3,
+          attributes: ["amount", "createdAt", "supProviderId"],
+          include: [{ model: SupProvider, attributes: ["razaoSocial"] }],
+        },
       ],
       order: [["createdAt", "ASC"]],
       limit,
       offset,
-      transaction
+      transaction,
     });
 
     const { rows, count } = supProducts;
@@ -110,7 +118,7 @@ module.exports = class SupProductDomain {
         page: null,
         show: 0,
         count,
-        rows: []
+        rows: [],
       };
     }
 
@@ -118,7 +126,7 @@ module.exports = class SupProductDomain {
       page: pageResponse,
       show: R.min(count, limit),
       count,
-      rows
+      rows,
     };
   }
 
@@ -131,24 +139,24 @@ module.exports = class SupProductDomain {
     if (!oldSupProduct) {
       throw new FieldValidationError({
         field: { id: true },
-        message: { id: "invalid id" }
+        message: { id: "invalid id" },
       });
     }
 
-    const notHasProp = prop => R.not(R.has(prop, supProduct));
+    const notHasProp = (prop) => R.not(R.has(prop, supProduct));
 
     let errors = false;
 
     const field = {
       name: false,
       unit: false,
-      manufacturerId: false
+      manufacturerId: false,
     };
 
     const message = {
       name: false,
       unit: false,
-      manufacturerId: false
+      manufacturerId: false,
     };
 
     if (notHasProp("name") || !supProduct.name) {
@@ -158,7 +166,7 @@ module.exports = class SupProductDomain {
     } else if (
       (await SupProduct.findOne({
         where: { name: supProduct.name },
-        transaction
+        transaction,
       })) &&
       oldSupProduct.name !== supProduct.name
     ) {
@@ -174,7 +182,7 @@ module.exports = class SupProductDomain {
       field.unit = true;
       message.unit = "unit cannot null";
     } else if (
-      unitArray.filter(item => item === supProduct.unit).length === 0
+      unitArray.filter((item) => item === supProduct.unit).length === 0
     ) {
       errors = true;
       field.unit = true;

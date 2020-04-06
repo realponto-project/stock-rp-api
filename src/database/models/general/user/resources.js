@@ -7,6 +7,11 @@ module.exports = sequelize => {
       defaultValue: Sequelize.UUIDV4,
       primaryKey: true
     },
+    suprimento: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+    },
+
     addCompany: {
       type: Sequelize.BOOLEAN,
       defaultValue: false

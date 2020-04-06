@@ -36,7 +36,8 @@ module.exports = class TypeAccountDomain {
         "gerROs",
         "delROs",
         "updateRos",
-        "addStatus"
+        "addStatus",
+        "suprimento"
       ],
       bodyData
     );
@@ -71,7 +72,8 @@ module.exports = class TypeAccountDomain {
       gerROs: false,
       delROs: false,
       updateRos: false,
-      addStatus: false
+      addStatus: false,
+      suprimento: false
     };
     const message = {
       typeName: "",
@@ -98,7 +100,8 @@ module.exports = class TypeAccountDomain {
       gerROs: "",
       delROs: "",
       updateRos: "",
-      addStatus: ""
+      addStatus: "",
+      suprimento: ""
     };
 
     let errors = false;
@@ -370,7 +373,14 @@ module.exports = class TypeAccountDomain {
       field.addStatus = true;
       message.addStatus = "addStatus não é um booleano";
     }
-
+    if (
+      resourcesNotHasProp("suprimento") ||
+      typeof resources.suprimento !== "boolean"
+    ) {
+      errors = true;
+      field.suprimento = true;
+      message.suprimento = "suprimento não é um booleano";
+    }
     if (typeAccountNotHasProp("responsibleUser")) {
       errors = true;
       field.responsibleUser = true;
@@ -515,7 +525,8 @@ module.exports = class TypeAccountDomain {
       gerROs: typeAccount.resource.gerROs,
       delROs: typeAccount.resource.delROs,
       updateRos: typeAccount.resource.updateRos,
-      addStatus: typeAccount.resource.addStatus
+      addStatus: typeAccount.resource.addStatus,
+      suprimento: typeAccount.resource.suprimento
     };
 
     return response;

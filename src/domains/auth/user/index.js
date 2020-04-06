@@ -49,7 +49,8 @@ class UserDomain {
       "gerROs",
       "delROs",
       "updateRos",
-      "addStatus"
+      "addStatus",
+      "suprimento"
     ];
 
     const userNotFormatted = R.omit(omitArray, bodyData);
@@ -131,7 +132,8 @@ class UserDomain {
       gerROs: false,
       delROs: false,
       updateRos: false,
-      addStatus: false
+      addStatus: false,
+      suprimento: false
     };
     const message = {
       typeName: "",
@@ -157,7 +159,8 @@ class UserDomain {
       gerROs: "",
       delROs: "",
       updateRos: "",
-      addStatus: ""
+      addStatus: "",
+      suprimento: ""
     };
 
     let errors = null;
@@ -342,6 +345,14 @@ class UserDomain {
       field.addStatus = true;
       message.addStatus = "addStatus não é um booleano";
     }
+    if (
+      bodyNotHasProps("suprimento") ||
+      typeof bodyData.suprimento !== "boolean"
+    ) {
+      errors = true;
+      field.suprimento = true;
+      message.suprimento = "suprimento não é um booleano";
+    }
     if (notHasProps("responsibleUser")) {
       errors = true;
       field.responsibleUser = true;
@@ -395,7 +406,8 @@ class UserDomain {
       gerROs: bodyData.gerROs,
       delROs: bodyData.delROs,
       updateRos: bodyData.updateRos,
-      addStatus: bodyData.addStatus
+      addStatus: bodyData.addStatus,
+      suprimento: bodyData.suprimento
     };
 
     if (userNotFormatted.customized) {
@@ -680,7 +692,8 @@ class UserDomain {
         gerROs: userResources.resource.gerROs,
         delROs: userResources.resource.delROs,
         updateRos: userResources.resource.updateRos,
-        addStatus: userResources.resource.addStatus
+        addStatus: userResources.resource.addStatus,
+        suprimento: userResources.resource.suprimento
       };
     } else {
       userResources = await User.findByPk(user.id, {
@@ -723,7 +736,8 @@ class UserDomain {
         gerROs: userResources.typeAccount.resource.gerROs,
         delROs: userResources.typeAccount.resource.delROs,
         updateRos: userResources.typeAccount.resource.updateRos,
-        addStatus: userResources.typeAccount.resource.addStatus
+        addStatus: userResources.typeAccount.resource.addStatus,
+        suprimento: userResources.typeAccount.resource.suprimento
       };
     }
 
@@ -763,7 +777,8 @@ class UserDomain {
       "gerROs",
       "delROs",
       "updateRos",
-      "addStatus"
+      "addStatus",
+      "suprimento"
     ];
 
     const userNotFormatted = R.omit(omitArray, bodyData);
@@ -845,7 +860,8 @@ class UserDomain {
       gerROs: false,
       delROs: false,
       updateRos: false,
-      addStatus: false
+      addStatus: false,
+      suprimento: false
     };
     const message = {
       typeName: "",
@@ -871,7 +887,8 @@ class UserDomain {
       gerROs: "",
       delROs: "",
       updateRos: "",
-      addStatus: ""
+      addStatus: "",
+      suprimento: ""
     };
 
     let errors = null;
@@ -1058,6 +1075,15 @@ class UserDomain {
       message.addStatus = "addStatus não é um booleano";
     }
 
+    if (
+      bodyNotHasProps("suprimento") ||
+      typeof bodyData.suprimento !== "boolean"
+    ) {
+      errors = true;
+      field.suprimento = true;
+      message.suprimento = "suprimento não é um booleano";
+    }
+
     if (notHasProps("responsibleUser")) {
       errors = true;
       field.responsibleUser = true;
@@ -1111,7 +1137,8 @@ class UserDomain {
       gerROs: bodyData.gerROs,
       delROs: bodyData.delROs,
       updateRos: bodyData.updateRos,
-      addStatus: bodyData.addStatus
+      addStatus: bodyData.addStatus,
+      suprimento: bodyData.suprimento
     };
 
     if (userNotFormatted.customized) {

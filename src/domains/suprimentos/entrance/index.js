@@ -13,7 +13,7 @@ module.exports = class SupEntranceDomain {
 
     const supEntrance = R.omit(["total"], body);
 
-    const notHasProp = prop => R.not(R.has(prop, supEntrance));
+    const notHasProp = (prop) => R.not(R.has(prop, supEntrance));
 
     let errors = false;
 
@@ -23,7 +23,7 @@ module.exports = class SupEntranceDomain {
       discount: false,
       supProviderId: false,
       supProductId: false,
-      responsibleUser: false
+      responsibleUser: false,
     };
 
     const message = {
@@ -32,7 +32,7 @@ module.exports = class SupEntranceDomain {
       discount: "",
       supProviderId: "",
       supProductId: "",
-      responsibleUser: ""
+      responsibleUser: "",
     };
 
     if (notHasProp("amount")) {
@@ -85,7 +85,7 @@ module.exports = class SupEntranceDomain {
       message.supProductId = "supProductId cannot null";
     } else {
       supProduct = await SupProduct.findByPk(supEntrance.supProductId, {
-        transaction
+        transaction,
       });
       if (!supProduct) {
         errors = true;
@@ -101,7 +101,7 @@ module.exports = class SupEntranceDomain {
     } else if (
       !(await User.findOne({
         where: { username: supEntrance.responsibleUser },
-        transaction
+        transaction,
       }))
     ) {
       errors = true;
@@ -130,11 +130,14 @@ module.exports = class SupEntranceDomain {
 
     const supEntrances = await SupEntrance.findAndCountAll({
       where: getWhere("supEntrance"),
-      include: [{ model: SupProduct, where: getWhere("supProduct") }],
+      include: [
+        { model: SupProduct, where: getWhere("supProduct") },
+        { model: SupProvider },
+      ],
       order: [["createdAt", "ASC"]],
       limit,
       offset,
-      transaction
+      transaction,
     });
 
     const { rows, count } = supEntrances;
@@ -144,7 +147,7 @@ module.exports = class SupEntranceDomain {
         page: null,
         show: 0,
         count,
-        rows: []
+        rows: [],
       };
     }
 
@@ -152,7 +155,7 @@ module.exports = class SupEntranceDomain {
       page: pageResponse,
       show: R.min(count, limit),
       count,
-      rows
+      rows,
     };
   }
 };

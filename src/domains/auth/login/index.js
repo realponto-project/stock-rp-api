@@ -131,7 +131,8 @@ class LoginDomain {
         gerROs: resourceReturn.gerROs,
         delROs: resourceReturn.delROs,
         updateRos: resourceReturn.updateRos,
-        addStatus: resourceReturn.addStatus
+        addStatus: resourceReturn.addStatus,
+        suprimento: resourceReturn.suprimento
       };
     } else {
       const { typeAccountId } = user;
@@ -171,7 +172,8 @@ class LoginDomain {
         gerROs: typeAccountReturn.resource.gerROs,
         delROs: typeAccountReturn.resource.delROs,
         updateRos: typeAccountReturn.resource.updateRos,
-        addStatus: typeAccountReturn.resource.addStatus
+        addStatus: typeAccountReturn.resource.addStatus,
+        suprimento: typeAccountReturn.resource.suprimento
       };
     }
 

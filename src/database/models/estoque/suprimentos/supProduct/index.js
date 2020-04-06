@@ -1,45 +1,46 @@
 const Sequelize = require("sequelize");
 
-module.exports = sequelize => {
+module.exports = (sequelize) => {
   const supProduct = sequelize.define("supProduct", {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: false
+      allowNull: false,
     },
 
     code: {
       type: Sequelize.STRING,
-      unique: true
+      unique: true,
     },
 
     name: {
       type: Sequelize.STRING,
       unique: true,
-      allowNull: false
+      allowNull: false,
     },
 
     unit: {
       type: Sequelize.ENUM(["UNID", "PÇ", "CX", "LT"]),
-      allowNull: false
+      allowNull: false,
     },
 
     amount: {
       type: Sequelize.INTEGER,
       defaultValue: 0,
       validate: {
-        min: 0
-      }
-    }
+        min: 0,
+      },
+    },
   });
 
-  supProduct.associate = models => {
+  supProduct.associate = (models) => {
     supProduct.belongsTo(models.manufacturer, {
       foreignKey: {
-        allowNull: false
-      }
+        allowNull: false,
+      },
     });
+    supProduct.hasMany(models.supEntrance);
   };
 
   return supProduct;
