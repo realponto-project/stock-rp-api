@@ -116,7 +116,10 @@ module.exports = class SupEntranceDomain {
 
     const total = amount * priceUnit - discount;
 
-    await supProduct.update({ amount }, { transaction });
+    await supProduct.update(
+      { amount: amount + supProduct.amount },
+      { transaction }
+    );
 
     return await SupEntrance.create({ ...supEntrance, total }, { transaction });
   }
