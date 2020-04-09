@@ -10,16 +10,16 @@ module.exports = class ManufacturerDomain {
 
     const manufacturer = body;
 
-    const notHasProp = prop => R.not(R.has(prop, manufacturer));
+    const notHasProp = (prop) => R.not(R.has(prop, manufacturer));
 
     let errors = false;
 
     const field = {
-      name: false
+      name: false,
     };
 
     const message = {
-      name: ""
+      name: "",
     };
 
     if (notHasProp("name") || !manufacturer.name) {
@@ -29,7 +29,7 @@ module.exports = class ManufacturerDomain {
     } else if (
       await Manufacturer.findOne({
         where: { name: manufacturer.name },
-        transaction
+        transaction,
       })
     ) {
       errors = true;
@@ -56,17 +56,18 @@ module.exports = class ManufacturerDomain {
       order: [["createdAt", "ASC"]],
       limit,
       offset,
-      transaction
+      transaction,
     });
 
     const { rows, count } = manufacturers;
 
+    console.log(JSON.parse(JSON.stringify(rows)));
     if (rows.length === 0) {
       return {
         page: null,
         show: 0,
         count,
-        rows: []
+        rows: [],
       };
     }
 
@@ -74,7 +75,7 @@ module.exports = class ManufacturerDomain {
       page: pageResponse,
       show: R.min(count, limit),
       count,
-      rows
+      rows,
     };
   }
 
@@ -83,26 +84,26 @@ module.exports = class ManufacturerDomain {
     const manufacturer = R.omit(["id"], body);
 
     const oldManufacturer = await Manufacturer.findByPk(body.id, {
-      transaction
+      transaction,
     });
 
     if (!oldManufacturer) {
       throw new FieldValidationError({
         field: { id: true },
-        message: { id: "invalid id" }
+        message: { id: "invalid id" },
       });
     }
 
-    const notHasProp = prop => R.not(R.has(prop, manufacturer));
+    const notHasProp = (prop) => R.not(R.has(prop, manufacturer));
 
     let errors = false;
 
     const field = {
-      name: false
+      name: false,
     };
 
     const message = {
-      name: ""
+      name: "",
     };
 
     if (notHasProp("name") || !manufacturer.name) {
@@ -112,7 +113,7 @@ module.exports = class ManufacturerDomain {
     } else if (
       (await Manufacturer.findOne({
         where: { name: manufacturer.name },
-        transaction
+        transaction,
       })) &&
       oldManufacturer.name !== manufacturer.name
     ) {
