@@ -9,7 +9,7 @@ module.exports = {
         "corredor",
         {
           type: Sequelize.STRING,
-          allowNull: true,
+          defauktValues: "",
         },
         { transaction }
       );
@@ -18,7 +18,7 @@ module.exports = {
         "coluna",
         {
           type: Sequelize.STRING,
-          allowNull: true,
+          defauktValues: "",
         },
         { transaction }
       );
@@ -27,7 +27,7 @@ module.exports = {
         "prateleira",
         {
           type: Sequelize.STRING,
-          allowNull: true,
+          defauktValues: "",
         },
         { transaction }
       );
@@ -36,7 +36,7 @@ module.exports = {
         "gaveta",
         {
           type: Sequelize.STRING,
-          allowNull: true,
+          defauktValues: "",
         },
         { transaction }
       );

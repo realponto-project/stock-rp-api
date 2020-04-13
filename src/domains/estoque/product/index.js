@@ -407,19 +407,13 @@ module.exports = class ProductDomain {
     const inicialOrder = {
       field: "createdAt",
       acendent: true,
-      direction: "DESC",
+      direction: "ASC",
     };
 
     const { query = null, transaction = null } = options;
 
     const newQuery = Object.assign({}, query);
     const newOrder = query && query.order ? query.order : inicialOrder;
-
-    if (newOrder.acendent) {
-      newOrder.direction = "DESC";
-    } else {
-      newOrder.direction = "ASC";
-    }
 
     const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
 
@@ -441,7 +435,7 @@ module.exports = class ProductDomain {
         },
       ],
       order: [[newOrder.field, newOrder.direction]],
-      limit,
+      limit: newQuery.total,
       offset,
       transaction,
     });
