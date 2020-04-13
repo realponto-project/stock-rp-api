@@ -103,6 +103,7 @@ module.exports = class SupProductDomain {
           limit: 3,
           attributes: ["amount", "createdAt", "supProviderId"],
           include: [{ model: SupProvider, attributes: ["razaoSocial"] }],
+          order: [["createdAt", "DESC"]],
         },
       ],
       order: [["createdAt", "ASC"]],

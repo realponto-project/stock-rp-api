@@ -13,7 +13,7 @@ module.exports = class SupOutDomain {
 
     const supOut = R.omit(["id", "authorized"], body);
 
-    const notHasProp = prop => R.not(R.has(prop, supOut));
+    const notHasProp = (prop) => R.not(R.has(prop, supOut));
 
     let errors = false;
 
@@ -23,7 +23,7 @@ module.exports = class SupOutDomain {
       emailResp: false,
       emailSolic: false,
       supProductId: false,
-      responsibleUser: false
+      responsibleUser: false,
     };
 
     const message = {
@@ -32,7 +32,7 @@ module.exports = class SupOutDomain {
       emailResp: "",
       emailSolic: "",
       supProductId: "",
-      responsibleUser: ""
+      responsibleUser: "",
     };
 
     if (notHasProp("amount")) {
@@ -84,7 +84,7 @@ module.exports = class SupOutDomain {
       message.supProductId = "supProductId cannot null";
     } else {
       supProduct = await SupProduct.findByPk(supOut.supProductId, {
-        transaction
+        transaction,
       });
       if (!supProduct || supProduct.amount - supOut.amount < 0) {
         errors = true;
@@ -100,7 +100,7 @@ module.exports = class SupOutDomain {
     } else if (
       !(await User.findOne({
         where: { username: supOut.responsibleUser },
-        transaction
+        transaction,
       }))
     ) {
       errors = true;
@@ -127,30 +127,33 @@ module.exports = class SupOutDomain {
       subject: "Sending with Twilio SendGrid is Fun",
       text: "and easy to do anywhere, even with Node.js",
       html: `
+      <>
       <strong>Quantidade: ${supOut.amount}</strong>
-      `
+      <strong>Quantidade: ${supProduct.name}</strong>
+      </>
+      `,
     };
     await sgMail
       .send(msg)
-      .then(function(resp) {
+      .then(function (resp) {
         console.log("resposta :");
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log("error: ", err);
       });
 
-    // if (supOut.emailResp) {
-    //   msg.to = supOut.emailResp;
+    if (supOut.emailResp) {
+      msg.to = supOut.emailResp;
 
-    //   await sgMail
-    //     .send(msg)
-    //     .then(function(resp) {
-    //       console.log("resposta :");
-    //     })
-    //     .catch(function(err) {
-    //       console.log("error: ", err);
-    //     });
-    // }
+      await sgMail
+        .send(msg)
+        .then(function (resp) {
+          console.log("resposta :");
+        })
+        .catch(function (err) {
+          console.log("error: ", err);
+        });
+    }
 
     return await SupOut.create(supOut, { transaction });
   }
@@ -162,16 +165,13 @@ module.exports = class SupOutDomain {
 
     const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
 
-    console.log(getWhere("supOut"));
-    console.log(getWhere("supProduct"));
-
     const supOuts = await SupOut.findAndCountAll({
       where: getWhere("supOut"),
       include: [{ model: SupProduct, where: getWhere("supProduct") }],
       order: [["createdAt", "ASC"]],
       limit,
       offset,
-      transaction
+      transaction,
     });
 
     const { rows, count } = supOuts;
@@ -181,7 +181,7 @@ module.exports = class SupOutDomain {
         page: null,
         show: 0,
         count,
-        rows: []
+        rows: [],
       };
     }
 
@@ -189,7 +189,7 @@ module.exports = class SupOutDomain {
       page: pageResponse,
       show: R.min(count, limit),
       count,
-      rows
+      rows,
     };
   }
 
