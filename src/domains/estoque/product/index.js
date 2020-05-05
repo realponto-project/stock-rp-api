@@ -622,7 +622,7 @@ module.exports = class ProductDomain {
         },
       ],
       order: [[newOrder.field, newOrder.direction]],
-      limit: 1,
+      limit,
       offset,
       transaction,
     });
@@ -660,7 +660,8 @@ module.exports = class ProductDomain {
       });
 
       const freeMarketParts = await FreeMarketParts.findAll({
-        attributes: ["productBaseId", "amount"],
+        attributes: ["productBaseId", "amount", "createdAt"],
+        order: [["createdAt", "DESC"]],
         include: [
           {
             model: ProductBase,
@@ -673,7 +674,8 @@ module.exports = class ProductDomain {
       });
 
       const osParts = await OsParts.findAll({
-        attributes: ["productBaseId", "output"],
+        attributes: ["productBaseId", "output", "deletedAt"],
+        order: [["deletedAt", "DESC"]],
         include: [
           {
             model: ProductBase,
@@ -686,7 +688,8 @@ module.exports = class ProductDomain {
       });
 
       const technicianReserveParts = await TechnicianReserveParts.findAll({
-        attributes: ["productBaseId", "amount"],
+        attributes: ["productBaseId", "amount", "createdAt"],
+        order: [["createdAt", "DESC"]],
         include: [
           {
             model: ProductBase,
@@ -699,7 +702,8 @@ module.exports = class ProductDomain {
       });
 
       const kitOuts = await KitOut.findAll({
-        attributes: ["kitPartId", "amount"],
+        attributes: ["kitPartId", "amount", "updatedAt"],
+        order: [["updatedAt", "DESC"]],
         include: [
           {
             attributes: ["productBaseId"],
@@ -716,7 +720,6 @@ module.exports = class ProductDomain {
         ],
         transaction,
       });
-      console.log(JSON.parse(JSON.stringify(kitOuts)));
 
       freeMarketParts.map(
         (freeMarketPart) =>
@@ -740,19 +743,30 @@ module.exports = class ProductDomain {
         name: product.name,
         quantidadeSaidaTotal,
         saidaOs,
+        createdAtOs: osParts.length > 0 ? osParts[0].deletedAt : null,
         saidaEComerce,
+        createdAtEComerce:
+          freeMarketParts.length > 0 ? freeMarketParts[0].createdAt : null,
         saidaInterno,
+        createdAtInterno:
+          technicianReserveParts.length > 0
+            ? technicianReserveParts[0].createdAt
+            : null,
         saidaKit,
-        // type: product.equipType ? product.equipType.type : "-",
-        // createdAt: formatDateFunct(product.createdAt),
-        // updatedAt: formatDateFunct(product.updatedAt),
+        createdAtKit: kitOuts.length > 0 ? kitOuts[0].updatedAt : null,
       };
-      return resp;
+      return {
+        ...resp,
+        updatedAt: R.max(
+          resp.createdAtOs,
+          resp.createdAtEComerce,
+          resp.createdAtInterno,
+          resp.createdAtKit
+        ),
+      };
     });
 
     const productsList = await Promise.all(formatData(rows));
-
-    console.log(JSON.parse(JSON.stringify(productsList[0])));
 
     return {
       page: pageResponse,
