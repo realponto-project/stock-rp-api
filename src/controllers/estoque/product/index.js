@@ -63,7 +63,7 @@ const getEquipsByEntrance = async (req, res, next) => {
 
     const equipTypes = await productDomain.getEquipsByEntrance({
       query,
-      transaction
+      transaction,
     });
 
     await transaction.commit();
@@ -105,8 +105,28 @@ const getProductByStockBase = async (req, res, next) => {
 
     const products = await productDomain.getProductByStockBase({
       query,
-      transaction
+      transaction,
     });
+
+    await transaction.commit();
+    res.json(products);
+  } catch (error) {
+    await transaction.rollback();
+    next();
+  }
+};
+
+const getAllVendas = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    let query;
+    if (R.has("query", req)) {
+      if (R.has("query", req.query)) {
+        query = JSON.parse(req.query.query);
+      }
+    }
+
+    const products = await productDomain.getAllVendas({ query, transaction });
 
     await transaction.commit();
     res.json(products);
@@ -122,5 +142,6 @@ module.exports = {
   getAll,
   getEquipsByEntrance,
   getAllNames,
-  getProductByStockBase
+  getProductByStockBase,
+  getAllVendas,
 };

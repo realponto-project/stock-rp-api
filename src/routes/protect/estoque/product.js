@@ -1,11 +1,12 @@
-const router = require('express').Router({ mergeParams: true })
-const productController = require('../../../controllers/estoque/product')
+const router = require("express").Router({ mergeParams: true });
+const productController = require("../../../controllers/estoque/product");
 
-router.post('', productController.add)
-router.put('', productController.update)
-router.get('', productController.getAll)
-router.get('/getEquipsByEntrance', productController.getEquipsByEntrance)
-router.get('/getAllNames', productController.getAllNames)
-router.get('/getProductByStockBase', productController.getProductByStockBase)
+router.post("", productController.add);
+router.put("", productController.update);
+router.get("", productController.getAll);
+router.get("/getEquipsByEntrance", productController.getEquipsByEntrance);
+router.get("/getAllNames", productController.getAllNames);
+router.get("/getProductByStockBase", productController.getProductByStockBase);
+router.get("/getAllVendas", productController.getAllVendas);
 
-module.exports = router
+module.exports = router;

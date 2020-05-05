@@ -38,13 +38,13 @@ module.exports = class EquipDomain {
       bodyData
     );
 
-    const equipNotHasProp = prop => R.not(R.has(prop, equip));
+    const equipNotHasProp = (prop) => R.not(R.has(prop, equip));
     const NotHasProp = (prop, obj) => R.not(R.has(prop, obj));
 
     const field = {
       productId: false,
       stockBase: false,
-      serialNumbers: false
+      serialNumbers: false,
       // equipModelId: false,
       // companyId: false,
       // corLeitor: false,
@@ -59,7 +59,7 @@ module.exports = class EquipDomain {
     const message = {
       productId: "",
       stockBase: "",
-      serialNumbers: ""
+      serialNumbers: "",
       // equipModelId: '',
       // companyId: '',
       // corLeitor: '',
@@ -118,7 +118,7 @@ module.exports = class EquipDomain {
       message.productId = "Por favor informe productId.";
     } else {
       const productBase = await Product.findByPk(bodyData.productId, {
-        transaction
+        transaction,
       });
 
       if (!productBase) {
@@ -135,7 +135,7 @@ module.exports = class EquipDomain {
     } else {
       const stockBase = await StockBase.findOne({
         where: { stockBase: bodyData.stockBase },
-        transaction
+        transaction,
       });
 
       if (stockBase) {
@@ -152,7 +152,7 @@ module.exports = class EquipDomain {
     } else {
       const serialNumberReturned = await Equip.findOne({
         where: { serialNumber: equip.serialNumber },
-        transaction
+        transaction,
       });
 
       if (serialNumberReturned) {
@@ -263,10 +263,10 @@ module.exports = class EquipDomain {
       include: [
         {
           model: StockBase,
-          where: { stockBase }
-        }
+          where: { stockBase },
+        },
       ],
-      transaction
+      transaction,
     });
 
     equip.productBaseId = productBase.id;
@@ -300,7 +300,7 @@ module.exports = class EquipDomain {
     const inicialOrder = {
       field: "createdAt",
       acendent: true,
-      direction: "DESC"
+      direction: "DESC",
     };
 
     const { query = null, transaction = null } = options;
@@ -331,17 +331,17 @@ module.exports = class EquipDomain {
               include: [
                 {
                   model: Mark,
-                  where: getWhere("mark")
-                }
-              ]
-            }
-          ]
-        }
+                  where: getWhere("mark"),
+                },
+              ],
+            },
+          ],
+        },
       ],
       offset,
-      limit,
+      limit: newQuery.total === null ? undefined : limit,
       order: [[newOrder.field, newOrder.direction]],
-      transaction
+      transaction,
     });
 
     const { rows } = equips;
@@ -351,11 +351,11 @@ module.exports = class EquipDomain {
         page: null,
         show: 0,
         count: equips.count,
-        rows: []
+        rows: [],
       };
     }
 
-    const formatData = R.map(equip => {
+    const formatData = R.map((equip) => {
       const resp = {
         id: equip.id,
         reserved: equip.reserved,
@@ -365,7 +365,7 @@ module.exports = class EquipDomain {
         mark:
           equip.productBase &&
           equip.productBase.product.mark &&
-          equip.productBase.product.mark.mark
+          equip.productBase.product.mark.mark,
       };
 
       return resp;
@@ -379,7 +379,7 @@ module.exports = class EquipDomain {
       page: pageResponse,
       show: equipsList.length,
       count: equips.count,
-      rows: equipsList
+      rows: equipsList,
     };
 
     // console.log(response);
@@ -729,7 +729,7 @@ module.exports = class EquipDomain {
     Object.assign(newEquip, R.omit(["mark", "type", "model"], equip));
 
     // const equipNotHasProp = prop => R.not(R.has(prop, equip))
-    const newEquipNotHasProp = prop => R.not(R.has(prop, newEquip));
+    const newEquipNotHasProp = (prop) => R.not(R.has(prop, newEquip));
 
     const field = {
       // equipModelId: false,
@@ -742,7 +742,7 @@ module.exports = class EquipDomain {
       proximidade: false,
       bio: false,
       barras: false,
-      cartografico: false
+      cartografico: false,
     };
     const message = {
       // equipModelId: '',
@@ -755,7 +755,7 @@ module.exports = class EquipDomain {
       proximidade: "",
       bio: "",
       barras: "",
-      cartografico: ""
+      cartografico: "",
     };
 
     let errors = false;
@@ -767,7 +767,7 @@ module.exports = class EquipDomain {
     } else {
       const serialNumberReturned = await Equip.findOne({
         where: { serialNumber: newEquip.serialNumber },
-        transaction
+        transaction,
       });
 
       if (
@@ -883,7 +883,7 @@ module.exports = class EquipDomain {
     const { transaction = null } = options;
     const response = await Equip.findOne({
       where: {
-        serialNumber
+        serialNumber,
       },
       attributes: [
         "id",
@@ -891,7 +891,7 @@ module.exports = class EquipDomain {
         "deletedAt",
         "osPartId",
         "freeMarketPartId",
-        "productBaseId"
+        "productBaseId",
       ],
       include: [
         {
@@ -902,9 +902,9 @@ module.exports = class EquipDomain {
             {
               paranoid: false,
               attributes: ["os"],
-              model: Os
-            }
-          ]
+              model: Os,
+            },
+          ],
         },
         {
           model: ProductBase,
@@ -912,9 +912,9 @@ module.exports = class EquipDomain {
           include: [
             {
               model: Product,
-              attributes: ["name"]
-            }
-          ]
+              attributes: ["name"],
+            },
+          ],
         },
         {
           paranoid: false,
@@ -924,13 +924,13 @@ module.exports = class EquipDomain {
             {
               paranoid: false,
               attributes: ["trackingCode"],
-              model: FreeMarket
-            }
-          ]
-        }
+              model: FreeMarket,
+            },
+          ],
+        },
       ],
       paranoid: false,
-      transaction
+      transaction,
     });
 
     return response;

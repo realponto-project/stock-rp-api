@@ -123,13 +123,20 @@ module.exports = class SupOutDomain {
 
     const msg = {
       to: supOut.emailSolic,
+      // from: "jessi_leandro@hotmail.com",
       from: "sistema_estoque@realponto.com",
       subject: "Sending with Twilio SendGrid is Fun",
       text: "and easy to do anywhere, even with Node.js",
       html: `
-      <>
-      <strong>Quantidade: ${supOut.amount}</strong>
-      <strong>Quantidade: ${supProduct.name}</strong>
+      <p>
+      CONFIRMAÇÃO DE SAIDA PELO RESPONSAVEL ${supOut.responsibleUser} SOBRE A SOLICITAÇÃO E CONFIRMAÇÃO DE RETIRADADOS DOS ITENS:
+      </p>
+      <strong>Item: </strong> ${supProduct.name}
+      <br>
+      <strong>Quantidade: </strong>${supOut.amount}
+      <p>
+      CONFORME SOLICITADO POR ${supOut.solicitante}, ESTANDO CIENTE SOBRE AS RETIRADAS DOS MESMOS EM SUA RESPONSABILIDADE.
+      </p>
       </>
       `,
     };

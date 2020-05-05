@@ -14,6 +14,13 @@ const Mark = database.model("mark");
 const Product = database.model("product");
 const ProductBase = database.model("productBase");
 const StockBase = database.model("stockBase");
+const Os = database.model("os");
+const OsParts = database.model("osParts");
+const FreeMarketParts = database.model("freeMarketParts");
+const Entrance = database.model("entrance");
+const TechnicianReserveParts = database.model("technicianReserveParts");
+const KitOut = database.model("kitOut");
+const KitParts = database.model("kitParts");
 
 const { Op: operators } = Sequelize;
 
@@ -590,5 +597,168 @@ module.exports = class ProductDomain {
       return resp;
     });
     return response.filter((item) => parseInt(item.available, 10) !== 0);
+  }
+
+  async getAllVendas(options = {}) {
+    const inicialOrder = {
+      field: "createdAt",
+      acendent: true,
+      direction: "ASC",
+    };
+
+    const { query = null, transaction = null } = options;
+
+    const newQuery = Object.assign({}, query);
+    const newOrder = query && query.order ? query.order : inicialOrder;
+
+    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
+
+    const products = await Product.findAndCountAll({
+      where: getWhere("product"),
+      // where: { ...getWhere("product"), name: "PINO DA BOBINA ZPM" },
+      include: [
+        {
+          model: StockBase,
+        },
+      ],
+      order: [[newOrder.field, newOrder.direction]],
+      limit: 1,
+      offset,
+      transaction,
+    });
+
+    const { count, rows } = products;
+
+    const formatData = R.map(async (product) => {
+      let quantidadeSaidaTotal = 0;
+      let saidaEComerce = 0;
+      let saidaOs = 0;
+      let saidaInterno = 0;
+      let saidaKit = 0;
+
+      const entrances = await Entrance.findAll({
+        attributes: ["amountAdded", "productId"],
+        where: { productId: product.id },
+        transaction,
+      });
+
+      entrances.map(
+        (entrance) =>
+          (quantidadeSaidaTotal =
+            quantidadeSaidaTotal + parseInt(entrance.amountAdded, 10))
+      );
+
+      const productBases = await ProductBase.findAll({
+        attributes: ["amount", "productId"],
+        where: { productId: product.id },
+        transaction,
+      });
+
+      productBases.map((productBase) => {
+        quantidadeSaidaTotal =
+          quantidadeSaidaTotal - parseInt(productBase.amount, 10);
+      });
+
+      const freeMarketParts = await FreeMarketParts.findAll({
+        attributes: ["productBaseId", "amount"],
+        include: [
+          {
+            model: ProductBase,
+            where: { productId: product.id },
+            attributes: ["id"],
+          },
+        ],
+        paranoid: false,
+        transaction,
+      });
+
+      const osParts = await OsParts.findAll({
+        attributes: ["productBaseId", "output"],
+        include: [
+          {
+            model: ProductBase,
+            where: { productId: product.id },
+            attributes: ["id"],
+          },
+        ],
+        paranoid: false,
+        transaction,
+      });
+
+      const technicianReserveParts = await TechnicianReserveParts.findAll({
+        attributes: ["productBaseId", "amount"],
+        include: [
+          {
+            model: ProductBase,
+            where: { productId: product.id },
+            attributes: ["id"],
+          },
+        ],
+        paranoid: false,
+        transaction,
+      });
+
+      const kitOuts = await KitOut.findAll({
+        attributes: ["kitPartId", "amount"],
+        include: [
+          {
+            attributes: ["productBaseId"],
+            model: KitParts,
+            required: true,
+            include: [
+              {
+                model: ProductBase,
+                where: { productId: product.id },
+                attributes: ["id"],
+              },
+            ],
+          },
+        ],
+        transaction,
+      });
+      console.log(JSON.parse(JSON.stringify(kitOuts)));
+
+      freeMarketParts.map(
+        (freeMarketPart) =>
+          (saidaEComerce = saidaEComerce + parseInt(freeMarketPart.amount, 10))
+      );
+      osParts.map(
+        (osPart) => (saidaOs = saidaOs + parseInt(osPart.output, 10))
+      );
+      technicianReserveParts.map(
+        (technicianReservePart) =>
+          (saidaInterno =
+            saidaInterno + parseInt(technicianReservePart.amount, 10))
+      );
+
+      kitOuts.map(
+        (kitOut) => (saidaKit = saidaKit + parseInt(kitOut.amount, 10))
+      );
+
+      const resp = {
+        id: product.id,
+        name: product.name,
+        quantidadeSaidaTotal,
+        saidaOs,
+        saidaEComerce,
+        saidaInterno,
+        saidaKit,
+        // type: product.equipType ? product.equipType.type : "-",
+        // createdAt: formatDateFunct(product.createdAt),
+        // updatedAt: formatDateFunct(product.updatedAt),
+      };
+      return resp;
+    });
+
+    const productsList = await Promise.all(formatData(rows));
+
+    console.log(JSON.parse(JSON.stringify(productsList[0])));
+
+    return {
+      page: pageResponse,
+      show: R.min(count, limit),
+      count,
+      rows: productsList,
+    };
   }
 };

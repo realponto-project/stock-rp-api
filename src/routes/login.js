@@ -13,6 +13,6 @@ router.delete("/logout", loginController.logoutController);
 // );
 // router.get("/util/writeDefautsEntrances", utilController.writeDefautsEntrances);
 // router.get("/util/writeDefautsConserto", utilController.writeDefautsConserto);
-router.get("/util/writeDefautsProducts", utilController.writeDefautsProducts);
+// router.get("/util/writeDefautsProducts", utilController.writeDefautsProducts);
 
 module.exports = router;
