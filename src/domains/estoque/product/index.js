@@ -601,7 +601,7 @@ module.exports = class ProductDomain {
 
   async getAllVendas(options = {}) {
     const inicialOrder = {
-      field: "createdAt",
+      field: "name",
       acendent: true,
       direction: "ASC",
     };
@@ -615,7 +615,6 @@ module.exports = class ProductDomain {
 
     const products = await Product.findAndCountAll({
       where: getWhere("product"),
-      // where: { ...getWhere("product"), name: "PINO DA BOBINA ZPM" },
       include: [
         {
           model: StockBase,
@@ -757,7 +756,7 @@ module.exports = class ProductDomain {
       };
       return {
         ...resp,
-        updatedAt: R.max(
+        updatedAt: Math.max(
           resp.createdAtOs,
           resp.createdAtEComerce,
           resp.createdAtInterno,
