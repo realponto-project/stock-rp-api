@@ -29,7 +29,7 @@ module.exports = class EmprestimoDomain {
       razaoSocial: false,
       dateExpedition: false,
       productId: false,
-      equipId: false
+      equipId: false,
     };
 
     const message = {
@@ -37,7 +37,7 @@ module.exports = class EmprestimoDomain {
       cnpj: "",
       dateExpedition: "",
       productId: "",
-      equipId: ""
+      equipId: "",
     };
 
     if (notHasProps("cnpj", emprestimo) || !emprestimo.cnpj) {
@@ -76,7 +76,7 @@ module.exports = class EmprestimoDomain {
       const { serialNumber } = bodyData;
       const equip = await Equip.findOne({
         where: { serialNumber },
-        transaction
+        transaction,
       });
 
       if (equip) {
@@ -94,7 +94,7 @@ module.exports = class EmprestimoDomain {
       message.technicianId = "technicianId cannot null";
     } else {
       const technician = await Technician.findByPk(emprestimo.technicianId, {
-        transaction
+        transaction,
       });
 
       if (!technician) {
@@ -109,20 +109,20 @@ module.exports = class EmprestimoDomain {
     }
 
     const emprestimoCreted = await Emprestimo.create(emprestimo, {
-      transaction
+      transaction,
     });
 
     const equip = await Equip.findByPk(emprestimo.equipId, {
-      transaction
+      transaction,
     });
 
     await equip.update(
       {
         ...JSON.parse(JSON.stringify(equip)),
-        inClient: true
+        inClient: true,
       },
       {
-        transaction
+        transaction,
       }
     );
 
@@ -133,12 +133,12 @@ module.exports = class EmprestimoDomain {
     const { transaction = null } = options;
 
     const oldEmprestimo = await Emprestimo.findByPk(bodyData.id, {
-      transaction
+      transaction,
     });
 
     if (!oldEmprestimo) {
       throw new FieldValidationError([
-        { field: { id: true }, message: { id: "inválid id" } }
+        { field: { id: true }, message: { id: "inválid id" } },
       ]);
     }
 
@@ -151,14 +151,14 @@ module.exports = class EmprestimoDomain {
       cnpj: false,
       razaoSocial: false,
       dateExpedition: false,
-      productId: false
+      productId: false,
     };
 
     const message = {
       razaoSocial: "",
       cnpj: "",
       dateExpedition: "",
-      productId: ""
+      productId: "",
     };
 
     if (notHasProps("cnpj", emprestimo) || !emprestimo.cnpj) {
@@ -195,7 +195,7 @@ module.exports = class EmprestimoDomain {
       message.technicianId = "technicianId cannot null";
     } else {
       const technician = await Technician.findByPk(emprestimo.technicianId, {
-        transaction
+        transaction,
       });
 
       if (!technician) {
@@ -211,13 +211,13 @@ module.exports = class EmprestimoDomain {
 
     const emperestimoUpdated = {
       ...JSON.parse(JSON.stringify(oldEmprestimo)),
-      ...emprestimo
+      ...emprestimo,
     };
 
     await oldEmprestimo.update(emperestimoUpdated, { transaction });
 
     const response = await Emprestimo.findByPk(bodyData.id, {
-      transaction
+      transaction,
     });
 
     return response;
@@ -227,7 +227,7 @@ module.exports = class EmprestimoDomain {
     const inicialOrder = {
       field: "createdAt",
       acendent: true,
-      direction: "DESC"
+      direction: "DESC",
     };
 
     const { query = null, transaction = null } = options;
@@ -257,24 +257,25 @@ module.exports = class EmprestimoDomain {
               include: [
                 {
                   model: Product,
-                  where: getWhere("product")
-                }
+                  where: getWhere("product"),
+                },
               ],
-              required: true
-            }
-          ]
+              required: true,
+            },
+          ],
+          paranoid: false,
         },
 
         {
           model: Technician,
-          where: getWhere("technician")
-        }
+          where: getWhere("technician"),
+        },
       ],
       paranoid,
       order: [[newOrder.field, newOrder.direction]],
-      limit,
+      limit: query.total === null ? undefined : limit,
       offset,
-      transaction
+      transaction,
     });
 
     const { rows } = emprestimos;
@@ -284,11 +285,11 @@ module.exports = class EmprestimoDomain {
         page: null,
         show: 0,
         count: emprestimos.count,
-        rows: []
+        rows: [],
       };
     }
 
-    const formatDateFunct = date => {
+    const formatDateFunct = (date) => {
       moment.locale("pt-br");
       const formatDate = moment(date).format("L");
       // const formatHours = moment(date).format("LT");
@@ -297,7 +298,7 @@ module.exports = class EmprestimoDomain {
       return dateformated;
     };
 
-    const formatData = R.map(emprestimo => {
+    const formatData = R.map((emprestimo) => {
       const resp = {
         id: emprestimo.id,
         razaoSocial: emprestimo.razaoSocial,
@@ -310,7 +311,8 @@ module.exports = class EmprestimoDomain {
         technician: emprestimo.technician.name,
         createdAtNotFormatted: emprestimo.createdAt,
         createdAt: formatDateFunct(emprestimo.createdAt),
-        deletedAt: emprestimo.deletedAt && formatDateFunct(emprestimo.deletedAt)
+        deletedAt:
+          emprestimo.deletedAt && formatDateFunct(emprestimo.deletedAt),
       };
       return resp;
     });
@@ -326,7 +328,7 @@ module.exports = class EmprestimoDomain {
       page: pageResponse,
       show,
       count: emprestimos.count,
-      rows: emprestimoList
+      rows: emprestimoList,
     };
 
     return response;
@@ -340,17 +342,17 @@ module.exports = class EmprestimoDomain {
     const deletEmprestimo = await Emprestimo.findByPk(bodyData.id, {
       include: [
         {
-          model: Equip
-        }
+          model: Equip,
+        },
       ],
-      transaction
+      transaction,
     });
 
     const field = {
-      id: false
+      id: false,
     };
     const message = {
-      id: ""
+      id: "",
     };
 
     if (!deletEmprestimo) {
@@ -363,7 +365,7 @@ module.exports = class EmprestimoDomain {
 
     await equip.update({
       ...JSON.parse(JSON.stringify(equip)),
-      inClient: false
+      inClient: false,
     });
 
     await deletEmprestimo.destroy({ ...optionsQuery, transaction });
