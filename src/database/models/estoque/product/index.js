@@ -83,6 +83,8 @@ module.exports = (sequelize) => {
       through: "productProduct",
     });
 
+    product.hasMany(models.entrance, {});
+
     product.belongsToMany(models.stockBase, { through: "productBase" });
   };
 

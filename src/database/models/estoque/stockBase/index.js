@@ -1,11 +1,11 @@
 const Sequelize = require("sequelize");
 
-module.exports = sequelize => {
+module.exports = (sequelize) => {
   const stockBase = sequelize.define("stockBase", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
-      primaryKey: true
+      primaryKey: true,
     },
 
     stockBase: {
@@ -14,14 +14,15 @@ module.exports = sequelize => {
         "NOVAREAL",
         "PONTOREAL",
         "EMPRESTIMO",
-        "INSUMOS"
+        "INSUMOS",
       ]),
-      allowNull: false
-    }
+      allowNull: false,
+    },
   });
 
-  stockBase.associate = models => {
+  stockBase.associate = (models) => {
     stockBase.belongsToMany(models.product, { through: "productBase" });
+    stockBase.hasMany(models.productBase);
   };
 
   return stockBase;

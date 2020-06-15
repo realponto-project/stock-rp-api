@@ -30,6 +30,7 @@ module.exports = class EmprestimoDomain {
       dateExpedition: false,
       productId: false,
       equipId: false,
+      observation: false,
     };
 
     const message = {
@@ -38,6 +39,7 @@ module.exports = class EmprestimoDomain {
       dateExpedition: "",
       productId: "",
       equipId: "",
+      observation: "",
     };
 
     if (notHasProps("cnpj", emprestimo) || !emprestimo.cnpj) {
@@ -104,6 +106,12 @@ module.exports = class EmprestimoDomain {
       }
     }
 
+    if (notHasProps("observation", emprestimo)) {
+      errors = true;
+      field.observation = true;
+      message.observation = "observation cannot undefined";
+    }
+
     if (errors) {
       throw new FieldValidationError([{ field, message }]);
     }
@@ -152,6 +160,7 @@ module.exports = class EmprestimoDomain {
       razaoSocial: false,
       dateExpedition: false,
       productId: false,
+      observation: false,
     };
 
     const message = {
@@ -159,6 +168,7 @@ module.exports = class EmprestimoDomain {
       cnpj: "",
       dateExpedition: "",
       productId: "",
+      observation: "",
     };
 
     if (notHasProps("cnpj", emprestimo) || !emprestimo.cnpj) {
@@ -203,6 +213,12 @@ module.exports = class EmprestimoDomain {
         field.technicianId = true;
         message.technicianId = "technicianId inválid";
       }
+    }
+
+    if (notHasProps("observation", emprestimo)) {
+      errors = true;
+      field.observation = true;
+      message.observation = "observation cannot undefined";
     }
 
     if (errors) {
@@ -303,6 +319,7 @@ module.exports = class EmprestimoDomain {
         id: emprestimo.id,
         razaoSocial: emprestimo.razaoSocial,
         cnpj: emprestimo.cnpj,
+        observation: emprestimo.observation,
         dateExpeditionNotFormatted: emprestimo.dateExpedition,
         dateExpedition: formatDateFunct(emprestimo.dateExpedition),
         serialNumber: emprestimo.equip.serialNumber,

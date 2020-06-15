@@ -18,6 +18,7 @@ const Os = database.model("os");
 const OsParts = database.model("osParts");
 const FreeMarketParts = database.model("freeMarketParts");
 const Entrance = database.model("entrance");
+const TechnicianReserve = database.model("technicianReserve");
 const TechnicianReserveParts = database.model("technicianReserveParts");
 const KitOut = database.model("kitOut");
 const KitParts = database.model("kitParts");
@@ -619,6 +620,10 @@ module.exports = class ProductDomain {
         {
           model: StockBase,
         },
+        {
+          attributes: ["amountAdded", "productId"],
+          model: Entrance,
+        },
       ],
       order: [[newOrder.field, newOrder.direction]],
       limit,
@@ -635,31 +640,23 @@ module.exports = class ProductDomain {
       let saidaInterno = 0;
       let saidaKit = 0;
 
-      const entrances = await Entrance.findAll({
-        attributes: ["amountAdded", "productId"],
-        where: { productId: product.id },
-        transaction,
-      });
+      // console.log(JSON.parse(JSON.stringify(product)));
+      // console.log(JSON.parse(JSON.stringify(product.stockBases[0])));
 
-      entrances.map(
-        (entrance) =>
-          (quantidadeSaidaTotal =
-            quantidadeSaidaTotal + parseInt(entrance.amountAdded, 10))
-      );
+      // product.entrances.map(
+      //   (entrance) =>
+      //     (quantidadeSaidaTotal =
+      //       quantidadeSaidaTotal + parseInt(entrance.amountAdded, 10))
+      // );
 
-      const productBases = await ProductBase.findAll({
-        attributes: ["amount", "productId"],
-        where: { productId: product.id },
-        transaction,
-      });
-
-      productBases.map((productBase) => {
-        quantidadeSaidaTotal =
-          quantidadeSaidaTotal - parseInt(productBase.amount, 10);
-      });
+      // product.stockBases.map((stockBase) => {
+      //   quantidadeSaidaTotal =
+      //     quantidadeSaidaTotal - parseInt(stockBase.productBase.amount, 10);
+      // });
 
       const freeMarketParts = await FreeMarketParts.findAll({
         attributes: ["productBaseId", "amount", "createdAt"],
+        where: getWhere("freeMarketParts"),
         order: [["createdAt", "DESC"]],
         include: [
           {
@@ -675,6 +672,7 @@ module.exports = class ProductDomain {
       const osParts = await OsParts.findAll({
         attributes: ["productBaseId", "output", "deletedAt"],
         order: [["deletedAt", "DESC"]],
+        where: getWhere("osParts"),
         include: [
           {
             model: ProductBase,
@@ -689,6 +687,7 @@ module.exports = class ProductDomain {
       const technicianReserveParts = await TechnicianReserveParts.findAll({
         attributes: ["productBaseId", "amount", "createdAt"],
         order: [["createdAt", "DESC"]],
+        where: getWhere("technicianReserveParts"),
         include: [
           {
             model: ProductBase,
@@ -703,6 +702,7 @@ module.exports = class ProductDomain {
       const kitOuts = await KitOut.findAll({
         attributes: ["kitPartId", "amount", "updatedAt"],
         order: [["updatedAt", "DESC"]],
+        where: getWhere("kitOut"),
         include: [
           {
             attributes: ["productBaseId"],
@@ -719,6 +719,8 @@ module.exports = class ProductDomain {
         ],
         transaction,
       });
+
+      console.log(JSON.parse(JSON.stringify(kitOuts)));
 
       freeMarketParts.map(
         (freeMarketPart) =>
@@ -740,7 +742,7 @@ module.exports = class ProductDomain {
       const resp = {
         id: product.id,
         name: product.name,
-        quantidadeSaidaTotal,
+        quantidadeSaidaTotal: saidaOs + saidaEComerce + saidaInterno + saidaKit,
         saidaOs,
         createdAtOs: osParts.length > 0 ? osParts[0].deletedAt : null,
         saidaEComerce,
