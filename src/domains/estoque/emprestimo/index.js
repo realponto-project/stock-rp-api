@@ -323,7 +323,7 @@ module.exports = class EmprestimoDomain {
         dateExpeditionNotFormatted: emprestimo.dateExpedition,
         dateExpedition: formatDateFunct(emprestimo.dateExpedition),
         serialNumber: emprestimo.equip.serialNumber,
-        name: emprestimo.equip.productBase.product.name,
+        product: emprestimo.equip.productBase.product.name,
         technicianId: emprestimo.technician.id,
         technician: emprestimo.technician.name,
         createdAtNotFormatted: emprestimo.createdAt,
@@ -347,6 +347,8 @@ module.exports = class EmprestimoDomain {
       count: emprestimos.count,
       rows: emprestimoList,
     };
+
+    console.log(response);
 
     return response;
   }
