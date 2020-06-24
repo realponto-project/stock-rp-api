@@ -18,9 +18,7 @@ module.exports = class SupProviderDomain {
 
     const supProvider = body;
 
-    console.log(body);
-
-    const notHasProp = prop => R.not(R.has(prop, supProvider));
+    const notHasProp = (prop) => R.not(R.has(prop, supProvider));
 
     let errors = false;
 
@@ -34,7 +32,7 @@ module.exports = class SupProviderDomain {
       state: false,
       neighborhood: false,
       complement: false,
-      contacts: false
+      contacts: false,
     };
 
     const message = {
@@ -47,7 +45,7 @@ module.exports = class SupProviderDomain {
       state: "",
       neighborhood: "",
       complement: "",
-      contacts: ""
+      contacts: "",
     };
 
     if (notHasProp("razaoSocial") || !supProvider.razaoSocial) {
@@ -57,7 +55,7 @@ module.exports = class SupProviderDomain {
     } else if (
       await SupProvider.findOne({
         where: { razaoSocial: supProvider.razaoSocial },
-        transaction
+        transaction,
       })
     ) {
       errors = true;
@@ -79,9 +77,9 @@ module.exports = class SupProviderDomain {
       } else if (
         await SupProvider.findOne({
           where: {
-            cnpj: cnpjOrCpf
+            cnpj: cnpjOrCpf,
           },
-          transaction
+          transaction,
         })
       ) {
         errors = true;
@@ -146,14 +144,14 @@ module.exports = class SupProviderDomain {
     }
 
     const supProviderCreated = await SupProvider.create(supProvider, {
-      transaction
+      transaction,
     });
 
     const { contacts } = supProvider;
 
     await Promise.all(
       contacts.map(
-        async contact =>
+        async (contact) =>
           await supContactDomain.create(
             { ...contact, supProviderId: supProviderCreated.id },
             { transaction }
@@ -163,7 +161,7 @@ module.exports = class SupProviderDomain {
 
     return await SupProvider.findByPk(supProviderCreated.id, {
       include: [{ model: SupContact }],
-      transaction
+      transaction,
     });
   }
 
@@ -180,7 +178,7 @@ module.exports = class SupProviderDomain {
       order: [["createdAt", "ASC"]],
       limit,
       offset,
-      transaction
+      transaction,
     });
 
     const { rows, count } = supProviders;
@@ -190,7 +188,7 @@ module.exports = class SupProviderDomain {
         page: null,
         show: 0,
         count,
-        rows: []
+        rows: [],
       };
     }
 
@@ -198,7 +196,7 @@ module.exports = class SupProviderDomain {
       page: pageResponse,
       show: R.min(count, limit),
       count,
-      rows
+      rows,
     };
   }
 
@@ -208,17 +206,17 @@ module.exports = class SupProviderDomain {
 
     const oldSupProvider = await SupProvider.findByPk(body.id, {
       include: [{ model: SupContact }],
-      transaction
+      transaction,
     });
 
     if (!oldSupProvider) {
       throw new FieldValidationError({
         field: { id: true },
-        message: { id: "invalid id" }
+        message: { id: "invalid id" },
       });
     }
 
-    const notHasProp = prop => R.not(R.has(prop, supProvider));
+    const notHasProp = (prop) => R.not(R.has(prop, supProvider));
 
     let errors = false;
 
@@ -232,7 +230,7 @@ module.exports = class SupProviderDomain {
       state: false,
       neighborhood: false,
       complement: false,
-      contacts: false
+      contacts: false,
     };
 
     const message = {
@@ -245,7 +243,7 @@ module.exports = class SupProviderDomain {
       state: "",
       neighborhood: "",
       complement: "",
-      contacts: ""
+      contacts: "",
     };
 
     if (notHasProp("razaoSocial") || !supProvider.razaoSocial) {
@@ -255,7 +253,7 @@ module.exports = class SupProviderDomain {
     } else if (
       (await SupProvider.findOne({
         where: { razaoSocial: supProvider.razaoSocial },
-        transaction
+        transaction,
       })) &&
       oldSupProvider.razaoSocial !== supProvider.razaoSocial
     ) {
@@ -278,9 +276,9 @@ module.exports = class SupProviderDomain {
       } else if (
         (await SupProvider.findOne({
           where: {
-            cnpj: cnpjOrCpf
+            cnpj: cnpjOrCpf,
           },
-          transaction
+          transaction,
         })) &&
         oldSupProvider.cnpj !== cnpjOrCpf
       ) {
@@ -350,10 +348,10 @@ module.exports = class SupProviderDomain {
     const { contacts } = supProvider;
 
     await Promise.all(
-      contacts.map(async contact => {
+      contacts.map(async (contact) => {
         if (R.has("id", contact)) {
           supContacts = supContacts.filter(
-            supContact => supContact.id !== contact.id
+            (supContact) => supContact.id !== contact.id
           );
 
           await supContactDomain.update(contact, { transaction });
@@ -368,13 +366,13 @@ module.exports = class SupProviderDomain {
 
     await Promise.all(
       supContacts.map(
-        async supContact => await supContact.destroy({ transaction })
+        async (supContact) => await supContact.destroy({ transaction })
       )
     );
 
     return await oldSupProvider.update(supProvider, {
       // include: [{ model: SupContact }],
-      transaction
+      transaction,
     });
   }
 };

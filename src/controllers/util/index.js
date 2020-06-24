@@ -65,8 +65,6 @@ const deleteEComerce = async (req, res, next) => {
       })
     );
 
-    console.log(JSON.parse(JSON.stringify(resp)));
-
     // await resp.dest\roy({ force: true, transaction });
 
     await transaction.commit();
@@ -110,7 +108,6 @@ const associateTechnicianReverve = async (req, res, next) => {
       })
     );
 
-    console.log(JSON.parse(JSON.stringify(technicianReserves)));
     await transaction.commit();
     res.json(technicianReserves);
   } catch (error) {

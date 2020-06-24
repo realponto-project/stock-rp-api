@@ -61,7 +61,6 @@ module.exports = class ManufacturerDomain {
 
     const { rows, count } = manufacturers;
 
-    console.log(JSON.parse(JSON.stringify(rows)));
     if (rows.length === 0) {
       return {
         page: null,

@@ -22,7 +22,7 @@ module.exports = class StockDomain {
     const inicialOrder = {
       field: "createdAt",
       acendent: true,
-      direction: "ASC"
+      direction: "ASC",
     };
 
     const { query = null, transaction = null } = options;
@@ -54,21 +54,21 @@ module.exports = class StockDomain {
               model: Mark,
               where: getWhere("mark"),
               attributes: ["mark"],
-              required: true
-            }
+              required: true,
+            },
           ],
-          required: true
+          required: true,
         },
         {
           model: StockBase,
           attributes: ["stockBase"],
-          where: getWhere("stockBase")
-        }
+          where: getWhere("stockBase"),
+        },
       ],
       order: [[newOrder.field, newOrder.direction]],
       limit,
       offset,
-      transaction
+      transaction,
     });
 
     const { rows } = productBases;
@@ -78,7 +78,7 @@ module.exports = class StockDomain {
         page: null,
         show: 0,
         count: productBases.count,
-        rows: []
+        rows: [],
       };
     }
 
@@ -90,7 +90,7 @@ module.exports = class StockDomain {
     //   return dateformated
     // }
 
-    const formatData = R.map(productBase => {
+    const formatData = R.map((productBase) => {
       const resp = {
         id: productBase.id,
         amount: productBase.amount,
@@ -102,7 +102,7 @@ module.exports = class StockDomain {
         category: productBase.product.category,
         minimumStock: productBase.product.minimumStock,
         manufacturer: productBase.product.mark.mark,
-        stockBase: productBase.stockBase.stockBase
+        stockBase: productBase.stockBase.stockBase,
       };
       return resp;
     });
@@ -118,7 +118,7 @@ module.exports = class StockDomain {
       page: pageResponse,
       show,
       count: productBases.count,
-      rows: productBasesList
+      rows: productBasesList,
     };
 
     return response;
@@ -128,7 +128,7 @@ module.exports = class StockDomain {
     const inicialOrder = {
       field: "createdAt",
       acendent: true,
-      direction: "DESC"
+      direction: "DESC",
     };
 
     const { query = null, transaction = null } = options;
@@ -149,7 +149,7 @@ module.exports = class StockDomain {
       order: [[newOrder.field, newOrder.direction]],
       limit,
       offset,
-      transaction
+      transaction,
     });
 
     const { rows } = notifications;
@@ -159,14 +159,14 @@ module.exports = class StockDomain {
         page: null,
         show: 0,
         count: notifications.count,
-        rows: []
+        rows: [],
       };
     }
 
-    const formatData = R.map(entrance => {
+    const formatData = R.map((entrance) => {
       const resp = {
         id: entrance.id,
-        message: entrance.message
+        message: entrance.message,
       };
       return resp;
     });
@@ -182,7 +182,7 @@ module.exports = class StockDomain {
       page: pageResponse,
       show,
       count: notifications.count,
-      rows: notificationsList
+      rows: notificationsList,
     };
 
     return response;
@@ -191,21 +191,20 @@ module.exports = class StockDomain {
   async updatteProductBase(body, options = {}) {
     const { transaction = null } = options;
 
-    console.log(body);
-    const bodyNotHasProp = prop => R.not(R.has(prop, body));
+    const bodyNotHasProp = (prop) => R.not(R.has(prop, body));
 
     let errors = false;
 
     const field = {
       id: false,
       amount: false,
-      serialNumbers: false
+      serialNumbers: false,
     };
 
     const message = {
       id: false,
       amount: false,
-      serialNumbers: false
+      serialNumbers: false,
     };
 
     let productBase = null;
@@ -239,14 +238,13 @@ module.exports = class StockDomain {
     }
 
     const { serialNumbers } = body;
-    console.log("teste");
 
-    const serialNumbersFindPromises = serialNumbers.map(async item => {
+    const serialNumbersFindPromises = serialNumbers.map(async (item) => {
       const serialNumberHasExist = await Equip.findOne({
         where: { serialNumber: item },
         attributes: [],
         paranoid: false,
-        transaction
+        transaction,
       });
 
       if (serialNumberHasExist) {
@@ -257,11 +255,11 @@ module.exports = class StockDomain {
     });
     await Promise.all(serialNumbersFindPromises);
 
-    const serialNumbersCreatePromises = serialNumbers.map(async item => {
+    const serialNumbersCreatePromises = serialNumbers.map(async (item) => {
       const equipCreate = {
         productBaseId: productBase.id,
         serialNumber: item,
-        loan: false
+        loan: false,
       };
 
       await Equip.create(equipCreate, { transaction });

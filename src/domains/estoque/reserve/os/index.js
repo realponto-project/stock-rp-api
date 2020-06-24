@@ -370,7 +370,6 @@ module.exports = class OsDomain {
         where: { oId: osId },
         transaction,
       });
-      console.log(JSON.parse(JSON.stringify(osParts)));
 
       const osPartsPromise = osParts.map(async (item) => {
         if (item.productBaseId) {
@@ -1107,7 +1106,6 @@ module.exports = class OsDomain {
       count,
       rows: osList,
     };
-    console.log(response);
 
     return response;
   }
@@ -1177,8 +1175,6 @@ module.exports = class OsDomain {
     const { transaction = null } = options;
     const bodyDataNotHasProp = (prop) => R.not(R.has(prop, bodyData));
     // const bodyHasProp = prop => R.has(prop, bodyData)
-
-    console.log(bodyData);
 
     const field = {
       osPartsId: false,
@@ -1359,7 +1355,6 @@ module.exports = class OsDomain {
       const serialNumbers = conserto.serialNumbers;
 
       outSerialNumbers.map((item) => {
-        // console.log(R.indexOf(item, serialNumbers));
         serialNumbers.splice(R.indexOf(item, serialNumbers), 1);
       });
 
@@ -1377,17 +1372,6 @@ module.exports = class OsDomain {
       ...osPart,
       [key]: (parseInt(value, 10) + parseInt(osPart[key], 10)).toString(),
     };
-
-    console.log(key);
-    console.log(parseInt(value, 10));
-    console.log(parseInt(osPart[key], 10));
-    console.log(parseInt(value, 10) + parseInt(osPart[key], 10));
-
-    console.log(
-      JSON.parse(
-        JSON.stringify(await osPart.update(osPartUpdate, { transaction }))
-      )
-    );
 
     const osPartsUpdate = await OsParts.findByPk(bodyData.osPartsId, {
       transaction,

@@ -28,21 +28,21 @@ module.exports = class TechnicianReserveDomain {
       bodyData
     );
 
-    const technicianReserveNotHasProp = prop =>
+    const technicianReserveNotHasProp = (prop) =>
       R.not(R.has(prop, technicianReserve));
-    const bodyHasProp = prop => R.has(prop, bodyData);
+    const bodyHasProp = (prop) => R.has(prop, bodyData);
 
     const field = {
       razaoSocial: false,
       data: false,
       technicianReserveParts: false,
-      technicianId: false
+      technicianId: false,
     };
     const message = {
       razaoSocial: "",
       data: "",
       technicianReserveParts: "",
-      technicianId: ""
+      technicianId: "",
     };
 
     let errors = false;
@@ -81,7 +81,7 @@ module.exports = class TechnicianReserveDomain {
     } else {
       const { technicianId } = bodyData;
       const technicianExist = await Technician.findByPk(technicianId, {
-        transaction
+        transaction,
       });
 
       if (!technicianExist) {
@@ -98,7 +98,7 @@ module.exports = class TechnicianReserveDomain {
     const technicianReserveCreated = await TechnicianReserve.create(
       technicianReserve,
       {
-        transaction
+        transaction,
       }
     );
 
@@ -106,19 +106,19 @@ module.exports = class TechnicianReserveDomain {
       const { technicianReserveParts } = bodyData;
 
       const technicianReservePartsCreattedPromises = technicianReserveParts.map(
-        async item => {
+        async (item) => {
           const productBase = await ProductBase.findByPk(item.productBaseId, {
             include: [
               {
-                model: Product
-              }
+                model: Product,
+              },
             ],
-            transaction
+            transaction,
           });
 
           const technicianReservePartsCreatted = {
             ...item,
-            technicianReserveId: technicianReserveCreated.id
+            technicianReserveId: technicianReserveCreated.id,
           };
 
           if (!productBase) {
@@ -127,12 +127,10 @@ module.exports = class TechnicianReserveDomain {
             throw new FieldValidationError([{ field, message }]);
           }
 
-          console.log(technicianReservePartsCreatted);
-
           const technicianReservePartCreated = await TechnicianReserveParts.create(
             technicianReservePartsCreatted,
             {
-              transaction
+              transaction,
             }
           );
 
@@ -147,14 +145,14 @@ module.exports = class TechnicianReserveDomain {
             }
 
             if (serialNumberArray.length > 0) {
-              await serialNumberArray.map(async serialNumber => {
+              await serialNumberArray.map(async (serialNumber) => {
                 const equip = await Equip.findOne({
                   where: {
                     serialNumber,
                     reserved: false,
-                    productBaseId: productBase.id
+                    productBaseId: productBase.id,
                   },
-                  transaction
+                  transaction,
                 });
 
                 if (!equip) {
@@ -164,21 +162,21 @@ module.exports = class TechnicianReserveDomain {
                   throw new FieldValidationError([{ field, message }]);
                 }
               });
-              await serialNumberArray.map(async serialNumber => {
+              await serialNumberArray.map(async (serialNumber) => {
                 const equip = await Equip.findOne({
                   where: {
                     serialNumber,
                     reserved: false,
-                    productBaseId: productBase.id
+                    productBaseId: productBase.id,
                   },
-                  transaction
+                  transaction,
                 });
 
                 await equip.update(
                   {
                     ...equip,
                     technicianReservePartId: technicianReservePartCreated.id,
-                    reserved: true
+                    reserved: true,
                   },
                   { transaction }
                 );
@@ -194,7 +192,7 @@ module.exports = class TechnicianReserveDomain {
             ).toString(),
             amount: (
               parseInt(productBase.amount, 10) - parseInt(item.amount, 10)
-            ).toString()
+            ).toString(),
           };
 
           if (
@@ -233,10 +231,10 @@ module.exports = class TechnicianReserveDomain {
       {
         include: [
           {
-            model: ProductBase
-          }
+            model: ProductBase,
+          },
         ],
-        transaction
+        transaction,
       }
     );
 
@@ -247,7 +245,7 @@ module.exports = class TechnicianReserveDomain {
     const inicialOrder = {
       field: "createdAt",
       acendent: true,
-      direction: "DESC"
+      direction: "DESC",
     };
     const { query = null, transaction = null } = options;
 
@@ -260,24 +258,24 @@ module.exports = class TechnicianReserveDomain {
       include: [
         {
           model: Technician,
-          where: getWhere("technician")
+          where: getWhere("technician"),
         },
         {
           model: ProductBase,
           include: [
             {
-              model: Product
-            }
+              model: Product,
+            },
           ],
           through: {
-            paranoid: false
-          }
-        }
+            paranoid: false,
+          },
+        },
       ],
       order: [[inicialOrder.field, inicialOrder.direction]],
       limit,
       offset,
-      transaction
+      transaction,
     });
 
     const { rows, count } = technicianReserve;
@@ -287,11 +285,11 @@ module.exports = class TechnicianReserveDomain {
         page: null,
         show: 0,
         count,
-        rows: []
+        rows: [],
       };
     }
 
-    const formatDateFunct = date => {
+    const formatDateFunct = (date) => {
       moment.locale("pt-br");
       const formatDate = moment(date).format("L");
       const formatHours = moment(date).format("LT");
@@ -299,11 +297,8 @@ module.exports = class TechnicianReserveDomain {
       return dateformated;
     };
 
-    const formatProduct = productBases => {
-      console.log(JSON.parse(JSON.stringify(productBases)));
-
-      return R.map(async item => {
-        console.log(JSON.parse(JSON.stringify(item)));
+    const formatProduct = (productBases) => {
+      return R.map(async (item) => {
         const { technicianReserveParts } = item;
         const { amount, output, missOut } = technicianReserveParts;
 
@@ -334,15 +329,14 @@ module.exports = class TechnicianReserveDomain {
           output,
           missOut,
           return: technicianReserveParts.return,
-          quantMax
+          quantMax,
         };
 
         return resp;
       }, productBases);
     };
 
-    const formatData = R.map(async item => {
-      // console.log(JSON.parse(JSON.stringify(item)));
+    const formatData = R.map(async (item) => {
       const resp = {
         id: item.id,
         razaoSocial: item.razaoSocial,
@@ -352,7 +346,7 @@ module.exports = class TechnicianReserveDomain {
         technician: item.technician.name,
         technicianId: item.technicianId,
         createdAt: formatDateFunct(item.createdAt),
-        products: [...(await Promise.all(formatProduct(item.productBases)))]
+        products: [...(await Promise.all(formatProduct(item.productBases)))],
       };
 
       return resp;
@@ -364,7 +358,7 @@ module.exports = class TechnicianReserveDomain {
       page: pageResponse,
       show: R.min(count, limit),
       count,
-      rows: technicianReserveList
+      rows: technicianReserveList,
     };
 
     return response;

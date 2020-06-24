@@ -348,8 +348,6 @@ module.exports = class EmprestimoDomain {
       rows: emprestimoList,
     };
 
-    console.log(response);
-
     return response;
   }
 

@@ -373,16 +373,12 @@ module.exports = class EquipDomain {
 
     const equipsList = formatData(rows);
 
-    // console.log(equips.count);
-
     const response = {
       page: pageResponse,
       show: equipsList.length,
       count: equips.count,
       rows: equipsList,
     };
-
-    // console.log(response);
 
     return response;
   }

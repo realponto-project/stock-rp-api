@@ -238,8 +238,6 @@ module.exports = class FreeMarketDomain {
       transaction,
     });
 
-    console.log(getWhere("product"));
-
     const freeMarket = await FreeMarket.findAndCountAll({
       where: getWhere("freeMarket"),
       include: [

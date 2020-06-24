@@ -24,7 +24,7 @@ module.exports = class KitOutDomain {
   async add(bodyData, options = {}) {
     const { transaction = null } = options;
 
-    const bodyDataNotHasProp = prop => R.not(R.has(prop, bodyData));
+    const bodyDataNotHasProp = (prop) => R.not(R.has(prop, bodyData));
 
     const field = {
       reposicao: false,
@@ -32,7 +32,7 @@ module.exports = class KitOutDomain {
       perda: false,
       os: false,
       kitPartId: false,
-      message: false
+      message: false,
     };
     const message = {
       reposicao: "",
@@ -42,7 +42,7 @@ module.exports = class KitOutDomain {
       amount: "",
       os: "",
       kitPartId: "",
-      message: ""
+      message: "",
     };
 
     let errors = false;
@@ -110,10 +110,10 @@ module.exports = class KitOutDomain {
         {
           model: Kit,
           attributes: ["technicianId"],
-          include: [{ model: Technician, attributes: ["name"] }]
-        }
+          include: [{ model: Technician, attributes: ["name"] }],
+        },
       ],
-      transaction
+      transaction,
     });
 
     const perdaNumber = parseInt(bodyData.perda, 10);
@@ -130,7 +130,7 @@ module.exports = class KitOutDomain {
     const kitPart = await KitParts.findByPk(kitPartId, { transaction });
 
     let productBase = await ProductBase.findByPk(kitPart.productBaseId, {
-      transaction
+      transaction,
     });
 
     if (perdaNumber > 0) {
@@ -139,7 +139,7 @@ module.exports = class KitOutDomain {
       const kitOut = {
         action: "perda",
         amount: perda,
-        kitPartId
+        kitPartId,
       };
 
       await KitOut.create(kitOut, { transaction });
@@ -152,13 +152,13 @@ module.exports = class KitOutDomain {
         ).toString(),
         reserved: (
           parseInt(productBase.reserved, 10) - parseInt(perda, 10)
-        ).toString()
+        ).toString(),
       };
 
       await productBase.update(productBaseUpdate, { transaction });
 
       productBase = await ProductBase.findByPk(kitPart.productBaseId, {
-        transaction
+        transaction,
       });
     }
 
@@ -168,7 +168,7 @@ module.exports = class KitOutDomain {
       const kitOut = {
         action: "reposicao",
         amount: reposicao,
-        kitPartId
+        kitPartId,
       };
 
       await KitOut.create(kitOut, { transaction });
@@ -180,13 +180,13 @@ module.exports = class KitOutDomain {
         ).toString(),
         reserved: (
           parseInt(productBase.reserved, 10) + parseInt(reposicao, 10)
-        ).toString()
+        ).toString(),
       };
 
       await productBase.update(productBaseUpdate, { transaction });
 
       productBase = await ProductBase.findByPk(kitPart.productBaseId, {
-        transaction
+        transaction,
       });
     }
 
@@ -212,7 +212,7 @@ module.exports = class KitOutDomain {
         where: { os },
         include: [{ model: Technician, attributes: ["name"] }],
         // paranoid: false,
-        transaction
+        transaction,
       });
 
       if (!osExist) {
@@ -236,9 +236,9 @@ module.exports = class KitOutDomain {
       const kitOutReturn = await KitOut.findOne({
         where: {
           os,
-          kitPartId: bodyData.kitPartId
+          kitPartId: bodyData.kitPartId,
         },
-        transaction
+        transaction,
       });
 
       if (kitOutReturn) {
@@ -246,7 +246,7 @@ module.exports = class KitOutDomain {
           ...kitOutReturn,
           amount: (
             parseInt(kitOutReturn.amount, 10) + parseInt(expedicao, 10)
-          ).toString()
+          ).toString(),
         };
 
         await kitOutReturn.update(kitOutUpdate, { transaction });
@@ -255,7 +255,7 @@ module.exports = class KitOutDomain {
           action: "expedicao",
           amount: expedicao,
           kitPartId,
-          os
+          os,
         };
         await KitOut.create(kitOut, { transaction });
 
@@ -266,13 +266,13 @@ module.exports = class KitOutDomain {
           ).toString(),
           reserved: (
             parseInt(productBase.reserved, 10) - parseInt(expedicao, 10)
-          ).toString()
+          ).toString(),
         };
 
         await productBase.update(productBaseUpdate, { transaction });
 
         productBase = await ProductBase.findByPk(kitPart.productBaseId, {
-          transaction
+          transaction,
         });
       }
     }
@@ -291,7 +291,7 @@ module.exports = class KitOutDomain {
 
     const kitPartUpdate = {
       ...kitPart,
-      amount
+      amount,
     };
 
     await kitPart.update(kitPartUpdate, { transaction });
@@ -360,7 +360,7 @@ module.exports = class KitOutDomain {
     const inicialOrder = {
       field: "createdAt",
       acendent: true,
-      direction: "DESC"
+      direction: "DESC",
     };
 
     const { query = null, transaction = null } = options;
@@ -376,8 +376,6 @@ module.exports = class KitOutDomain {
 
     const { getWhere, limit, pageResponse } = formatQuery(newQuery);
 
-    console.log(getWhere("product"));
-
     const kitOut = await KitOut.findAndCountAll({
       where: getWhere("kitOut"),
       include: [
@@ -391,10 +389,10 @@ module.exports = class KitOutDomain {
               include: [
                 {
                   model: Product,
-                  where: getWhere("product")
-                }
+                  where: getWhere("product"),
+                },
               ],
-              required: true
+              required: true,
             },
             {
               model: Kit,
@@ -402,17 +400,17 @@ module.exports = class KitOutDomain {
               include: [
                 {
                   model: Technician,
-                  where: getWhere("technician")
-                }
+                  where: getWhere("technician"),
+                },
               ],
-              required: true
-            }
-          ]
-        }
+              required: true,
+            },
+          ],
+        },
       ],
       order: [["createdAt", "ASC"]],
       limit: 10,
-      transaction
+      transaction,
     });
 
     const osConserto = await OsParts.findAndCountAll({
@@ -425,29 +423,27 @@ module.exports = class KitOutDomain {
           include: [
             {
               model: Technician,
-              where: getWhere("technician")
-            }
-          ]
+              where: getWhere("technician"),
+            },
+          ],
         },
         {
           model: Conserto,
           include: [
             {
               model: Product,
-              where: getWhere("product")
-            }
+              where: getWhere("product"),
+            },
           ],
           required: true,
-          paranoid: false
-        }
+          paranoid: false,
+        },
       ],
       order: [["createdAt", "ASC"]],
       limit: 10,
       paranoid: false,
-      transaction
+      transaction,
     });
-
-    // console.log(JSON.parse(JSON.stringify(osConserto)));
 
     const osProductBase = await OsParts.findAndCountAll({
       where: { ...getWhere("osParts"), missOut: { [operators.ne]: "0" } },
@@ -459,28 +455,26 @@ module.exports = class KitOutDomain {
           include: [
             {
               model: Technician,
-              where: getWhere("technician")
-            }
-          ]
+              where: getWhere("technician"),
+            },
+          ],
         },
         {
           model: ProductBase,
           include: [
             {
               model: Product,
-              where: getWhere("product")
-            }
+              where: getWhere("product"),
+            },
           ],
-          required: true
-        }
+          required: true,
+        },
       ],
       order: [["createdAt", "ASC"]],
       limit: 10,
       paranoid: false,
-      transaction
+      transaction,
     });
-
-    // console.log(JSON.parse(JSON.stringify(osProductBase)));
 
     if (
       kitOut.rows.length === 0 &&
@@ -488,47 +482,47 @@ module.exports = class KitOutDomain {
       osProductBase.rows.length === 0
     ) {
       return {
-        rows: []
+        rows: [],
       };
     }
 
-    const formatDateFunct = date => {
+    const formatDateFunct = (date) => {
       moment.locale("pt-br");
       const formatDate = moment(date).format("L");
       return formatDate;
     };
 
-    const formatKitOut = R.map(async item => {
+    const formatKitOut = R.map(async (item) => {
       const resp = {
         id: item.id,
         amount: item.amount,
         name: item.kitPart.productBase.product.name,
         technician: item.kitPart.kit.technician.name,
-        createdAt: formatDateFunct(item.createdAt)
+        createdAt: formatDateFunct(item.createdAt),
       };
       return resp;
     });
 
-    const formatProductBase = R.map(async item => {
+    const formatProductBase = R.map(async (item) => {
       const resp = {
         // id: item.id,
         os: item.o.os,
         amount: item.missOut,
         name: item.productBase.product.name,
         technician: item.o.technician.name,
-        createdAt: formatDateFunct(item.createdAt)
+        createdAt: formatDateFunct(item.createdAt),
       };
       return resp;
     });
 
-    const formatConserto = R.map(async item => {
+    const formatConserto = R.map(async (item) => {
       const resp = {
         // id: item.id,
         os: item.o.os,
         amount: item.missOut,
         name: item.conserto.product.name,
         technician: item.o.technician.name,
-        createdAt: formatDateFunct(item.createdAt)
+        createdAt: formatDateFunct(item.createdAt),
       };
       return resp;
     });
@@ -549,7 +543,7 @@ module.exports = class KitOutDomain {
         : [];
 
     const response = {
-      rows: [...kitOutList, ...osConsertoList, ...osProductBaseList]
+      rows: [...kitOutList, ...osConsertoList, ...osProductBaseList],
     };
 
     return response;

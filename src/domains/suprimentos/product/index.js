@@ -7,6 +7,9 @@ const Manufacturer = database.model("manufacturer");
 const SupEntrance = database.model("supEntrance");
 const SupProvider = database.model("supProvider");
 
+const Sequelize = require("sequelize");
+const { Op: operators } = Sequelize;
+
 module.exports = class SupProductDomain {
   async create(body, options = {}) {
     const { transaction = null } = options;
@@ -21,12 +24,14 @@ module.exports = class SupProductDomain {
       name: false,
       unit: false,
       manufacturerId: false,
+      minimumQuantity: false,
     };
 
     const message = {
-      name: false,
-      unit: false,
-      manufacturerId: false,
+      name: "",
+      unit: "",
+      manufacturerId: "",
+      minimumQuantity: "",
     };
 
     if (notHasProp("name") || !supProduct.name) {
@@ -70,6 +75,16 @@ module.exports = class SupProductDomain {
       message.manufacturerId = "manufacturer not found";
     }
 
+    if (notHasProp("minimumQuantity") || !supProduct.minimumQuantity) {
+      errors = true;
+      field.minimumQuantity = true;
+      message.minimumQuantity = "minimumQuantity cannot null";
+    } else if (typeof supProduct.minimumQuantity !== "number") {
+      errors = true;
+      field.minimumQuantity = true;
+      message.minimumQuantity = "minimumQuantity invalid";
+    }
+
     if (errors) {
       throw new FieldValidationError([{ field, message }]);
     }
@@ -91,8 +106,17 @@ module.exports = class SupProductDomain {
 
     const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
 
+    const where = query.compra
+      ? {
+          ...getWhere("supProduct"),
+          minimumQuantity: {
+            [operators.gt]: { [operators.col]: "supProduct.amount" },
+          },
+        }
+      : getWhere("supProduct");
+
     const supProducts = await SupProduct.findAndCountAll({
-      where: getWhere("supProduct"),
+      where,
       include: [
         {
           model: Manufacturer,
@@ -107,7 +131,7 @@ module.exports = class SupProductDomain {
         },
       ],
       order: [["createdAt", "ASC"]],
-      limit,
+      limit: query.total === null ? undefined : limit,
       offset,
       transaction,
     });
@@ -152,12 +176,14 @@ module.exports = class SupProductDomain {
       name: false,
       unit: false,
       manufacturerId: false,
+      minimumQuantity: false,
     };
 
     const message = {
-      name: false,
-      unit: false,
-      manufacturerId: false,
+      name: "",
+      unit: "",
+      manufacturerId: "",
+      minimumQuantity: "",
     };
 
     if (notHasProp("name") || !supProduct.name) {
@@ -200,6 +226,16 @@ module.exports = class SupProductDomain {
       errors = true;
       field.manufacturerId = true;
       message.manufacturerId = "manufacturer not found";
+    }
+
+    if (notHasProp("minimumQuantity") || !supProduct.minimumQuantity) {
+      errors = true;
+      field.minimumQuantity = true;
+      message.minimumQuantity = "minimumQuantity cannot null";
+    } else if (typeof supProduct.minimumQuantity !== "number") {
+      errors = true;
+      field.minimumQuantity = true;
+      message.minimumQuantity = "minimumQuantity invalid";
     }
 
     if (errors) {

@@ -32,6 +32,14 @@ module.exports = (sequelize) => {
         min: 0,
       },
     },
+
+    minimumQuantity: {
+      type: Sequelize.INTEGER,
+      defaultValue: 5,
+      validate: {
+        min: 1,
+      },
+    },
   });
 
   supProduct.associate = (models) => {

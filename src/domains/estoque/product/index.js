@@ -40,6 +40,7 @@ module.exports = class ProductDomain {
       category: false,
       SKU: false,
       serial: false,
+      modulo: false,
       minimumStock: false,
       mark: false,
       type: false,
@@ -53,6 +54,7 @@ module.exports = class ProductDomain {
       category: "",
       SKU: "",
       serial: "",
+      modulo: "",
       minimumStock: "",
       mark: "",
       type: "",
@@ -147,6 +149,12 @@ module.exports = class ProductDomain {
       } else {
         product.markId = markHasExist.id;
       }
+    }
+
+    if (productNotHasProp("modulo") || typeof product.modulo !== "boolean") {
+      errors = true;
+      field.modulo = true;
+      message.modulo = "modulo cannot undefined";
     }
 
     if (bodyData.category === "equipamento") {
@@ -640,9 +648,6 @@ module.exports = class ProductDomain {
       let saidaInterno = 0;
       let saidaKit = 0;
 
-      // console.log(JSON.parse(JSON.stringify(product)));
-      // console.log(JSON.parse(JSON.stringify(product.stockBases[0])));
-
       // product.entrances.map(
       //   (entrance) =>
       //     (quantidadeSaidaTotal =
@@ -719,8 +724,6 @@ module.exports = class ProductDomain {
         ],
         transaction,
       });
-
-      console.log(JSON.parse(JSON.stringify(kitOuts)));
 
       freeMarketParts.map(
         (freeMarketPart) =>

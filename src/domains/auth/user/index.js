@@ -694,6 +694,7 @@ class UserDomain {
         updateRos: userResources.resource.updateRos,
         addStatus: userResources.resource.addStatus,
         suprimento: userResources.resource.suprimento,
+        modulo: userResources.resource.modulo,
       };
     } else {
       userResources = await User.findByPk(user.id, {
@@ -738,6 +739,7 @@ class UserDomain {
         updateRos: userResources.typeAccount.resource.updateRos,
         addStatus: userResources.typeAccount.resource.addStatus,
         suprimento: userResources.typeAccount.resource.suprimento,
+        modulo: userResources.typeAccount.resource.modulo,
       };
     }
 
@@ -747,8 +749,6 @@ class UserDomain {
   // eslint-disable-next-line camelcase
   async user_Update(bodyData, options = {}) {
     const { transaction = null } = options;
-
-    console.log(bodyData);
 
     const omitArray = [
       "id",

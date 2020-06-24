@@ -7,7 +7,7 @@ const SessionDomain = require("./session");
 
 const {
   UnauthorizedError,
-  FieldValidationError
+  FieldValidationError,
 } = require("../../../helpers/errors");
 // const { FieldValidationError } = require('../../helpers/errors')
 
@@ -29,32 +29,32 @@ class LoginDomain {
           where: { username },
           include: [
             {
-              model: TypeAccount
-            }
-          ]
-        }
+              model: TypeAccount,
+            },
+          ],
+        },
       ],
-      transaction
+      transaction,
     });
 
     if (!login) {
       throw new UnauthorizedError([
         {
           field: {
-            username: true
+            username: true,
           },
-          message: "usuario não foi encontrado"
-        }
+          message: "usuario não foi encontrado",
+        },
       ]);
     }
 
     const authorizedStock = R.filter(R.propEq("stock", true), [
       typeAccount,
-      login.user.typeAccount
+      login.user.typeAccount,
     ]);
     const authorizedLabTec = R.filter(R.propEq("labTec", true), [
       typeAccount,
-      login.user.typeAccount
+      login.user.typeAccount,
     ]);
 
     if (authorizedStock.length !== 2 && authorizedLabTec.length !== 2) {
@@ -69,15 +69,15 @@ class LoginDomain {
       throw new UnauthorizedError([
         {
           field: {
-            password: true
+            password: true,
           },
-          message: "senha incorreta"
-        }
+          message: "senha incorreta",
+        },
       ]);
     }
 
     const session = await sessionDomain.createSession(login.id, {
-      transaction
+      transaction,
     });
 
     const user = await User.findByPk(login.user.id, {
@@ -87,13 +87,13 @@ class LoginDomain {
         "username",
         "customized",
         "resourceId",
-        "typeAccountId"
+        "typeAccountId",
       ],
       include: [
         {
-          model: TypeAccount
-        }
-      ]
+          model: TypeAccount,
+        },
+      ],
     });
 
     let resource = {};
@@ -102,7 +102,7 @@ class LoginDomain {
       const { resourceId } = user;
 
       const resourceReturn = await Resources.findByPk(resourceId, {
-        transaction
+        transaction,
       });
 
       resource = {
@@ -132,7 +132,8 @@ class LoginDomain {
         delROs: resourceReturn.delROs,
         updateRos: resourceReturn.updateRos,
         addStatus: resourceReturn.addStatus,
-        suprimento: resourceReturn.suprimento
+        suprimento: resourceReturn.suprimento,
+        modulo: resourceReturn.modulo,
       };
     } else {
       const { typeAccountId } = user;
@@ -140,10 +141,10 @@ class LoginDomain {
       const typeAccountReturn = await TypeAccount.findByPk(typeAccountId, {
         include: [
           {
-            model: Resources
-          }
+            model: Resources,
+          },
         ],
-        transaction
+        transaction,
       });
 
       resource = {
@@ -173,7 +174,8 @@ class LoginDomain {
         delROs: typeAccountReturn.resource.delROs,
         updateRos: typeAccountReturn.resource.updateRos,
         addStatus: typeAccountReturn.resource.addStatus,
-        suprimento: typeAccountReturn.resource.suprimento
+        suprimento: typeAccountReturn.resource.suprimento,
+        modulo: typeAccountReturn.resource.modulo,
       };
     }
 
@@ -183,7 +185,7 @@ class LoginDomain {
       userId: user.id,
       username: user.username,
       typeAccount: user.typeAccount.typeName,
-      active: session.active
+      active: session.active,
     };
 
     return response;
@@ -203,7 +205,7 @@ class LoginDomain {
     // }
 
     const sucess = {
-      logout: true
+      logout: true,
     };
     return sucess;
   }
