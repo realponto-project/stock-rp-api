@@ -109,6 +109,8 @@ class UserDomain {
     }
 
     const field = {
+      modulo: false,
+
       typeName: false,
       addCompany: false,
       addPart: false,
@@ -136,6 +138,8 @@ class UserDomain {
       suprimento: false,
     };
     const message = {
+      modulo: "",
+
       typeName: "",
       addCompany: "",
       addPart: "",
@@ -164,6 +168,15 @@ class UserDomain {
     };
 
     let errors = null;
+
+    if (
+      bodyNotHasProps("modulo") ||
+      typeof userNotFormatted.modulo !== "boolean"
+    ) {
+      errors = true;
+      field.modulo = true;
+      message.modulo = "modulo cannot undefined";
+    }
 
     if (
       bodyNotHasProps("addCompany") ||

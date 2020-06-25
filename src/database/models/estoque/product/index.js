@@ -55,6 +55,10 @@ module.exports = (sequelize) => {
       type: Sequelize.STRING,
       allowNull: true,
     },
+    modulo: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+    },
   });
 
   product.associate = (models) => {

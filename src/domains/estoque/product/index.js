@@ -223,7 +223,7 @@ module.exports = class ProductDomain {
   async update(bodyData, options = {}) {
     const { transaction = null } = options;
 
-    const product = R.omit(["id", "type", "mark"], bodyData);
+    const product = R.omit(["id", "type", "mark", "modulo"], bodyData);
 
     const productNotHasProp = (prop) => R.not(R.has(prop, product));
     const bodyDataNotHasProp = (prop) => R.not(R.has(prop, bodyData));
@@ -432,6 +432,8 @@ module.exports = class ProductDomain {
     const newOrder = query && query.order ? query.order : inicialOrder;
 
     const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
+
+    console.log(getWhere("product"));
 
     const products = await Product.findAndCountAll({
       where: getWhere("product"),
