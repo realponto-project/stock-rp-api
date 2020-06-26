@@ -88,6 +88,7 @@ class LoginDomain {
         "customized",
         "resourceId",
         "typeAccountId",
+        "modulo",
       ],
       include: [
         {
@@ -133,7 +134,6 @@ class LoginDomain {
         updateRos: resourceReturn.updateRos,
         addStatus: resourceReturn.addStatus,
         suprimento: resourceReturn.suprimento,
-        modulo: resourceReturn.modulo,
       };
     } else {
       const { typeAccountId } = user;
@@ -175,7 +175,6 @@ class LoginDomain {
         updateRos: typeAccountReturn.resource.updateRos,
         addStatus: typeAccountReturn.resource.addStatus,
         suprimento: typeAccountReturn.resource.suprimento,
-        modulo: typeAccountReturn.resource.modulo,
       };
     }
 
@@ -184,6 +183,7 @@ class LoginDomain {
       token: session.id,
       userId: user.id,
       username: user.username,
+      modulo: user.modulo,
       typeAccount: user.typeAccount.typeName,
       active: session.active,
     };

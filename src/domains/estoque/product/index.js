@@ -523,13 +523,17 @@ module.exports = class ProductDomain {
 
     const { getWhere } = formatQuery(newQuery);
 
+    console.log(getWhere("product"));
+
     const products = await Product.findAll({
       where: getWhere("product"),
-      attributes: ["id", "name", "serial"],
+      attributes: ["id", "name", "serial", "modulo"],
       order: [["name", "ASC"]],
       limit: 20,
       transaction,
     });
+
+    console.log(JSON.parse(JSON.stringify(products)));
 
     const response = products.map((item) => ({
       id: item.id,
