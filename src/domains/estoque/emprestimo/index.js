@@ -261,8 +261,6 @@ module.exports = class EmprestimoDomain {
 
     const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
 
-    console.log(getWhere("product"));
-
     const emprestimos = await Emprestimo.findAndCountAll({
       where: getWhere("emprestimo"),
       include: [

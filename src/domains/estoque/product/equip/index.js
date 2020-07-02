@@ -359,6 +359,7 @@ module.exports = class EquipDomain {
       const resp = {
         id: equip.id,
         reserved: equip.reserved,
+        inClient: equip.inClient,
         serialNumber: equip.serialNumber,
         razaoSocial: equip.razaoSocial,
         name: equip.productBase && equip.productBase.product.name,
@@ -930,5 +931,42 @@ module.exports = class EquipDomain {
     });
 
     return response;
+  }
+  async delete(body, options = {}) {
+    const { transaction = null } = options;
+    const equip = await Equip.findByPk(body.id, { transaction });
+    const productBase = await ProductBase.findByPk(body.productBaseId, {
+      transaction,
+    });
+
+    if (!productBase) {
+      throw new FieldValidationError([
+        {
+          field: { productBaseId: true },
+          message: { productBaseId: "invalid productBaseId" },
+        },
+      ]);
+    }
+
+    if (!equip) {
+      throw new FieldValidationError([
+        { field: { id: true }, message: { id: "invalid id" } },
+      ]);
+    } else if (equip.reserved || equip.inClient) {
+      throw new FieldValidationError([
+        {
+          field: { id: true },
+          message: { id: "equipamneto reservado ou em cliente" },
+        },
+      ]);
+    }
+
+    await equip.destroy({ transaction });
+
+    const amount = parseInt(productBase.amount, 10) - 1,
+      available = parseInt(productBase.available, 10) - 1;
+
+    await productBase.update({ amount, available }, { transaction });
+    return;
   }
 };

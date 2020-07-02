@@ -66,9 +66,23 @@ const update = async (req, res, next) => {
   }
 };
 
+const delet = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    const equip = await equipDomain.delete(req.query, { transaction });
+
+    await transaction.commit();
+    res.json(equip);
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
+};
+
 module.exports = {
   add,
   getAll,
   getOneBySerialNumber,
-  update
+  update,
+  delet,
 };

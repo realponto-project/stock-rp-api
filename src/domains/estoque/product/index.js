@@ -433,8 +433,6 @@ module.exports = class ProductDomain {
 
     const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
 
-    console.log(getWhere("product"));
-
     const products = await Product.findAndCountAll({
       where: getWhere("product"),
       include: [
@@ -523,8 +521,6 @@ module.exports = class ProductDomain {
 
     const { getWhere } = formatQuery(newQuery);
 
-    console.log(getWhere("product"));
-
     const products = await Product.findAll({
       where: getWhere("product"),
       attributes: ["id", "name", "serial", "modulo"],
@@ -532,8 +528,6 @@ module.exports = class ProductDomain {
       limit: 20,
       transaction,
     });
-
-    console.log(JSON.parse(JSON.stringify(products)));
 
     const response = products.map((item) => ({
       id: item.id,
