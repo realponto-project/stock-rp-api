@@ -1373,6 +1373,7 @@ module.exports = class OsDomain {
       [key]: (parseInt(value, 10) + parseInt(osPart[key], 10)).toString(),
     };
 
+    await osPart.update(osPartUpdate, { transaction });
     const osPartsUpdate = await OsParts.findByPk(bodyData.osPartsId, {
       transaction,
     });
