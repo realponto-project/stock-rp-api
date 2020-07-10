@@ -1288,7 +1288,7 @@ module.exports = class OsDomain {
               transaction,
             });
 
-            if (key !== "output") {
+            if (key === "return") {
               await equip.update(
                 {
                   ...equip,

@@ -3,17 +3,46 @@ const moment = require("moment");
 
 const database = require("../../database");
 
-const Product = database.model("product");
-const ProductBase = database.model("productBase");
-const FreeMarket = database.model("freeMarket");
-const FreeMarketParts = database.model("freeMarketParts");
-const Equip = database.model("equip");
-const TechnicianReserve = database.model("technicianReserve");
-const TechnicianReserveParts = database.model("technicianReserveParts");
-const Entrance = database.model("entrance");
-const Conserto = database.model("conserto");
-
+const models = require("../../database/models");
+const { response } = require("express");
 const { Op } = Sequelize;
+
+const Login = database.model("login"),
+  Resources = database.model("resources"),
+  Session = database.model("session"),
+  TypeAccount = database.model("typeAccount"),
+  User = database.model("user"),
+  Company = database.model("company"),
+  Accessories = database.model("accessories"),
+  Car = database.model("car"),
+  Entrance = database.model("entrance"),
+  Equip = database.model("equip"),
+  EquipType = database.model("equipType"),
+  FreeMarket = database.model("freeMarket"),
+  FreeMarketParts = database.model("freeMarketParts"),
+  Kit = database.model("kit"),
+  KitOut = database.model("kitOut"),
+  KitParts = database.model("kitParts"),
+  KitPartsOut = database.model("kitPartsOut"),
+  Product = database.model("product"),
+  Mark = database.model("mark"),
+  Notification = database.model("notification"),
+  Os = database.model("os"),
+  OsParts = database.model("osParts"),
+  StockBase = database.model("stockBase"),
+  Technician = database.model("technician"),
+  TechnicianReserve = database.model("technicianReserve"),
+  TechnicianReserveParts = database.model("technicianReserveParts"),
+  ProductBase = database.model("productBase"),
+  StatusExpedition = database.model("statusExpedition"),
+  Emprestimo = database.model("emprestimo"),
+  Conserto = database.model("conserto"),
+  SupEntrance = database.model("supEntrance"),
+  SupProduct = database.model("supProduct"),
+  Manufacturer = database.model("manufacturer"),
+  SupProvider = database.model("supProvider"),
+  SupOut = database.model("supOut"),
+  SupContact = database.model("supContact");
 
 const deleteEComerce = async (req, res, next) => {
   const transaction = await database.transaction();
@@ -191,10 +220,195 @@ const writeDefautsProducts = async (req, res, next) => {
   }
 };
 
+const findAllTable = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    //     await Entrance.findAll({
+    //       where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //       transaction,
+    //       await ProductBase.findAll({
+    //         where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //         transaction,
+    //       })
+    // await FreeMarketParts.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   transaction,
+    // });
+    // await Product.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   transaction,
+    // })
+    // await Os.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   transaction,
+    // })
+    // await OsParts.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   transaction,
+    // })
+    // await TechnicianReserve.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   transaction,
+    // })
+    // await TechnicianReserveParts.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   transaction,
+    // });
+    // await Emprestimo.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   transaction,
+    // })
+    // await Conserto.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   transaction,
+    // })
+    // await SupProduct.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   transaction,
+    // })
+    // console.log(
+    //   JSON.parse(
+    //     JSON
+    //       .stringify
+    //       // await Equip.findAll({
+    //       //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //       //   paranoid: false,
+    //       //   transaction,
+    //       // })
+    //       ()
+    //   )
+    // );
+
+    // const freeMarkets = await FreeMarket.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   include: [
+    //     {
+    //       model: ProductBase,
+    //       include: [{ model: Product }, { model: StockBase }],
+    //     },
+    //   ],
+    //   transaction,
+    // });
+
+    // let response = [];
+
+    // await Promise.all(
+    //   freeMarkets.map(async (freeMarket) => {
+    //     const {
+    //       trackingCode: codigo,
+    //       cnpjOrCpf: cnpj,
+    //       name: razaosocial,
+    //       productBases,
+    //     } = freeMarket;
+
+    //     await Promise.all(
+    //       productBases.map(async (productBase) => {
+    //         const {
+    //           stockBase: { stockBase: estoque },
+    //           product: { name: produto, serial },
+    //           freeMarketParts: { amount: quantidade, id },
+    //         } = productBase;
+    //         // console.log(JSON.parse(JSON.stringify(productBase)));
+    //         if (serial) {
+    //           console.log(id);
+    //           const equips = await Equip.findAll({
+    //             attributes: ["serialNumber"],
+    //             where: {
+    //               updatedAt: { [Op.gte]: new Date("07/02/2020") },
+    //               freeMarketPartId: id,
+    //             },
+    //             paranoid: false,
+    //             transaction,
+    //           });
+
+    //           console.log(JSON.parse(JSON.stringify(equips)));
+    //           response = [
+    //             ...response,
+    //             {
+    //               codigo,
+    //               cnpj,
+    //               razaosocial,
+    //               estoque,
+    //               produto,
+    //               quantidade,
+    //               equips,
+    //             },
+    //           ];
+    //         } else {
+    //           response = [
+    //             ...response,
+    //             { codigo, cnpj, razaosocial, estoque, produto, quantidade },
+    //           ];
+    //         }
+    //         return;
+    //       })
+    //     );
+    //     return;
+    //   })
+    // );
+
+    // await SupOut.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   include: [{ model: SupProduct }],
+    //   transaction,
+    // })
+    // const response = await SupOut.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   include: [{ model: SupProduct }],
+    //   transaction,
+    // });
+
+    // const internos = await TechnicianReserve.findAll({
+    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
+    //   include: [
+    //     { model: Technician },
+    //     {
+    //       model: ProductBase,
+    //       include: [{ model: Product }, { model: StockBase }],
+    //     },
+    //   ],
+    //   transaction,
+    // });
+
+    // console.log(JSON.parse(JSON.stringify(internos)));
+
+    // let response = [];
+
+    // internos.map((interno) => {
+    //   const {
+    //     razaoSocial,
+    //     date,
+    //     technician: { name: tecnico },
+    //     productBases,
+    //   } = interno;
+
+    //   productBases.map((productBase) => {
+    //     const {
+    //       stockBase: { stockBase: estoque },
+    //       product: { name: produto },
+    //       technicianReserveParts: { amount: quantidade },
+    //     } = productBase;
+
+    //     response = [
+    //       ...response,
+    //       { date, tecnico, razaoSocial, estoque, produto, quantidade },
+    //     ];
+    //   });
+    // });
+
+    await transaction.commit();
+    res.json(response);
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
+};
+
 module.exports = {
   deleteEComerce,
   associateTechnicianReverve,
   writeDefautsEntrances,
   writeDefautsConserto,
   writeDefautsProducts,
+  findAllTable,
 };

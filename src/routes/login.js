@@ -15,4 +15,6 @@ router.delete("/logout", loginController.logoutController);
 // router.get("/util/writeDefautsConserto", utilController.writeDefautsConserto);
 // router.get("/util/writeDefautsProducts", utilController.writeDefautsProducts);
 
+// router.get("/util/findAllTable", utilController.findAllTable);
+
 module.exports = router;
