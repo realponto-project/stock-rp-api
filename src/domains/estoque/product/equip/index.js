@@ -877,7 +877,7 @@ module.exports = class EquipDomain {
   }
 
   async getOneBySerialNumber(serialNumber, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null, paranoid = false } = options;
     const response = await Equip.findOne({
       where: {
         serialNumber,
@@ -926,7 +926,7 @@ module.exports = class EquipDomain {
           ],
         },
       ],
-      paranoid: false,
+      paranoid: paranoid === "true",
       transaction,
     });
 

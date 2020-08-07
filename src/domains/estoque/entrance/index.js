@@ -27,7 +27,7 @@ module.exports = class TechnicianDomain {
 
     const entrance = R.omit(["id"], bodyData);
 
-    const entranceNotHasProp = prop => R.not(R.has(prop, entrance));
+    const entranceNotHasProp = (prop) => R.not(R.has(prop, entrance));
     // const bodyDataNotHasProp = prop => R.not(R.has(prop, bodyData))
 
     const field = {
@@ -37,7 +37,7 @@ module.exports = class TechnicianDomain {
       companyId: false,
       message: false,
       responsibleUser: false,
-      analysis: false
+      analysis: false,
     };
     const message = {
       amountAdded: "",
@@ -46,7 +46,7 @@ module.exports = class TechnicianDomain {
       companyId: "",
       message: "",
       responsibleUser: "",
-      analysis: ""
+      analysis: "",
     };
 
     let errors = false;
@@ -77,7 +77,9 @@ module.exports = class TechnicianDomain {
       errors = true;
       field.stockBase = true;
       message.stockBase = "Por favor informar a base de estoque.";
-    } else if (!stockBaseArray.filter(value => value === entrance.stockBase)) {
+    } else if (
+      !stockBaseArray.filter((value) => value === entrance.stockBase)
+    ) {
       errors = true;
       field.stockBase = true;
       message.stockBase = "Base de estoque inválida.";
@@ -92,7 +94,7 @@ module.exports = class TechnicianDomain {
 
       const user = await User.findOne({
         where: { username: responsibleUser },
-        transaction
+        transaction,
       });
 
       if (!user) {
@@ -119,7 +121,7 @@ module.exports = class TechnicianDomain {
     } else {
       const fornecedor = await Company.findByPk(entrance.companyId, {
         where: { relation: "fornecedor" },
-        transaction
+        transaction,
       });
 
       if (!fornecedor) {
@@ -130,7 +132,7 @@ module.exports = class TechnicianDomain {
     }
 
     const product = await Product.findByPk(entrance.productId, {
-      transaction
+      transaction,
     });
 
     if (!product) {
@@ -181,15 +183,15 @@ module.exports = class TechnicianDomain {
 
     const stockBase = await StockBase.findOne({
       where: { stockBase: entrance.stockBase },
-      transaction
+      transaction,
     });
 
     let productBase = await ProductBase.findOne({
       where: {
         productId: entrance.productId,
-        stockBaseId: stockBase.id
+        stockBaseId: stockBase.id,
       },
-      transaction
+      transaction,
     });
 
     if (!productBase) {
@@ -200,7 +202,7 @@ module.exports = class TechnicianDomain {
           amount: entrance.amountAdded,
           available: entrance.amountAdded,
           analysis: entrance.analysis,
-          reserved: "0"
+          reserved: "0",
         },
         { transaction }
       );
@@ -226,7 +228,7 @@ module.exports = class TechnicianDomain {
         ...productBase,
         amount,
         available,
-        analysis
+        analysis,
       };
 
       await productBase.update(productBaseUpdate, { transaction });
@@ -235,42 +237,50 @@ module.exports = class TechnicianDomain {
     productBase = await ProductBase.findOne({
       where: {
         productId: entrance.productId,
-        stockBaseId: stockBase.id
+        stockBaseId: stockBase.id,
       },
-      transaction
+      transaction,
     });
 
     if (product.serial && entrance.analysis === "0") {
       const { serialNumbers } = entrance;
 
-      const serialNumbersFindPromises = serialNumbers.map(async item => {
-        const serialNumberHasExist = await Equip.findOne({
-          where: { serialNumber: item },
-          attributes: [],
-          include: [
-            {
-              model: ProductBase,
-              where: { id: productBase.id },
-              attributes: []
-            }
-          ],
-          paranoid: false,
-          transaction
-        });
+      const serialNumbersFindPromises = serialNumbers.map(
+        async (item, index) => {
+          const serialNumberHasExist = await Equip.findOne({
+            where: { serialNumber: item },
+            // attributes: [],
+            // include: [
+            //   {
+            //     model: ProductBase,
+            //     where: { id: productBase.id },
+            //     attributes: [],
+            //   },
+            // ],
+            paranoid: false,
+            transaction,
+          });
 
-        if (serialNumberHasExist) {
-          field.serialNumbers = true;
-          message.serialNumbers = `${item} já está registrado`;
-          throw new FieldValidationError([{ field, message }]);
+          if (serialNumberHasExist) {
+            if (serialNumberHasExist.deletedAt === null) {
+              field.serialNumbers = true;
+              message.serialNumbers = `${item} já está registrado`;
+              throw new FieldValidationError([{ field, message }]);
+            } else {
+              serialNumbers.splice(index, 1);
+              await serialNumberHasExist.restore({ transaction });
+            }
+          }
         }
-      });
+      );
+
       await Promise.all(serialNumbersFindPromises);
 
-      const serialNumbersCreatePromises = serialNumbers.map(async item => {
+      const serialNumbersCreatePromises = serialNumbers.map(async (item) => {
         const equipCreate = {
           productBaseId: productBase.id,
           serialNumber: item,
-          loan: entrance.stockBase === "EMPRESTIMO"
+          loan: entrance.stockBase === "EMPRESTIMO",
         };
 
         await Equip.create(equipCreate, { transaction });
@@ -280,7 +290,7 @@ module.exports = class TechnicianDomain {
 
     entrance.amountAdded = Math.max.apply(null, [
       entrance.analysis,
-      entrance.amountAdded
+      entrance.amountAdded,
     ]);
 
     entrance.analysis = entrance.analysis !== "0";
@@ -290,13 +300,13 @@ module.exports = class TechnicianDomain {
     const response = await Entrance.findByPk(entranceCreated.id, {
       include: [
         {
-          model: Company
+          model: Company,
         },
         {
-          model: Product
-        }
+          model: Product,
+        },
       ],
-      transaction
+      transaction,
     });
 
     return response;
@@ -309,7 +319,7 @@ module.exports = class TechnicianDomain {
 
     const oldEntrance = await Entrance.findByPk(bodyData.id, { transaction });
 
-    const entranceNotHasProp = prop => R.not(R.has(prop, entrance));
+    const entranceNotHasProp = (prop) => R.not(R.has(prop, entrance));
     // const bodyDataNotHasProp = prop => R.not(R.has(prop, bodyData))
 
     const field = {
@@ -318,7 +328,7 @@ module.exports = class TechnicianDomain {
       productId: false,
       companyId: false,
       message: false,
-      responsibleUser: false
+      responsibleUser: false,
     };
     const message = {
       amountAdded: "",
@@ -326,7 +336,7 @@ module.exports = class TechnicianDomain {
       productId: "",
       companyId: "",
       message: "",
-      responsibleUser: ""
+      responsibleUser: "",
     };
 
     let errors = false;
@@ -347,7 +357,9 @@ module.exports = class TechnicianDomain {
       errors = true;
       field.stockBase = true;
       message.stockBase = "Por favor informar a base de estoque.";
-    } else if (!stockBaseArray.filter(value => value === entrance.stockBase)) {
+    } else if (
+      !stockBaseArray.filter((value) => value === entrance.stockBase)
+    ) {
       errors = true;
       field.stockBase = true;
       message.stockBase = "Base de estoque inválida.";
@@ -362,7 +374,7 @@ module.exports = class TechnicianDomain {
 
       const user = await User.findOne({
         where: { username: responsibleUser },
-        transaction
+        transaction,
       });
 
       if (!user) {
@@ -389,7 +401,7 @@ module.exports = class TechnicianDomain {
     } else {
       const fornecedor = await Company.findByPk(entrance.companyId, {
         where: { relation: "fornecedor" },
-        transaction
+        transaction,
       });
 
       if (!fornecedor) {
@@ -400,7 +412,7 @@ module.exports = class TechnicianDomain {
     }
 
     const product = await Product.findByPk(entrance.productId, {
-      transaction
+      transaction,
     });
 
     if (!product) {
@@ -445,28 +457,28 @@ module.exports = class TechnicianDomain {
 
     const stockBase = await StockBase.findOne({
       where: { stockBase: entrance.stockBase },
-      transaction
+      transaction,
     });
 
     const oldStockBase = await StockBase.findOne({
       where: { stockBase: oldEntrance.stockBase },
-      transaction
+      transaction,
     });
 
     let productBase = await ProductBase.findOne({
       where: {
         productId: entrance.productId,
-        stockBaseId: stockBase.id
+        stockBaseId: stockBase.id,
       },
-      transaction
+      transaction,
     });
 
     const oldProductBase = await ProductBase.findOne({
       where: {
         productId: oldEntrance.productId,
-        stockBaseId: oldStockBase.id
+        stockBaseId: oldStockBase.id,
       },
-      transaction
+      transaction,
     });
 
     if (!oldProductBase) {
@@ -488,7 +500,7 @@ module.exports = class TechnicianDomain {
       const oldProductBaseUpdate = {
         ...oldProductBase,
         amount,
-        available
+        available,
       };
 
       if (
@@ -509,7 +521,7 @@ module.exports = class TechnicianDomain {
           stockBaseId: stockBase.id,
           amount: entrance.amountAdded,
           available: entrance.amountAdded,
-          reserved: "0"
+          reserved: "0",
         },
         { transaction }
       );
@@ -532,7 +544,7 @@ module.exports = class TechnicianDomain {
       const productBaseUpdate = {
         ...productBase,
         amount,
-        available
+        available,
       };
 
       if (
@@ -550,28 +562,28 @@ module.exports = class TechnicianDomain {
     productBase = await ProductBase.findOne({
       where: {
         productId: entrance.productId,
-        stockBaseId: stockBase.id
+        stockBaseId: stockBase.id,
       },
-      transaction
+      transaction,
     });
 
     if (product.serial) {
       const { serialNumbers } = entrance;
 
-      const serialNumbersFindPromises = serialNumbers.map(async item => {
+      const serialNumbersFindPromises = serialNumbers.map(async (item) => {
         const equip = await Equip.findOne({
           where: {
             serialNumber: item,
-            reserved: false
+            reserved: false,
           },
           include: [
             {
               model: ProductBase,
               where: { id: oldProductBase.id },
-              attributes: []
-            }
+              attributes: [],
+            },
           ],
-          transaction
+          transaction,
         });
 
         if (!equip) {
@@ -582,7 +594,7 @@ module.exports = class TechnicianDomain {
 
         const equipUpdate = {
           ...equip,
-          productBaseId: productBase.id
+          productBaseId: productBase.id,
         };
 
         await equip.update(equipUpdate, { transaction });
@@ -592,7 +604,7 @@ module.exports = class TechnicianDomain {
 
     const newEntrance = {
       ...oldEntrance,
-      ...entrance
+      ...entrance,
     };
 
     await oldEntrance.update(newEntrance, { transaction });
@@ -600,13 +612,13 @@ module.exports = class TechnicianDomain {
     const response = await Entrance.findByPk(bodyData.id, {
       include: [
         {
-          model: Company
+          model: Company,
         },
         {
-          model: Product
-        }
+          model: Product,
+        },
       ],
-      transaction
+      transaction,
     });
 
     return response;
@@ -618,10 +630,10 @@ module.exports = class TechnicianDomain {
     const deletEntrance = await Entrance.findByPk(id, { transaction });
 
     const field = {
-      id: false
+      id: false,
     };
     const message = {
-      id: ""
+      id: "",
     };
 
     if (!deletEntrance) {
@@ -638,15 +650,15 @@ module.exports = class TechnicianDomain {
             .toString(),
           [operators.lte]: moment(deletEntrance.createdAt)
             .add(3, "seconds")
-            .toString()
-        }
+            .toString(),
+        },
       },
       order: [["serialNumber", "ASC"]],
       paranoid: false,
-      transaction
+      transaction,
     });
 
-    const equipDeletePromise = equips.map(async item => {
+    const equipDeletePromise = equips.map(async (item) => {
       if (item.deletedAt !== null || item.reserved === true) {
         field.reserved = true;
         message.reserved = "Há equipamento liberado ou reservado";
@@ -659,15 +671,15 @@ module.exports = class TechnicianDomain {
 
     const stockBase = await StockBase.findOne({
       where: { stockBase: deletEntrance.stockBase },
-      transaction
+      transaction,
     });
 
     const productBase = await ProductBase.findOne({
       where: {
         productId: deletEntrance.productId,
-        stockBaseId: stockBase.id
+        stockBaseId: stockBase.id,
       },
-      transaction
+      transaction,
     });
 
     if (!productBase) {
@@ -694,7 +706,7 @@ module.exports = class TechnicianDomain {
         ...productBase,
         amount,
         available,
-        analysis
+        analysis,
       };
 
       if (analysis < 0 || amount < 0 || available < 0) {
@@ -714,7 +726,7 @@ module.exports = class TechnicianDomain {
     const inicialOrder = {
       field: "createdAt",
       acendent: true,
-      direction: "DESC"
+      direction: "DESC",
     };
 
     const { query = null, transaction = null } = options;
@@ -741,17 +753,17 @@ module.exports = class TechnicianDomain {
           // where: getWhere('product'),
           include: [
             {
-              model: Mark
-            }
+              model: Mark,
+            },
           ],
           // or: true,
-          required: true
-        }
+          required: true,
+        },
       ],
       order: [[newOrder.field, newOrder.direction]],
       limit,
       offset,
-      transaction
+      transaction,
     });
 
     const { rows } = entrances;
@@ -761,11 +773,11 @@ module.exports = class TechnicianDomain {
         page: null,
         show: 0,
         count: entrances.count,
-        rows: []
+        rows: [],
       };
     }
 
-    const formatDateFunct = date => {
+    const formatDateFunct = (date) => {
       moment.locale("pt-br");
       const formatDate = moment(date).format("L");
       const formatHours = moment(date).format("LT");
@@ -774,7 +786,7 @@ module.exports = class TechnicianDomain {
     };
 
     // eslint-disable-next-line consistent-return
-    const formatData = R.map(entrance => {
+    const formatData = R.map((entrance) => {
       if (entrance.product) {
         const resp = {
           id: entrance.id,
@@ -795,7 +807,7 @@ module.exports = class TechnicianDomain {
           // eslint-disable-next-line max-len
           name: entrance.product.name,
           createdAtNotFormatted: entrance.createdAt,
-          createdAt: formatDateFunct(entrance.createdAt)
+          createdAt: formatDateFunct(entrance.createdAt),
         };
         return resp;
       }
@@ -817,7 +829,7 @@ module.exports = class TechnicianDomain {
       page: pageResponse,
       show,
       count: entrances.count,
-      rows: entrancesList
+      rows: entrancesList,
     };
 
     return response;

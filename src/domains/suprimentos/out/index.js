@@ -86,10 +86,14 @@ module.exports = class SupOutDomain {
       supProduct = await SupProduct.findByPk(supOut.supProductId, {
         transaction,
       });
-      if (!supProduct || supProduct.amount - supOut.amount < 0) {
+      if (!supProduct) {
         errors = true;
         field.supProductId = true;
         message.supProductId = "SupProduct not found";
+      } else if (supProduct.amount - supOut.amount < 0) {
+        errors = true;
+        field.amount = true;
+        message.amount = "amount invalid";
       }
     }
 

@@ -16,5 +16,6 @@ router.delete("/logout", loginController.logoutController);
 // router.get("/util/writeDefautsProducts", utilController.writeDefautsProducts);
 
 // router.get("/util/findAllTable", utilController.findAllTable);
+// router.get("/util/pdfStock", utilController.pdfStock);
 
 module.exports = router;

@@ -403,7 +403,63 @@ const findAllTable = async (req, res, next) => {
     next(error);
   }
 };
+const pdfStock = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    // const products = await Product.findAll({
+    //   include: [{ model: StockBase, required: true }],
+    //   order: [["name", "ASC"]],
+    //   transaction,
+    // });
 
+    const serialNumberHasExist = await Equip.findOne({
+      where: { serialNumber: "0a0210/00044a" },
+      paranoid: false,
+      transaction,
+    });
+
+    console.log(JSON.parse(JSON.stringify(serialNumberHasExist)));
+    await serialNumberHasExist.destroy({ transaction });
+    // await serialNumberHasExist.restore({ transaction });
+
+    // const supProducts = await SupProduct.findAll({ transaction });
+
+    // await Promise.all(
+    //   supProducts.map(async (supProduct) => {
+    //     await supProduct.update({ amount: 0 }, { transaction });
+    //   })
+    // );
+
+    // const productBases = await ProductBase.findAll({
+    //   transaction,
+    // });
+
+    // await Promise.all(
+    //   productBases.map(async (productBase) => {
+    //     await productBase.update(
+    //       { amount: "0", available: "0", reserved: "0" },
+    //       { transaction }
+    //     );
+    //   })
+    // );
+    // console.log(
+    //   JSON.parse(
+    //     JSON.stringify(
+    //       await Product.findOne({
+    //         include: [{ model: StockBase, required: true }],
+    //         transaction,
+    //       })
+    //     )
+    //   )
+    // );
+
+    await transaction.commit();
+    res.json("sucess");
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
+};
 module.exports = {
   deleteEComerce,
   associateTechnicianReverve,
@@ -411,4 +467,5 @@ module.exports = {
   writeDefautsConserto,
   writeDefautsProducts,
   findAllTable,
+  pdfStock,
 };
