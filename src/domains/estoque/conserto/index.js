@@ -3,7 +3,7 @@ const database = require("../../../database");
 const { FieldValidationError } = require("../../../helpers/errors");
 const formatQuery = require("../../../helpers/lazyLoad");
 
-const Conserto = database.model("conserto");
+// const Conserto = database.model("conserto");
 const Product = database.model("product");
 const Equip = database.model("equip");
 const Technician = database.model("technician");
@@ -13,57 +13,57 @@ module.exports = class ConsertoDomain {
   async add(bodyData, options = {}) {
     const { transaction = null } = options;
 
-    const conserto = R.omit(["id"], bodyData);
-    const hasProps = (prop, obj) => R.has(prop, obj);
-    const notHasProps = (prop, obj) => R.not(R.has(prop, obj));
+    // const conserto = R.omit(["id"], bodyData);
+    // const hasProps = (prop, obj) => R.has(prop, obj);
+    // const notHasProps = (prop, obj) => R.not(R.has(prop, obj));
 
-    let errors = false;
+    // let errors = false;
 
-    const field = {
-      serialNumber: false,
-      productId: false
-    };
+    // const field = {
+    //   serialNumber: false,
+    //   productId: false
+    // };
 
-    const message = {
-      serialNumber: "",
-      productId: ""
-    };
+    // const message = {
+    //   serialNumber: "",
+    //   productId: ""
+    // };
 
-    if (notHasProps("serialNumbers", conserto) || !conserto.serialNumbers) {
-      errors = true;
-      field.serialNumbers = true;
-      message.serialNumbers = "serialNumbers cannot null";
-    } else {
-      conserto.serialNumbers = conserto.serialNumbers.map(serialNumber =>
-        serialNumber.replace(/\D/gi, "")
-      );
-    }
+    // if (notHasProps("serialNumbers", conserto) || !conserto.serialNumbers) {
+    //   errors = true;
+    //   field.serialNumbers = true;
+    //   message.serialNumbers = "serialNumbers cannot null";
+    // } else {
+    //   conserto.serialNumbers = conserto.serialNumbers.map(serialNumber =>
+    //     serialNumber.replace(/\D/gi, "")
+    //   );
+    // }
 
-    if (notHasProps("productId", conserto) || !conserto.productId) {
-      errors = true;
-      field.productId = true;
-      message.productId = "productId cannot null";
-    } else {
-      const product = await Product.findByPk(conserto.productId, {
-        transaction
-      });
+    // if (notHasProps("productId", conserto) || !conserto.productId) {
+    //   errors = true;
+    //   field.productId = true;
+    //   message.productId = "productId cannot null";
+    // } else {
+    //   const product = await Product.findByPk(conserto.productId, {
+    //     transaction
+    //   });
 
-      if (!product) {
-        errors = true;
-        field.productId = true;
-        message.productId = "productId inválid";
-      }
-    }
+    //   if (!product) {
+    //     errors = true;
+    //     field.productId = true;
+    //     message.productId = "productId inválid";
+    //   }
+    // }
 
-    if (errors) {
-      throw new FieldValidationError([{ field, message }]);
-    }
+    // if (errors) {
+    //   throw new FieldValidationError([{ field, message }]);
+    // }
 
-    const consertoCreted = await Conserto.create(conserto, {
-      transaction
-    });
+    // const consertoCreted = await Conserto.create(conserto, {
+    //   transaction
+    // });
 
-    return consertoCreted;
+    // return consertoCreted;
   }
 
   // async getAll(options = {}) {

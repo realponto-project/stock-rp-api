@@ -176,7 +176,7 @@ module.exports = class FreeMarketDomain {
           ).toString(),
         };
         if (
-          parseInt(productBaseUpdate.available, 10) < 0 ||
+          parseInt(productBaseUpdate.amount, 10) < 0 ||
           parseInt(productBaseUpdate.available, 10) < 0
         ) {
           field.productBaseUpdate = true;

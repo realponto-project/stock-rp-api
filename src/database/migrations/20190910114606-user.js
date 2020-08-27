@@ -1,7 +1,6 @@
-
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const user = queryInterface.createTable('user', {
+    const user = queryInterface.createTable("user", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -21,6 +20,12 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+
+      modulo: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
+
       createdAt: {
         defaultValue: Sequelize.NOW,
         type: Sequelize.DATE,
@@ -39,8 +44,8 @@ module.exports = {
       loginId: {
         type: Sequelize.UUID,
         references: {
-          model: 'login',
-          key: 'id',
+          model: "login",
+          key: "id",
         },
         allowNull: true,
       },
@@ -48,8 +53,8 @@ module.exports = {
       resourceId: {
         type: Sequelize.UUID,
         references: {
-          model: 'resources',
-          key: 'id',
+          model: "resources",
+          key: "id",
         },
         allowNull: true,
       },
@@ -57,30 +62,30 @@ module.exports = {
       typeAccountId: {
         type: Sequelize.UUID,
         references: {
-          model: 'typeAccount',
-          key: 'id',
+          model: "typeAccount",
+          key: "id",
         },
         allowNull: true,
       },
-    })
+    });
 
     user.associate = (models) => {
-      user.belongsTo(models.login)
-      user.belongsTo(models.resources)
+      user.belongsTo(models.login);
+      user.belongsTo(models.resources);
       user.belongsTo(models.typeAccount, {
         // foreignKey: {
         //   allowNull: false,
         // },
-      })
+      });
       // user.belongsTo(models.user, {
       //   foreignKey: {
       //     allowNull: false,
       //   },
       // })
-    }
+    };
 
-    return user
+    return user;
   },
 
-  down: queryInterface => queryInterface.dropTable('user'),
-}
+  down: (queryInterface) => queryInterface.dropTable("user"),
+};

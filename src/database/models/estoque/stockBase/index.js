@@ -14,7 +14,6 @@ module.exports = (sequelize) => {
         "NOVAREAL",
         "PONTOREAL",
         "EMPRESTIMO",
-        "INSUMOS",
       ]),
       allowNull: false,
     },

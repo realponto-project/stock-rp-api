@@ -24,12 +24,9 @@ const os = require("./estoque/reserve/os");
 const osParts = require("./estoque/reserve/osParts");
 const stockBase = require("./estoque/stockBase");
 const technician = require("./estoque/technician");
-const technicianReserve = require("./estoque/reserve/technicianReserve");
-const technicianReserveParts = require("./estoque/reserve/technicianReserveParts");
 const productBase = require("./estoque/stockBase/productBase");
 const statusExpedition = require("./estoque/reserve/statusExpedition");
 const emprestimo = require("./estoque/emprestimo");
-const conserto = require("./estoque/conserto");
 
 const supEntrance = require("./estoque/suprimentos/supEntrance");
 const supProduct = require("./estoque/suprimentos/supProduct");
@@ -65,17 +62,14 @@ module.exports = [
   osParts,
   stockBase,
   technician,
-  technicianReserve,
-  technicianReserveParts,
   productBase,
   statusExpedition,
   emprestimo,
-  conserto,
 
   supEntrance,
   supProduct,
   manufacturer,
   supProvider,
   supOut,
-  supContact
+  supContact,
 ];

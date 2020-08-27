@@ -112,6 +112,16 @@ module.exports = {
         defaultValue: false,
       },
 
+      suprimento: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
+
+      modulo: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
+
       createdAt: {
         defaultValue: Sequelize.NOW,
         type: Sequelize.DATE,

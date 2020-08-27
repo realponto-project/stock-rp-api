@@ -1,7 +1,6 @@
-
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const product = queryInterface.createTable('product', {
+    const product = queryInterface.createTable("product", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -14,7 +13,7 @@ module.exports = {
       },
 
       category: {
-        type: Sequelize.ENUM(['peca', 'equipamento', 'acessorios']),
+        type: Sequelize.ENUM(["peca", "equipamento", "acessorios"]),
         allowNull: false,
       },
 
@@ -37,6 +36,32 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+
+      corredor: {
+        type: Sequelize.STRING,
+        defauktValues: "",
+      },
+
+      coluna: {
+        type: Sequelize.STRING,
+        defauktValues: "",
+      },
+
+      prateleira: {
+        type: Sequelize.STRING,
+        defauktValues: "",
+      },
+
+      gaveta: {
+        type: Sequelize.STRING,
+        defauktValues: "",
+      },
+
+      modulo: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
+
       createdAt: {
         defaultValue: Sequelize.NOW,
         type: Sequelize.DATE,
@@ -54,27 +79,27 @@ module.exports = {
       markId: {
         type: Sequelize.UUID,
         references: {
-          model: 'mark',
-          key: 'id',
+          model: "mark",
+          key: "id",
         },
         allowNull: false,
       },
       equipTypeId: {
         type: Sequelize.UUID,
         references: {
-          model: 'equipType',
-          key: 'id',
+          model: "equipType",
+          key: "id",
         },
         allowNull: true,
       },
-    })
+    });
 
     product.associate = (models) => {
       product.belongsTo(models.mark, {
         foreignKey: {
           allowNull: false,
         },
-      })
+      });
 
       // product.belongsTo(models.part, {
       //   foreignKey: {
@@ -88,18 +113,18 @@ module.exports = {
       //   },
       // })
 
-      product.belongsTo(models.equipType)
+      product.belongsTo(models.equipType);
 
       product.belongsToMany(models.product, {
-        as: 'productToMany',
-        through: 'productProduct',
-      })
+        as: "productToMany",
+        through: "productProduct",
+      });
 
-      product.belongsToMany(models.stockBase, { through: 'productBase' })
-    }
+      product.belongsToMany(models.stockBase, { through: "productBase" });
+    };
 
-    return product
+    return product;
   },
 
-  down: queryInterface => queryInterface.dropTable('product'),
-}
+  down: (queryInterface) => queryInterface.dropTable("product"),
+};

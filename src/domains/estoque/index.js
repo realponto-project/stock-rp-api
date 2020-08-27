@@ -40,7 +40,7 @@ module.exports = class StockDomain {
 
     const productBases = await ProductBase.findAndCountAll({
       // where: getWhere('productBase'),
-      attributes: ["id", "amount", "available", "analysis"],
+      attributes: ["id", "amount", "available", "analysis", "preAnalysis"],
       include: [
         {
           model: Product,
@@ -95,6 +95,7 @@ module.exports = class StockDomain {
         id: productBase.id,
         amount: productBase.amount,
         analysis: productBase.analysis,
+        preAnalysis: productBase.preAnalysis,
         available: productBase.available,
         serial: productBase.product.serial,
         productId: productBase.product.id,
@@ -199,15 +200,29 @@ module.exports = class StockDomain {
       id: false,
       amount: false,
       serialNumbers: false,
+      status: false,
     };
 
     const message = {
-      id: false,
-      amount: false,
-      serialNumbers: false,
+      id: "",
+      amount: "",
+      serialNumbers: "",
+      status: "",
     };
 
     let productBase = null;
+
+    const statusArray = ["preAnalysis", "analysis"];
+
+    if (bodyNotHasProp("status") || !body.status) {
+      errors = true;
+      field.status = true;
+      message.status = "status cannot null";
+    } else if (!statusArray.filter((status) => status === body.status)) {
+      errors = true;
+      field.status = true;
+      message.status = "status invalid";
+    }
 
     if (bodyNotHasProp("id") || !body.id) {
       errors = true;
@@ -227,7 +242,7 @@ module.exports = class StockDomain {
       message.amount = "";
     }
 
-    if (bodyNotHasProp("serialNumbers") || !body.serialNumbers) {
+    if (bodyNotHasProp("serialNumbers")) {
       errors = true;
       field.serialNumbers = true;
       message.serialNumbers = "";
@@ -237,47 +252,82 @@ module.exports = class StockDomain {
       throw new FieldValidationError([{ field, message }]);
     }
 
-    const { serialNumbers } = body;
+    let analysis = null,
+      preAnalysis = null,
+      amount = null,
+      available = null;
 
-    const serialNumbersFindPromises = serialNumbers.map(async (item) => {
-      const serialNumberHasExist = await Equip.findOne({
-        where: { serialNumber: item },
-        attributes: [],
-        paranoid: false,
-        transaction,
-      });
+    switch (body.status) {
+      case "analysis":
+        if (body.serialNumbers.length === 0) {
+          errors = true;
+          field.serialNumbers = true;
+          message.serialNumbers = "serialNumbers não pode ser vazio";
+        } else {
+          const { serialNumbers } = body;
 
-      if (serialNumberHasExist) {
-        field.serialNumbers = true;
-        message.serialNumbers = `${item} já está registrado`;
+          const serialNumbersFindPromises = serialNumbers.map(async (item) => {
+            const serialNumberHasExist = await Equip.findOne({
+              where: { serialNumber: item },
+              attributes: [],
+              paranoid: false,
+              transaction,
+            });
+
+            if (serialNumberHasExist) {
+              field.serialNumbers = true;
+              message.serialNumbers = `${item} já está registrado`;
+              throw new FieldValidationError([{ field, message }]);
+            }
+          });
+          await Promise.all(serialNumbersFindPromises);
+
+          const serialNumbersCreatePromises = serialNumbers.map(
+            async (item) => {
+              const equipCreate = {
+                productBaseId: productBase.id,
+                serialNumber: item,
+                loan: false,
+              };
+
+              await Equip.create(equipCreate, { transaction });
+            }
+          );
+          await Promise.all(serialNumbersCreatePromises);
+
+          analysis = (
+            parseInt(productBase.analysis, 10) - body.amount
+          ).toString();
+
+          preAnalysis = productBase.preAnalysis;
+
+          amount = (parseInt(productBase.amount, 10) + body.amount).toString();
+
+          available = (
+            parseInt(productBase.available, 10) + body.amount
+          ).toString();
+        }
+        break;
+      case "preAnalysis":
+        preAnalysis = (
+          parseInt(productBase.preAnalysis, 10) - body.amount
+        ).toString();
+
+        analysis = (
+          parseInt(productBase.analysis, 10) + body.amount
+        ).toString();
+
+        amount = productBase.amount;
+
+        available = productBase.available;
+
+        break;
+      default:
         throw new FieldValidationError([{ field, message }]);
-      }
-    });
-    await Promise.all(serialNumbersFindPromises);
-
-    const serialNumbersCreatePromises = serialNumbers.map(async (item) => {
-      const equipCreate = {
-        productBaseId: productBase.id,
-        serialNumber: item,
-        loan: false,
-      };
-
-      await Equip.create(equipCreate, { transaction });
-    });
-    await Promise.all(serialNumbersCreatePromises);
-
-    const analysis = (
-      parseInt(productBase.analysis, 10) - body.amount
-    ).toString();
-
-    const amount = (parseInt(productBase.amount, 10) + body.amount).toString();
-
-    const available = (
-      parseInt(productBase.available, 10) + body.amount
-    ).toString();
+    }
 
     return await productBase.update(
-      { analysis, amount, available },
+      { analysis, preAnalysis, amount, available },
       { transaction }
     );
   }

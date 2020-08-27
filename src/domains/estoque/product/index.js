@@ -18,8 +18,8 @@ const Os = database.model("os");
 const OsParts = database.model("osParts");
 const FreeMarketParts = database.model("freeMarketParts");
 const Entrance = database.model("entrance");
-const TechnicianReserve = database.model("technicianReserve");
-const TechnicianReserveParts = database.model("technicianReserveParts");
+// const TechnicianReserve = database.model("technicianReserve");
+// const TechnicianReserveParts = database.model("technicianReserveParts");
 const KitOut = database.model("kitOut");
 const KitParts = database.model("kitParts");
 
@@ -163,24 +163,24 @@ module.exports = class ProductDomain {
         field.quantMin = true;
         message.quantMin = "Informe se tem numero de série";
       }
+    }
 
-      if (bodyDataNotHasProp("type") || !bodyData.type) {
+    if (bodyDataNotHasProp("type") || !bodyData.type) {
+      errors = true;
+      field.type = true;
+      message.type = "Informe o tipo.";
+    } else {
+      const equipTypeHasExist = await EquipType.findOne({
+        where: { type: bodyData.type },
+        transaction,
+      });
+
+      if (!equipTypeHasExist) {
         errors = true;
         field.type = true;
-        message.type = "Informe o tipo.";
+        message.type = "tipo invalido";
       } else {
-        const equipTypeHasExist = await EquipType.findOne({
-          where: { type: bodyData.type },
-          transaction,
-        });
-
-        if (!equipTypeHasExist) {
-          errors = true;
-          field.type = true;
-          message.type = "Selecione uma marca";
-        } else {
-          product.equipTypeId = equipTypeHasExist.id;
-        }
+        product.equipTypeId = equipTypeHasExist.id;
       }
     }
 
@@ -211,6 +211,19 @@ module.exports = class ProductDomain {
     }
 
     const productCreated = await Product.create(product, { transaction });
+
+    await ProductBase.create(
+      {
+        productId: productCreated.id,
+        stockBaseId: null,
+        amount: "0",
+        available: "0",
+        preAnalysis: "0",
+        reserved: "0",
+        analysis: "0",
+      },
+      { transaction }
+    );
 
     const response = await Product.findByPk(productCreated.id, {
       include: [{ model: Mark }, { model: EquipType }],
@@ -357,24 +370,24 @@ module.exports = class ProductDomain {
         field.quantMin = true;
         message.quantMin = "Informe se tem numero de série";
       }
+    }
 
-      if (bodyDataNotHasProp("type") || !bodyData.type) {
+    if (bodyDataNotHasProp("type") || !bodyData.type) {
+      errors = true;
+      field.type = true;
+      message.type = "Informe o tipo.";
+    } else {
+      const equipTypeHasExist = await EquipType.findOne({
+        where: { type: bodyData.type },
+        transaction,
+      });
+
+      if (!equipTypeHasExist) {
         errors = true;
         field.type = true;
-        message.type = "Informe o tipo.";
+        message.type = "tipo inválido";
       } else {
-        const equipTypeHasExist = await EquipType.findOne({
-          where: { type: bodyData.type },
-          transaction,
-        });
-
-        if (!equipTypeHasExist) {
-          errors = true;
-          field.type = true;
-          message.type = "Selecione uma marca";
-        } else {
-          product.equipTypeId = equipTypeHasExist.id;
-        }
+        product.equipTypeId = equipTypeHasExist.id;
       }
     }
 
@@ -565,6 +578,13 @@ module.exports = class ProductDomain {
 
     const { getWhere } = formatQuery(newQuery);
 
+    // console.log(
+    //   getWhere("productBase"),
+    //   getWhere("product"),
+    //   getWhere("stockBase"),
+    //   query
+    // );
+
     const kit =
       R.prop("kit", query) === undefined ? false : R.prop("kit", query);
 
@@ -583,29 +603,42 @@ module.exports = class ProductDomain {
       };
     }
 
-    const products = await Product.findAll({
-      where: { ...or, ...getWhere("product") },
-      order: [["name", "ASC"]],
-      limit: 20,
+    const productBases = await ProductBase.findAll({
+      where: getWhere("productBase"),
       include: [
         {
           model: StockBase,
-          where: getWhere("stockBase"),
+          // where: getWhere("stockBase"),
+          required: !!newQuery.stockBaseId,
+        },
+        {
+          model: Product,
+          where: { ...or, ...getWhere("product") },
         },
       ],
+      limit: 20,
+
+      // order: [["name", "ASC"]],
       transaction,
     });
 
-    const response = products.map((product) => {
+    // console.log(JSON.parse(JSON.stringify(productBases)));
+
+    const response = productBases.map((productBase) => {
       const resp = {
-        id: product.stockBases[0].productBase.id,
-        available: product.stockBases[0].productBase.available,
-        name: product.name,
-        serial: product.serial,
+        id: productBase.id,
+        available: productBase.available,
+        name: productBase.product.name,
+        serial: productBase.product.serial,
       };
       return resp;
     });
-    return response.filter((item) => parseInt(item.available, 10) !== 0);
+
+    if (!newQuery.stockBaseId) {
+      return response;
+    } else {
+      return response.filter((item) => parseInt(item.available, 10) !== 0);
+    }
   }
 
   async getAllVendas(options = {}) {
@@ -689,20 +722,20 @@ module.exports = class ProductDomain {
         transaction,
       });
 
-      const technicianReserveParts = await TechnicianReserveParts.findAll({
-        attributes: ["productBaseId", "amount", "createdAt"],
-        order: [["createdAt", "DESC"]],
-        where: getWhere("technicianReserveParts"),
-        include: [
-          {
-            model: ProductBase,
-            where: { productId: product.id },
-            attributes: ["id"],
-          },
-        ],
-        paranoid: false,
-        transaction,
-      });
+      // const technicianReserveParts = await TechnicianReserveParts.findAll({
+      //   attributes: ["productBaseId", "amount", "createdAt"],
+      //   order: [["createdAt", "DESC"]],
+      //   where: getWhere("technicianReserveParts"),
+      //   include: [
+      //     {
+      //       model: ProductBase,
+      //       where: { productId: product.id },
+      //       attributes: ["id"],
+      //     },
+      //   ],
+      //   paranoid: false,
+      //   transaction,
+      // });
 
       const kitOuts = await KitOut.findAll({
         attributes: ["kitPartId", "amount", "updatedAt"],
@@ -732,11 +765,11 @@ module.exports = class ProductDomain {
       osParts.map(
         (osPart) => (saidaOs = saidaOs + parseInt(osPart.output, 10))
       );
-      technicianReserveParts.map(
-        (technicianReservePart) =>
-          (saidaInterno =
-            saidaInterno + parseInt(technicianReservePart.amount, 10))
-      );
+      // technicianReserveParts.map(
+      //   (technicianReservePart) =>
+      //     (saidaInterno =
+      //       saidaInterno + parseInt(technicianReservePart.amount, 10))
+      // );
 
       kitOuts.map(
         (kitOut) => (saidaKit = saidaKit + parseInt(kitOut.amount, 10))
@@ -752,10 +785,10 @@ module.exports = class ProductDomain {
         createdAtEComerce:
           freeMarketParts.length > 0 ? freeMarketParts[0].createdAt : null,
         saidaInterno,
-        createdAtInterno:
-          technicianReserveParts.length > 0
-            ? technicianReserveParts[0].createdAt
-            : null,
+        // createdAtInterno:
+        //   technicianReserveParts.length > 0
+        //     ? technicianReserveParts[0].createdAt
+        //     : null,
         saidaKit,
         createdAtKit: kitOuts.length > 0 ? kitOuts[0].updatedAt : null,
       };

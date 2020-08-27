@@ -10,22 +10,42 @@ module.exports = (sequelize) => {
 
     amount: {
       type: Sequelize.STRING,
-      allowNull: false,
+      defautValue: "0",
+      validate: {
+        min: 0,
+      },
     },
 
     available: {
       type: Sequelize.STRING,
-      allowNull: false,
+      defautValue: "0",
+      validate: {
+        min: 0,
+      },
     },
 
     analysis: {
       type: Sequelize.STRING,
       defautValue: "0",
+      validate: {
+        min: 0,
+      },
+    },
+
+    preAnalysis: {
+      type: Sequelize.STRING,
+      defautValue: "0",
+      validate: {
+        min: 0,
+      },
     },
 
     reserved: {
       type: Sequelize.STRING,
-      allowNull: false,
+      defautValue: "0",
+      validate: {
+        min: 0,
+      },
     },
   });
 
@@ -39,7 +59,7 @@ module.exports = (sequelize) => {
     });
     productBase.belongsTo(models.stockBase, {
       foreignKey: {
-        allowNull: false,
+        allowNull: true,
       },
     }),
       productBase.belongsToMany(models.os, { through: "osParts" });

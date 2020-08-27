@@ -4,7 +4,6 @@ const OsDomain = require("../../../domains/estoque/reserve/os");
 const KitDomain = require("../../../domains/estoque/reserve/kit");
 const KitOutDomain = require("../../../domains/estoque/reserve/kit/kitOut");
 const FreeMarketDomain = require("../../../domains/estoque/reserve/freeMarket");
-const TechnicianReserveDomain = require("../../../domains/estoque/reserve/technician");
 const StatusExpeditionDomain = require("../../../domains/estoque/reserve/os/statusExpedition");
 const database = require("../../../database");
 
@@ -12,45 +11,7 @@ const osDomain = new OsDomain();
 const kitDomain = new KitDomain();
 const kitOutDomain = new KitOutDomain();
 const freeMarketDomain = new FreeMarketDomain();
-const technicianReserveDomain = new TechnicianReserveDomain();
 const statusExpeditionDomain = new StatusExpeditionDomain();
-
-const addRInterno = async (req, res, next) => {
-  const transaction = await database.transaction();
-  try {
-    const technicianReserve = await technicianReserveDomain.add(req.body, {
-      transaction
-    });
-
-    await transaction.commit();
-    res.json(technicianReserve);
-  } catch (error) {
-    await transaction.rollback();
-    next(error);
-  }
-};
-
-const getRInterno = async (req, res, next) => {
-  const transaction = await database.transaction();
-  try {
-    let query;
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
-        query = JSON.parse(req.query.query);
-      }
-    }
-    const technicianReserves = await technicianReserveDomain.getAll({
-      query,
-      transaction
-    });
-
-    await transaction.commit();
-    res.json(technicianReserves);
-  } catch (error) {
-    await transaction.rollback();
-    next(error);
-  }
-};
 
 const addOs = async (req, res, next) => {
   const transaction = await database.transaction();
@@ -149,7 +110,7 @@ const getKitDefaultValue = async (req, res, next) => {
 
     const kitDefault = await kitDomain.getKitDefaultValue({
       query,
-      transaction
+      transaction,
     });
 
     await transaction.commit();
@@ -277,7 +238,7 @@ const updateStatusExpedition = async (req, res, next) => {
   const transaction = await database.transaction();
   try {
     const status = await statusExpeditionDomain.update(req.body, {
-      transaction
+      transaction,
     });
 
     await transaction.commit();
@@ -292,7 +253,7 @@ const deleteStatusExpedition = async (req, res, next) => {
   const transaction = await database.transaction();
   try {
     const status = await statusExpeditionDomain.delete(req.query.id, {
-      transaction
+      transaction,
     });
 
     await transaction.commit();
@@ -315,7 +276,7 @@ const getAllStatusExpedition = async (req, res, next) => {
 
     const entrances = await statusExpeditionDomain.getAll({
       query,
-      transaction
+      transaction,
     });
 
     await transaction.commit();
@@ -327,8 +288,6 @@ const getAllStatusExpedition = async (req, res, next) => {
 };
 
 module.exports = {
-  addRInterno,
-  getRInterno,
   addOs,
   output,
   updateOs,
@@ -345,6 +304,6 @@ module.exports = {
   addStatusExpedition,
   updateStatusExpedition,
   deleteStatusExpedition,
-  getAllStatusExpedition
+  getAllStatusExpedition,
   //   getAll,
 };

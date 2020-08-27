@@ -4,16 +4,16 @@ module.exports = {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true
+        primaryKey: true,
       },
 
       dateExpedition: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: false,
       },
 
       razaoSocial: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
 
       cnpj: {
@@ -21,57 +21,62 @@ module.exports = {
         set(oldValue) {
           const newValue = oldValue.replace(/\.|-|\//gi, "");
           this.setDataValue("cnpj", newValue);
-        }
+        },
+      },
+
+      observation: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
 
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
 
       equipId: {
         type: Sequelize.UUID,
         references: {
           model: "equip",
-          key: "id"
+          key: "id",
         },
-        allowNull: true
+        allowNull: true,
       },
 
       technicianId: {
         type: Sequelize.UUID,
         references: {
           model: "technician",
-          key: "id"
+          key: "id",
         },
-        allowNull: true
-      }
+        allowNull: true,
+      },
     });
 
-    emprestimo.associate = models => {
+    emprestimo.associate = (models) => {
       emprestimo.belongsTo(models.equip, {
         foreignKey: {
-          allowNull: false
-        }
+          allowNull: false,
+        },
       });
       emprestimo.belongsTo(models.technician, {
         foreignKey: {
-          allowNull: false
-        }
+          allowNull: false,
+        },
       });
     };
     return emprestimo;
   },
 
-  down: queryInterface => queryInterface.dropTable("emprestimo")
+  down: (queryInterface) => queryInterface.dropTable("emprestimo"),
 };

@@ -21,7 +21,7 @@ const StockBase = database.model("stockBase");
 const ProductBase = database.model("productBase");
 const Equip = database.model("equip");
 
-module.exports = class TechnicianDomain {
+module.exports = class EntranceDomain {
   async add(bodyData, options = {}) {
     const { transaction = null } = options;
 
@@ -201,8 +201,9 @@ module.exports = class TechnicianDomain {
           stockBaseId: stockBase.id,
           amount: entrance.amountAdded,
           available: entrance.amountAdded,
-          analysis: entrance.analysis,
+          preAnalysis: entrance.analysis,
           reserved: "0",
+          analysis: "0",
         },
         { transaction }
       );
@@ -211,8 +212,8 @@ module.exports = class TechnicianDomain {
     } else {
       entrance.oldAmount = productBase.amount;
 
-      const analysis = (
-        parseInt(productBase.analysis, 10) + parseInt(entrance.analysis, 10)
+      const preAnalysis = (
+        parseInt(productBase.preAnalysis, 10) + parseInt(entrance.analysis, 10)
       ).toString();
 
       // eslint-disable-next-line max-len
@@ -228,7 +229,7 @@ module.exports = class TechnicianDomain {
         ...productBase,
         amount,
         available,
-        analysis,
+        preAnalysis,
       };
 
       await productBase.update(productBaseUpdate, { transaction });
@@ -270,22 +271,19 @@ module.exports = class TechnicianDomain {
               serialNumbers.splice(index, 1);
               await serialNumberHasExist.restore({ transaction });
             }
+          } else {
+            const equipCreate = {
+              productBaseId: productBase.id,
+              serialNumber: item,
+              loan: entrance.stockBase === "EMPRESTIMO",
+            };
+
+            await Equip.create(equipCreate, { transaction });
           }
         }
       );
 
       await Promise.all(serialNumbersFindPromises);
-
-      const serialNumbersCreatePromises = serialNumbers.map(async (item) => {
-        const equipCreate = {
-          productBaseId: productBase.id,
-          serialNumber: item,
-          loan: entrance.stockBase === "EMPRESTIMO",
-        };
-
-        await Equip.create(equipCreate, { transaction });
-      });
-      await Promise.all(serialNumbersCreatePromises);
     }
 
     entrance.amountAdded = Math.max.apply(null, [
@@ -642,6 +640,19 @@ module.exports = class TechnicianDomain {
       throw new FieldValidationError([{ field, message }]);
     }
 
+    const stockBase = await StockBase.findOne({
+      where: { stockBase: deletEntrance.stockBase },
+      transaction,
+    });
+
+    const productBase = await ProductBase.findOne({
+      where: {
+        productId: deletEntrance.productId,
+        stockBaseId: stockBase.id,
+      },
+      transaction,
+    });
+
     const equips = await Equip.findAll({
       where: {
         createdAt: {
@@ -652,6 +663,7 @@ module.exports = class TechnicianDomain {
             .add(3, "seconds")
             .toString(),
         },
+        productBaseId: productBase.id,
       },
       order: [["serialNumber", "ASC"]],
       paranoid: false,
@@ -669,31 +681,18 @@ module.exports = class TechnicianDomain {
 
     await Promise.all(equipDeletePromise);
 
-    const stockBase = await StockBase.findOne({
-      where: { stockBase: deletEntrance.stockBase },
-      transaction,
-    });
-
-    const productBase = await ProductBase.findOne({
-      where: {
-        productId: deletEntrance.productId,
-        stockBaseId: stockBase.id,
-      },
-      transaction,
-    });
-
     if (!productBase) {
       field.message = true;
       message.message = "ProductBase não encontrada.";
       throw new FieldValidationError([{ field, message }]);
     } else {
-      let analysis = parseInt(productBase.analysis, 10);
+      let preAnalysis = parseInt(productBase.preAnalysis, 10);
       let amount = parseInt(productBase.amount, 10);
       let available = parseInt(productBase.available, 10);
 
       if (deletEntrance.analysis) {
-        analysis = (
-          analysis - parseInt(deletEntrance.amountAdded, 10)
+        preAnalysis = (
+          preAnalysis - parseInt(deletEntrance.amountAdded, 10)
         ).toString();
       } else {
         amount = (amount - parseInt(deletEntrance.amountAdded, 10)).toString();
@@ -706,10 +705,10 @@ module.exports = class TechnicianDomain {
         ...productBase,
         amount,
         available,
-        analysis,
+        preAnalysis,
       };
 
-      if (analysis < 0 || amount < 0 || available < 0) {
+      if (preAnalysis < 0 || amount < 0 || available < 0) {
         field.productBaseUpdate = true;
         message.productBaseUpdate = "Número negativo não é valido";
         throw new FieldValidationError([{ field, message }]);

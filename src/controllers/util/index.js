@@ -31,12 +31,9 @@ const Login = database.model("login"),
   OsParts = database.model("osParts"),
   StockBase = database.model("stockBase"),
   Technician = database.model("technician"),
-  TechnicianReserve = database.model("technicianReserve"),
-  TechnicianReserveParts = database.model("technicianReserveParts"),
   ProductBase = database.model("productBase"),
   StatusExpedition = database.model("statusExpedition"),
   Emprestimo = database.model("emprestimo"),
-  Conserto = database.model("conserto"),
   SupEntrance = database.model("supEntrance"),
   SupProduct = database.model("supProduct"),
   Manufacturer = database.model("manufacturer"),
@@ -104,47 +101,6 @@ const deleteEComerce = async (req, res, next) => {
   }
 };
 
-const associateTechnicianReverve = async (req, res, next) => {
-  const transaction = await database.transaction();
-  try {
-    const technicianReserves = await TechnicianReserve.findAll({
-      transaction,
-    });
-
-    await Promise.all(
-      technicianReserves.map(async (technicianReserve) => {
-        const technicianReserveParts = await TechnicianReserveParts.findAll({
-          where: {
-            createdAt: {
-              [Op.gte]: moment(technicianReserve.createdAt).subtract(
-                4,
-                "seconds"
-              ),
-              [Op.lte]: moment(technicianReserve.createdAt).add(4, "seconds"),
-            },
-          },
-          transaction,
-        });
-
-        await Promise.all(
-          technicianReserveParts.map(async (technicianReservePart) => {
-            await technicianReservePart.update(
-              { technicianReserveId: technicianReserve.id },
-              { transaction }
-            );
-          })
-        );
-      })
-    );
-
-    await transaction.commit();
-    res.json(technicianReserves);
-  } catch (error) {
-    await transaction.rollback();
-    next(error);
-  }
-};
-
 const writeDefautsEntrances = async (req, res, next) => {
   const transaction = await database.transaction();
   try {
@@ -174,28 +130,6 @@ const writeDefautsEntrances = async (req, res, next) => {
   }
 };
 
-const writeDefautsConserto = async (req, res, next) => {
-  const transaction = await database.transaction();
-  try {
-    const consertos = await Conserto.findAll({
-      paranoid: false,
-      transaction,
-    });
-
-    await Promise.all(
-      consertos.map(async (conserto) => {
-        const serialNumbers = [conserto.serialNumber];
-        await conserto.update({ serialNumbers }, { transaction });
-      })
-    );
-    await transaction.commit();
-    res.json("sucess");
-  } catch (error) {
-    await transaction.rollback();
-    next(error);
-  }
-};
-
 const writeDefautsProducts = async (req, res, next) => {
   const transaction = await database.transaction();
   try {
@@ -214,6 +148,95 @@ const writeDefautsProducts = async (req, res, next) => {
     );
     await transaction.commit();
     res.json("sucess");
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
+};
+
+const getBug = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    // const os = await Os.findAll({
+    //   include: [
+    //     {
+    //       model: ProductBase,
+    //       include: [
+    //         {
+    //           model: Product,
+    //           where: { name: "IMPRESSORA PRINT ID TOUCH" },
+    //         },
+    //       ],
+    //       through: {
+    //         paranoid: false,
+    //       },
+    //       required: true,
+    //     },
+    //     //   { model: Product, where: { name: "IMPRESSORA PRINT ID TOUCH" } },
+    //   ],
+    //   paranoid: false,
+    //   transaction,
+    // });
+
+    // console.log(JSON.parse(JSON.stringify(os)));
+
+    const producBase = await ProductBase.findOne({
+      where: { id: "31c2df5e-e3f5-44f8-843a-5101d79a6190" },
+      include: [
+        { model: Product, where: { serial: true } },
+        { model: StockBase, where: { stockBase: { [Op.ne]: "EMPRESTIMO" } } },
+      ],
+      // limit: 2,
+      transaction,
+    });
+
+    // await Promise.all(
+    //   producBases.map(async (producBase) => {
+    //     const equipsAmount = await Equip.count({
+    //       where: { productBaseId: producBase.id, deletedAt: { [Op.eq]: null } },
+    //       paranoid: false,
+    //       transaction,
+    //     });
+    //     const equipsAvailable = await Equip.count({
+    //       where: {
+    //         productBaseId: producBase.id,
+    //         deletedAt: { [Op.eq]: null },
+    //         reserved: false,
+    //       },
+    //       paranoid: false,
+    //       transaction,
+    //     });
+    //     const equipsReserved = await Equip.count({
+    //       where: {
+    //         productBaseId: producBase.id,
+    //         deletedAt: { [Op.eq]: null },
+    //         reserved: true,
+    //       },
+    //       paranoid: false,
+    //       transaction,
+    //     });
+
+    //     await producBase.update(
+    //       {
+    //         amount: equipsAmount,
+    //         available: equipsAvailable,
+    //         reserved: equipsReserved,
+    //       },
+    //       {
+    //         transaction,
+    //       }
+    //     );
+    //   })
+    // );
+
+    console.log(JSON.parse(JSON.stringify(producBase)));
+
+    await producBase.update({ amount: "0" }, { transaction });
+
+    console.log(JSON.parse(JSON.stringify(producBase)));
+
+    await transaction.commit();
+    res.json("response");
   } catch (error) {
     await transaction.rollback();
     next(error);
@@ -255,10 +278,6 @@ const findAllTable = async (req, res, next) => {
     //   transaction,
     // });
     // await Emprestimo.findAll({
-    //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
-    //   transaction,
-    // })
-    // await Conserto.findAll({
     //   where: { updatedAt: { [Op.gte]: new Date("07/02/2020") } },
     //   transaction,
     // })
@@ -412,14 +431,30 @@ const pdfStock = async (req, res, next) => {
     //   transaction,
     // });
 
-    const serialNumberHasExist = await Equip.findOne({
-      where: { serialNumber: "0a0210/00044a" },
-      paranoid: false,
+    const equips = await Equip.findAll({
+      include: [
+        {
+          model: ProductBase,
+          required: true,
+          include: [
+            {
+              model: StockBase,
+              where: { stockBase: { [Op.ne]: "EMPRESTIMO" } },
+            },
+          ],
+        },
+      ],
       transaction,
     });
 
-    console.log(JSON.parse(JSON.stringify(serialNumberHasExist)));
-    await serialNumberHasExist.destroy({ transaction });
+    console.log(JSON.parse(JSON.stringify(equips)));
+
+    await Promise.all(
+      equips.map(async (equip) => {
+        await equip.destroy({ transaction });
+      })
+    );
+
     // await serialNumberHasExist.restore({ transaction });
 
     // const supProducts = await SupProduct.findAll({ transaction });
@@ -462,10 +497,9 @@ const pdfStock = async (req, res, next) => {
 };
 module.exports = {
   deleteEComerce,
-  associateTechnicianReverve,
   writeDefautsEntrances,
-  writeDefautsConserto,
   writeDefautsProducts,
   findAllTable,
   pdfStock,
+  getBug,
 };

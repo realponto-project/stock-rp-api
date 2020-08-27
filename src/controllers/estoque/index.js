@@ -29,7 +29,7 @@ const updatteProductBase = async (req, res, next) => {
   const transaction = await database.transaction();
   try {
     const stock = await stockDomain.updatteProductBase(req.body, {
-      transaction
+      transaction,
     });
 
     await transaction.commit();
@@ -42,5 +42,5 @@ const updatteProductBase = async (req, res, next) => {
 
 module.exports = {
   getAll,
-  updatteProductBase
+  updatteProductBase,
 };

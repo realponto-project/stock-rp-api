@@ -4,22 +4,27 @@ module.exports = {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true
+        primaryKey: true,
       },
 
       amountAdded: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
 
       oldAmount: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+      },
+
+      analysis: {
+        type: Sequelize.BOOLEAN,
+        defautValue: false,
       },
 
       responsibleUser: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
 
       stockBase: {
@@ -27,58 +32,58 @@ module.exports = {
           "REALPONTO",
           "NOVAREAL",
           "PONTOREAL",
-          "EMPRESTIMO"
+          "EMPRESTIMO",
         ]),
-        allowNull: false
+        allowNull: false,
       },
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       productId: {
         type: Sequelize.UUID,
         references: {
           model: "product",
-          key: "id"
+          key: "id",
         },
-        allowNull: false
+        allowNull: false,
       },
       companyId: {
         type: Sequelize.UUID,
         references: {
           model: "company",
-          key: "id"
+          key: "id",
         },
-        allowNull: false
-      }
+        allowNull: false,
+      },
     });
 
-    entrance.associate = models => {
+    entrance.associate = (models) => {
       entrance.belongsTo(models.product, {
         foreignKey: {
-          allowNull: false
-        }
+          allowNull: false,
+        },
       });
 
       entrance.belongsTo(models.company, {
         foreignKey: {
-          allowNull: true
-        }
+          allowNull: true,
+        },
       });
     };
 
     return entrance;
   },
 
-  down: queryInterface => queryInterface.dropTable("entrance")
+  down: (queryInterface) => queryInterface.dropTable("entrance"),
 };

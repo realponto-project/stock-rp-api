@@ -15,7 +15,7 @@ const ProductBase = database.model("productBase");
 const Product = database.model("product");
 const Technician = database.model("technician");
 const Os = database.model("os");
-const Conserto = database.model("conserto");
+// const Conserto = database.model("conserto");
 const OsParts = database.model("osParts");
 
 const { Op: operators } = Sequelize;
@@ -413,38 +413,6 @@ module.exports = class KitOutDomain {
       transaction,
     });
 
-    const osConserto = await OsParts.findAndCountAll({
-      where: { ...getWhere("osParts"), missOut: { [operators.ne]: "0" } },
-      include: [
-        {
-          model: Os,
-          where: getWhere("os"),
-          paranoid: false,
-          include: [
-            {
-              model: Technician,
-              where: getWhere("technician"),
-            },
-          ],
-        },
-        {
-          model: Conserto,
-          include: [
-            {
-              model: Product,
-              where: getWhere("product"),
-            },
-          ],
-          required: true,
-          paranoid: false,
-        },
-      ],
-      order: [["createdAt", "ASC"]],
-      limit: 10,
-      paranoid: false,
-      transaction,
-    });
-
     const osProductBase = await OsParts.findAndCountAll({
       where: { ...getWhere("osParts"), missOut: { [operators.ne]: "0" } },
       include: [
@@ -476,11 +444,7 @@ module.exports = class KitOutDomain {
       transaction,
     });
 
-    if (
-      kitOut.rows.length === 0 &&
-      osConserto.rows.length === 0 &&
-      osProductBase.rows.length === 0
-    ) {
+    if (kitOut.rows.length === 0 && osProductBase.rows.length === 0) {
       return {
         rows: [],
       };
@@ -515,26 +479,9 @@ module.exports = class KitOutDomain {
       return resp;
     });
 
-    const formatConserto = R.map(async (item) => {
-      const resp = {
-        // id: item.id,
-        os: item.o.os,
-        amount: item.missOut,
-        name: item.conserto.product.name,
-        technician: item.o.technician.name,
-        createdAt: formatDateFunct(item.createdAt),
-      };
-      return resp;
-    });
-
     const kitOutList =
       kitOut.rows.length !== 0
         ? await Promise.all(formatKitOut(kitOut.rows))
-        : [];
-
-    const osConsertoList =
-      osConserto.rows.length !== 0
-        ? await Promise.all(formatConserto(osConserto.rows))
         : [];
 
     const osProductBaseList =
@@ -543,7 +490,7 @@ module.exports = class KitOutDomain {
         : [];
 
     const response = {
-      rows: [...kitOutList, ...osConsertoList, ...osProductBaseList],
+      rows: [...kitOutList, ...osProductBaseList],
     };
 
     return response;

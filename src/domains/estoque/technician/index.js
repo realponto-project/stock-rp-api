@@ -19,18 +19,18 @@ module.exports = class TechnicianDomain {
 
     const technician = R.omit(["id", "plate"], bodyData);
 
-    const technicianNotHasProp = prop => R.not(R.has(prop, technician));
-    const bodyDataNotHasProp = prop => R.not(R.has(prop, bodyData));
+    const technicianNotHasProp = (prop) => R.not(R.has(prop, technician));
+    const bodyDataNotHasProp = (prop) => R.not(R.has(prop, bodyData));
 
     const field = {
       name: false,
       CNH: false,
-      plate: false
+      plate: false,
     };
     const message = {
       name: false,
       CNH: false,
-      plate: false
+      plate: false,
     };
 
     let errors = false;
@@ -46,7 +46,7 @@ module.exports = class TechnicianDomain {
     } else {
       const nameHasExist = await Technician.findOne({
         where: { name: technician.name },
-        transaction
+        transaction,
       });
 
       if (nameHasExist) {
@@ -80,7 +80,7 @@ module.exports = class TechnicianDomain {
     } else {
       const car = await Car.findOne({
         where: { plate: bodyData.plate },
-        transaction
+        transaction,
       });
 
       if (!car) {
@@ -104,13 +104,13 @@ module.exports = class TechnicianDomain {
     }
     const car = await Car.findOne({
       where: { plate: bodyData.plate },
-      transaction
+      transaction,
     });
 
     technician.CNH = technician.CNH.replace(/\D/gi, "");
 
     const technicianCreated = await Technician.create(technician, {
-      transaction
+      transaction,
     });
 
     await car.addTechnician(technicianCreated, { transaction });
@@ -118,13 +118,13 @@ module.exports = class TechnicianDomain {
     if (technician.external) {
       const kit = await Kit.findOne({
         where: { technicianId: null },
-        transaction
+        transaction,
       });
 
       if (kit) {
         const kitParts = await KitParts.findAll({
           where: { kitId: kit.id },
-          transaction
+          transaction,
         });
 
         const kitCreated = await Kit.create(
@@ -132,11 +132,11 @@ module.exports = class TechnicianDomain {
           { transaction }
         );
 
-        const kitPartsPromise = kitParts.map(async item => {
+        const kitPartsPromise = kitParts.map(async (item) => {
           const kitPart = {
             kitId: kitCreated.id,
             productBaseId: item.productBaseId,
-            amount: "0"
+            amount: "0",
           };
 
           await KitParts.create(kitPart, { transaction });
@@ -149,10 +149,10 @@ module.exports = class TechnicianDomain {
     const response = await Technician.findByPk(technicianCreated.id, {
       include: [
         {
-          model: Car
-        }
+          model: Car,
+        },
       ],
-      transaction
+      transaction,
     });
 
     return response;
@@ -163,12 +163,12 @@ module.exports = class TechnicianDomain {
 
     const technician = R.omit(["id", "plate"], bodyData);
 
-    const technicianNotHasProp = prop => R.not(R.has(prop, technician));
-    const bodyDataNotHasProp = prop => R.not(R.has(prop, bodyData));
+    const technicianNotHasProp = (prop) => R.not(R.has(prop, technician));
+    const bodyDataNotHasProp = (prop) => R.not(R.has(prop, bodyData));
 
     const oldTechnician = await Technician.findByPk(bodyData.id, {
       include: [{ model: Car }],
-      transaction
+      transaction,
     });
 
     // throw new FieldValidationError()
@@ -176,12 +176,12 @@ module.exports = class TechnicianDomain {
     const field = {
       name: false,
       CNH: false,
-      plate: false
+      plate: false,
     };
     const message = {
       name: false,
       CNH: false,
-      plate: false
+      plate: false,
     };
 
     let errors = false;
@@ -203,7 +203,7 @@ module.exports = class TechnicianDomain {
     } else {
       const nameHasExist = await Technician.findOne({
         where: { name: technician.name },
-        transaction
+        transaction,
       });
 
       if (nameHasExist && nameHasExist.id !== bodyData.id) {
@@ -237,7 +237,7 @@ module.exports = class TechnicianDomain {
     } else {
       const car = await Car.findOne({
         where: { plate: bodyData.plate },
-        transaction
+        transaction,
       });
 
       if (!car) {
@@ -261,11 +261,11 @@ module.exports = class TechnicianDomain {
     }
     const car = await Car.findOne({
       where: { plate: bodyData.plate },
-      transaction
+      transaction,
     });
 
     const oldCar = await Car.findByPk(oldTechnician.cars[0].id, {
-      transaction
+      transaction,
     });
 
     await oldCar.removeTechnician(oldTechnician, { transaction });
@@ -277,13 +277,13 @@ module.exports = class TechnicianDomain {
     if (!oldTechnician.external && technician.external) {
       const kit = await Kit.findOne({
         where: { technicianId: null },
-        transaction
+        transaction,
       });
 
       if (kit) {
         const kitParts = await KitParts.findAll({
           where: { kitId: kit.id },
-          transaction
+          transaction,
         });
 
         const kitCreated = await Kit.create(
@@ -291,11 +291,11 @@ module.exports = class TechnicianDomain {
           { transaction }
         );
 
-        const kitPartsPromise = kitParts.map(async item => {
+        const kitPartsPromise = kitParts.map(async (item) => {
           const kitPart = {
             kitId: kitCreated.id,
             productBaseId: item.productBaseId,
-            amount: "0"
+            amount: "0",
           };
 
           await KitParts.create(kitPart, { transaction });
@@ -310,25 +310,25 @@ module.exports = class TechnicianDomain {
     if (oldTechnician.external && !technician.external) {
       const kit = await Kit.findOne({
         where: { technicianId: bodyData.id },
-        transaction
+        transaction,
       });
 
       const oldKitParts = await KitParts.findAll({
         where: { kitId: kit.id },
         attributes: ["id", "amount", "productBaseId"],
-        transaction
+        transaction,
       });
 
-      const kitPartsDeletePromises = oldKitParts.map(async item => {
+      const kitPartsDeletePromises = oldKitParts.map(async (item) => {
         const productBase = await ProductBase.findByPk(item.productBaseId, {
-          transaction
+          transaction,
         });
 
         count = {
           ...count,
           [item.productBaseId]: count[item.productBaseId]
             ? count[item.productBaseId]
-            : 0
+            : 0,
         };
 
         count[item.productBaseId] += parseInt(item.amount, 10);
@@ -340,11 +340,11 @@ module.exports = class TechnicianDomain {
           ).toString(),
           reserved: (
             parseInt(productBase.reserved, 10) - count[item.productBaseId]
-          ).toString()
+          ).toString(),
         };
 
         if (
-          parseInt(productBaseUpdate.available, 10) < 0 ||
+          parseInt(productBaseUpdate.amount, 10) < 0 ||
           parseInt(productBaseUpdate.available, 10) < 0
         ) {
           field.productBaseUpdate = true;
@@ -364,7 +364,7 @@ module.exports = class TechnicianDomain {
 
     const newTechnician = {
       ...oldTechnician,
-      ...technician
+      ...technician,
     };
 
     await oldTechnician.update(newTechnician, { transaction });
@@ -372,10 +372,10 @@ module.exports = class TechnicianDomain {
     const response = await Technician.findByPk(bodyData.id, {
       include: [
         {
-          model: Car
-        }
+          model: Car,
+        },
       ],
-      transaction
+      transaction,
     });
 
     return response;
@@ -385,7 +385,7 @@ module.exports = class TechnicianDomain {
     const inicialOrder = {
       field: "createdAt",
       acendent: true,
-      direction: "DESC"
+      direction: "DESC",
     };
 
     const { query = null, transaction = null } = options;
@@ -406,13 +406,13 @@ module.exports = class TechnicianDomain {
       include: [
         {
           model: Car,
-          where: getWhere("car")
-        }
+          where: getWhere("car"),
+        },
       ],
       order: [[newOrder.field, newOrder.direction]],
       limit,
       offset,
-      transaction
+      transaction,
     });
 
     const { rows } = technical;
@@ -422,11 +422,11 @@ module.exports = class TechnicianDomain {
         page: null,
         show: 0,
         count: technical.count,
-        rows: []
+        rows: [],
       };
     }
 
-    const formatDateFunct = date => {
+    const formatDateFunct = (date) => {
       moment.locale("pt-br");
       const formatDate = moment(date).format("L");
       const formatHours = moment(date).format("LT");
@@ -434,7 +434,7 @@ module.exports = class TechnicianDomain {
       return dateformated;
     };
 
-    const formatData = R.map(technician => {
+    const formatData = R.map((technician) => {
       const resp = {
         id: technician.id,
         name: technician.name,
@@ -442,7 +442,7 @@ module.exports = class TechnicianDomain {
         external: technician.external,
         plate: technician.cars[0].plate,
         createdAt: formatDateFunct(technician.createdAt),
-        updatedAt: formatDateFunct(technician.updatedAt)
+        updatedAt: formatDateFunct(technician.updatedAt),
       };
       return resp;
     });
@@ -458,7 +458,7 @@ module.exports = class TechnicianDomain {
       page: pageResponse,
       show,
       count: technical.count,
-      rows: technicianList
+      rows: technicianList,
     };
     return response;
   }
@@ -476,12 +476,12 @@ module.exports = class TechnicianDomain {
       include: [
         {
           model: Car,
-          attributes: ["plate"]
-        }
+          attributes: ["plate"],
+        },
       ],
       attributes: ["id", "name"],
       order: [["name", "ASC"]],
-      transaction
+      transaction,
     });
 
     // const formatData = R.map((technician) => {

@@ -1,8 +1,6 @@
 const router = require("express").Router({ mergeParams: true });
 const reserveController = require("../../../controllers/estoque/reserve");
 
-router.post("/RInterno", reserveController.addRInterno);
-router.get("/RInterno", reserveController.getRInterno);
 router.post("/OS", reserveController.addOs);
 router.put("/OS", reserveController.updateOs);
 router.delete("/OS", reserveController.deleteOs);

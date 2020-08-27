@@ -5,10 +5,11 @@ const Sequelize = require("sequelize");
 const Cnpj = require("@fnando/cnpj/es");
 const Cpf = require("@fnando/cpf/es");
 
+const { Op } = Sequelize;
+
 const formatQuery = require("../../../../helpers/lazyLoad");
 const database = require("../../../../database");
 const { FieldValidationError } = require("../../../../helpers/errors");
-const ConsertoDomain = require("../../conserto");
 
 const Os = database.model("os");
 const OsParts = database.model("osParts");
@@ -21,11 +22,8 @@ const KitOut = database.model("kitOut");
 const KitParts = database.model("kitParts");
 // const Notification = database.model('notification')
 const StatusExpedition = database.model("statusExpedition");
-const Conserto = database.model("conserto");
 
 const { Op: operators } = Sequelize;
-
-const consertoDomain = new ConsertoDomain();
 
 module.exports = class OsDomain {
   async add(bodyData, options = {}) {
@@ -176,50 +174,47 @@ module.exports = class OsDomain {
         }
 
         if (item.status === "CONSERTO") {
-          const conserto = await consertoDomain.add(item, { transaction });
-
-          const osPartsCreatted = {
-            amount: item.amount,
-            consertoId: conserto.id,
-            statusExpeditionId: status.id,
-            oId: reserveCreated.id,
-          };
-
-          const osPartCreated = await OsParts.create(osPartsCreatted, {
-            transaction,
-          });
-
-          // throw new FieldValidationError([{ field, message }]);
-        } else {
-          const productBase = await ProductBase.findByPk(item.productBaseId, {
-            include: [
-              {
-                model: Product,
-              },
-            ],
-            transaction,
-          });
-
-          const osPartsCreatted = {
-            ...item,
-            statusExpeditionId: status.id,
-            oId: reserveCreated.id,
-          };
-
-          if (!productBase) {
+          if (R.not(R.has("serialNumbers", item)) || !item.serialNumbers) {
             errors = true;
-            field.peca = true;
-            message.peca = "produto não oconst a na base de dados";
+            field.serialNumbers = true;
+            message.serialNumbers = "serialNumbers cannot null";
+          } else {
+            item.serialNumbers = item.serialNumbers.map((serialNumber) =>
+              serialNumber.replace(/\D/gi, "")
+            );
           }
+        }
 
-          if (errors) {
-            throw new FieldValidationError([{ field, message }]);
-          }
+        const productBase = await ProductBase.findByPk(item.productBaseId, {
+          include: [
+            {
+              model: Product,
+            },
+          ],
+          transaction,
+        });
 
-          const osPartCreated = await OsParts.create(osPartsCreatted, {
-            transaction,
-          });
+        const osPartsCreatted = {
+          ...item,
+          statusExpeditionId: status.id,
+          oId: reserveCreated.id,
+        };
 
+        if (!productBase) {
+          errors = true;
+          field.peca = true;
+          message.peca = "produto não oconst a na base de dados";
+        }
+
+        if (errors) {
+          throw new FieldValidationError([{ field, message }]);
+        }
+
+        const osPartCreated = await OsParts.create(osPartsCreatted, {
+          transaction,
+        });
+
+        if (item.status !== "CONSERTO") {
           if (productBase.product.serial) {
             const { serialNumberArray } = item;
 
@@ -290,7 +285,7 @@ module.exports = class OsDomain {
           };
 
           if (
-            parseInt(productBaseUpdate.available, 10) < 0 ||
+            parseInt(productBaseUpdate.amount, 10) < 0 ||
             parseInt(productBaseUpdate.available, 10) < 0
           ) {
             field.productBaseUpdate = true;
@@ -405,7 +400,7 @@ module.exports = class OsDomain {
           };
 
           if (
-            parseInt(productBaseUpdate.available, 10) < 0 ||
+            parseInt(productBaseUpdate.amount, 10) < 0 ||
             parseInt(productBaseUpdate.available, 10) < 0
           ) {
             field.productBaseUpdate = true;
@@ -414,12 +409,6 @@ module.exports = class OsDomain {
           }
 
           await productBase.update(productBaseUpdate, { transaction });
-        } else {
-          const conserto = await Conserto.findByPk(item.consertoId, {
-            transaction,
-          });
-
-          await conserto.destroy({ transaction });
         }
 
         await item.destroy({ transaction });
@@ -554,7 +543,7 @@ module.exports = class OsDomain {
             };
 
             if (
-              parseInt(productBaseUpdate.available, 10) < 0 ||
+              parseInt(productBaseUpdate.amount, 10) < 0 ||
               parseInt(productBaseUpdate.available, 10) < 0
             ) {
               field.productBaseUpdate = true;
@@ -600,130 +589,115 @@ module.exports = class OsDomain {
             throw new FieldValidationError([{ field, message }]);
           }
 
-          if (item.status === "CONSERTO") {
-            const conserto = await consertoDomain.add(item, { transaction });
+          const osPartsCreatted = {
+            ...item,
+            statusExpeditionId: status.id,
+            oId: bodyData.id,
+          };
 
-            const osPartsCreatted = {
-              amount: conserto.serialNumbers.length,
-              consertoId: conserto.id,
-              statusExpeditionId: status.id,
-              oId: bodyData.id,
-            };
+          const osPartCreated = await OsParts.create(osPartsCreatted, {
+            transaction,
+          });
 
-            await OsParts.create(osPartsCreatted, {
-              transaction,
-            });
-          } else {
-            const osPartsCreatted = {
-              ...item,
-              statusExpeditionId: status.id,
-              oId: bodyData.id,
-            };
+          const productBase = await ProductBase.findByPk(item.productBaseId, {
+            include: [
+              {
+                model: Product,
+                attributes: ["serial"],
+              },
+            ],
+            transaction,
+          });
 
-            const osPartCreated = await OsParts.create(osPartsCreatted, {
-              transaction,
-            });
-
-            const productBase = await ProductBase.findByPk(item.productBaseId, {
-              include: [
-                {
-                  model: Product,
-                  attributes: ["serial"],
-                },
-              ],
-              transaction,
-            });
-
-            if (!productBase) {
-              field.peca = true;
-              message.peca = "produto não oconst a na base de dados";
-              throw new FieldValidationError([{ field, message }]);
-            }
-
-            if (productBase.product.serial) {
-              const { serialNumberArray } = item;
-
-              if (serialNumberArray.length !== parseInt(item.amount, 10)) {
-                errors = true;
-                field.serialNumbers = true;
-                message.serialNumbers =
-                  "quantidade adicionada nãop condiz com a quantidade de números de série.";
-              }
-
-              if (serialNumberArray.length > 0) {
-                await serialNumberArray.map(async (serialNumber) => {
-                  const equip = await Equip.findOne({
-                    where: {
-                      serialNumber,
-                      reserved: false,
-                      productBaseId: productBase.id,
-                    },
-                    transaction,
-                  });
-
-                  if (!equip) {
-                    errors = true;
-                    field.serialNumber = true;
-                    message.serialNumber = `este equipamento não esta cadastrado nessa base de estoque/ ${serialNumber} ja esta reservado`;
-                    throw new FieldValidationError([{ field, message }]);
-                  }
-                });
-
-                await serialNumberArray.map(async (serialNumber) => {
-                  const equip = await Equip.findOne({
-                    where: {
-                      serialNumber,
-                      reserved: false,
-                      productBaseId: productBase.id,
-                    },
-                    transaction,
-                  });
-
-                  await equip.update(
-                    {
-                      ...equip,
-                      osPartId: osPartCreated.id,
-                      reserved: true,
-                    },
-                    { transaction }
-                  );
-                });
-              }
-            }
-
-            const productBaseUpdate = {
-              ...productBase,
-              available: (
-                parseInt(productBase.available, 10) - parseInt(item.amount, 10)
-              ).toString(),
-              reserved: (
-                parseInt(productBase.reserved, 10) + parseInt(item.amount, 10)
-              ).toString(),
-            };
-
-            if (
-              parseInt(productBaseUpdate.available, 10) < 0 ||
-              parseInt(productBaseUpdate.available, 10) < 0
-            ) {
-              field.productBaseUpdate = true;
-              message.productBaseUpdate = "Número negativo não é valido";
-              throw new FieldValidationError([{ field, message }]);
-            }
-
-            // if (
-            //   parseInt(productBaseUpdate.available, 10)
-            //   < parseInt(productBase.product.minimumStock, 10)
-            // ) {
-            //   const messageNotification = `${productBase.product.name} está abaixo da quantidade mínima disponível no estoque, que é de ${productBase.product.minimumStock} unidades`
-
-            //   await Notification.create(
-            //     { message: messageNotification },
-            //     { transaction },
-            //   )
-            // }
-
-            await productBase.update(productBaseUpdate, { transaction });
+          if (!productBase) {
+            field.peca = true;
+            message.peca = "produto não oconst a na base de dados";
+            throw new FieldValidationError([{ field, message }]);
           }
+
+          if (productBase.product.serial) {
+            const { serialNumberArray } = item;
+
+            if (serialNumberArray.length !== parseInt(item.amount, 10)) {
+              errors = true;
+              field.serialNumbers = true;
+              message.serialNumbers =
+                "quantidade adicionada nãop condiz com a quantidade de números de série.";
+            }
+
+            if (serialNumberArray.length > 0) {
+              await serialNumberArray.map(async (serialNumber) => {
+                const equip = await Equip.findOne({
+                  where: {
+                    serialNumber,
+                    reserved: false,
+                    productBaseId: productBase.id,
+                  },
+                  transaction,
+                });
+
+                if (!equip) {
+                  errors = true;
+                  field.serialNumber = true;
+                  message.serialNumber = `este equipamento não esta cadastrado nessa base de estoque/ ${serialNumber} ja esta reservado`;
+                  throw new FieldValidationError([{ field, message }]);
+                }
+              });
+
+              await serialNumberArray.map(async (serialNumber) => {
+                const equip = await Equip.findOne({
+                  where: {
+                    serialNumber,
+                    reserved: false,
+                    productBaseId: productBase.id,
+                  },
+                  transaction,
+                });
+
+                await equip.update(
+                  {
+                    ...equip,
+                    osPartId: osPartCreated.id,
+                    reserved: true,
+                  },
+                  { transaction }
+                );
+              });
+            }
+          }
+
+          const productBaseUpdate = {
+            ...productBase,
+            available: (
+              parseInt(productBase.available, 10) - parseInt(item.amount, 10)
+            ).toString(),
+            reserved: (
+              parseInt(productBase.reserved, 10) + parseInt(item.amount, 10)
+            ).toString(),
+          };
+
+          if (
+            parseInt(productBaseUpdate.amount, 10) < 0 ||
+            parseInt(productBaseUpdate.available, 10) < 0
+          ) {
+            field.productBaseUpdate = true;
+            message.productBaseUpdate = "Número negativo não é valido";
+            throw new FieldValidationError([{ field, message }]);
+          }
+
+          // if (
+          //   parseInt(productBaseUpdate.available, 10)
+          //   < parseInt(productBase.product.minimumStock, 10)
+          // ) {
+          //   const messageNotification = `${productBase.product.name} está abaixo da quantidade mínima disponível no estoque, que é de ${productBase.product.minimumStock} unidades`
+
+          //   await Notification.create(
+          //     { message: messageNotification },
+          //     { transaction },
+          //   )
+          // }
+
+          await productBase.update(productBaseUpdate, { transaction });
         }
       });
       await Promise.all(osPartsUpdatePromises);
@@ -768,7 +742,7 @@ module.exports = class OsDomain {
             };
 
             if (
-              parseInt(productBaseUpdate.available, 10) < 0 ||
+              parseInt(productBaseUpdate.amount, 10) < 0 ||
               parseInt(productBaseUpdate.available, 10) < 0
             ) {
               field.productBaseUpdate = true;
@@ -815,6 +789,7 @@ module.exports = class OsDomain {
       acendent: true,
       direction: "DESC",
     };
+
     const { query = null, transaction = null } = options;
 
     const newQuery = Object.assign({}, query);
@@ -850,6 +825,23 @@ module.exports = class OsDomain {
       transaction,
     });
 
+    // console.log(
+    //   JSON.parse(
+    //     JSON.stringify(
+    //       await ProductBase.findOne({
+    //         include: [
+    //           { model: Product },
+    //           { model: StockBase, required: true },
+    //           { model: Equip },
+    //         ],
+    //         transaction,
+    //       })
+    //     )
+    //   )
+    // );
+
+    console.log(getWhere("equip"));
+    // console.log(Sequelize.fn("os", Sequelize.col("id")));
     const os = await Os.findAndCountAll({
       where: getWhere("os"),
       include: [
@@ -859,27 +851,27 @@ module.exports = class OsDomain {
         },
         {
           model: ProductBase,
+          required: false,
           include: [
             {
               model: Product,
+              where: getWhere("product"),
+              // required: false,
             },
+            // {
+            //   model: Equip,
+            //   where: {
+            //     ...getWhere("equip"),
+            //     // id: Sequelize.col("id"),
+            //     osPartId: { [operators.col]: "osPartId" },
+            //   },
+            //   required: false,
+            // },
           ],
+          required: false,
           through: {
             paranoid,
           },
-        },
-        {
-          model: Conserto,
-          include: [
-            {
-              model: Product,
-            },
-          ],
-          paranoid,
-          through: {
-            paranoid,
-          },
-          // required: !getWhere("osParts"),
         },
       ],
       order: [[newOrder.field, newOrder.direction]],
@@ -888,6 +880,8 @@ module.exports = class OsDomain {
       paranoid,
       transaction,
     });
+
+    console.log("tese");
 
     const { rows } = os;
 
@@ -967,6 +961,8 @@ module.exports = class OsDomain {
 
     const formatProduct = (productBases, index) => {
       return R.map(async (item) => {
+        // console.log(JSON.parse(JSON.stringify(item)));
+
         const { osParts } = item;
         const { amount, output, missOut } = osParts;
         const status = await StatusExpedition.findByPk(
@@ -976,6 +972,7 @@ module.exports = class OsDomain {
             transaction,
           }
         );
+
         notDelet[index] =
           output !== "0" ||
           missOut !== "0" ||
@@ -983,15 +980,26 @@ module.exports = class OsDomain {
           !!notDelet[index];
         let equips = [];
 
+        console.log("item");
+        console.log(JSON.parse(JSON.stringify(item)));
+
         const serial = item.product.serial;
 
-        if (serial) {
-          equips = await Equip.findAll({
-            attributes: ["serialNumber"],
-            where: { osPartId: osParts.id },
-            transaction,
-          });
-          notDelet[index] = parseInt(amount, 10) !== equips.length;
+        if (
+          item.osParts.statusExpeditionId !==
+          "18b37c3a-1a1f-4b7f-8f8a-2f2f7dc6724a"
+        ) {
+          if (serial) {
+            equips = await Equip.findAll({
+              attributes: ["serialNumber", "productBaseId"],
+              where: { osPartId: osParts.id, productBaseId: item.id },
+              transaction,
+            });
+            notDelet[index] = parseInt(amount, 10) !== equips.length;
+          }
+        } else {
+          notDelet[index] =
+            parseInt(amount, 10) !== item.osParts.serialNumbers.length;
         }
 
         const quantMax =
@@ -1013,51 +1021,10 @@ module.exports = class OsDomain {
           status: status && status.status,
         };
 
+        console.log(resp);
+
         return resp;
       }, productBases);
-    };
-
-    const formatConserto = (conserto, index) => {
-      return R.map(async (item) => {
-        const { osParts, serialNumbers } = item;
-        const { amount, output, missOut } = osParts;
-        const status = await StatusExpedition.findByPk(
-          osParts.statusExpeditionId,
-          {
-            attributes: ["status"],
-            transaction,
-          }
-        );
-
-        notDelet[index] =
-          output !== "0" ||
-          missOut !== "0" ||
-          osParts.return !== "0" ||
-          notDelet[index];
-
-        const quantMax =
-          parseInt(amount, 10) -
-          parseInt(osParts.return, 10) -
-          parseInt(output, 10) -
-          parseInt(missOut, 10);
-
-        const resp = {
-          serialNumbers: serialNumbers.map((number) => {
-            return { serialNumber: number };
-          }),
-          name: item.product.name,
-          serial: item.product.serial,
-          id: osParts.id,
-          amount,
-          output,
-          missOut,
-          return: osParts.return,
-          quantMax,
-          status: status && status.status,
-        };
-
-        return resp;
-      }, conserto);
     };
 
     const mapIndexed = R.addIndex(R.map);
@@ -1075,17 +1042,12 @@ module.exports = class OsDomain {
         createdAt: formatDateFunct(item.createdAt),
         products: [
           ...(await Promise.all(formatProduct(item.productBases, index))),
-          ...(await Promise.all(formatConserto(item.consertos, index))),
           ...(await findKitOuts(item.os)),
         ],
         notDelet:
           (item.productBases &&
             item.productBases.filter(
               (productBase) => productBase.osParts.deletedAt !== null
-            ).length !== 0) ||
-          (item.consertos &&
-            item.consertos.filter(
-              (conserto) => conserto.osParts.deletedAt !== null
             ).length !== 0) ||
           notDelet[index],
       };
@@ -1336,7 +1298,7 @@ module.exports = class OsDomain {
       }
 
       if (
-        parseInt(productBaseUpdate.available, 10) < 0 ||
+        parseInt(productBaseUpdate.amount, 10) < 0 ||
         parseInt(productBaseUpdate.available, 10) < 0
       ) {
         field.productBaseUpdate = true;
@@ -1346,26 +1308,21 @@ module.exports = class OsDomain {
 
       await productBase.update(productBaseUpdate, { transaction });
     } else {
-      const conserto = await Conserto.findByPk(osPart.consertoId, {
-        transaction,
-      });
-
-      const outSerialNumbers = bodyData.serialNumberArray;
-
-      const serialNumbers = conserto.serialNumbers;
-
-      outSerialNumbers.map((item) => {
-        serialNumbers.splice(R.indexOf(item, serialNumbers), 1);
-      });
-
-      await conserto.update(
-        { outSerialNumbers, serialNumbers },
-        { transaction }
-      );
-
-      if (serialNumbers.length === 0) {
-        await conserto.destroy({ transaction });
-      }
+      // const conserto = await Conserto.findByPk(osPart.consertoId, {
+      //   transaction,
+      // });
+      // const outSerialNumbers = bodyData.serialNumberArray;
+      // const serialNumbers = conserto.serialNumbers;
+      // outSerialNumbers.map((item) => {
+      //   serialNumbers.splice(R.indexOf(item, serialNumbers), 1);
+      // });
+      // await conserto.update(
+      //   { outSerialNumbers, serialNumbers },
+      //   { transaction }
+      // );
+      // if (serialNumbers.length === 0) {
+      //   await conserto.destroy({ transaction });
+      // }
     }
 
     const osPartUpdate = {
@@ -1387,14 +1344,11 @@ module.exports = class OsDomain {
         {
           model: ProductBase,
         },
-        {
-          model: Conserto,
-        },
       ],
       transaction,
     });
 
-    if (os.productBases.length === 0 && os.consertos.length === 0) {
+    if (os.productBases.length === 0) {
       await os.destroy({ transaction });
     }
 
