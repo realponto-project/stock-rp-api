@@ -24,12 +24,7 @@ module.exports = (sequelize) => {
     },
 
     stockBase: {
-      type: Sequelize.ENUM([
-        "REALPONTO",
-        "NOVAREAL",
-        "PONTOREAL",
-        "EMPRESTIMO",
-      ]),
+      type: Sequelize.ENUM(["ESTOQUE", "EMPRESTIMO"]),
       allowNull: false,
     },
     analysis: {

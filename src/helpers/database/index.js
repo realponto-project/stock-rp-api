@@ -53,7 +53,7 @@ const createUserAdmin = async () => {
     gerROs: true,
     delROs: true,
     updateRos: true,
-    addStatus: true
+    addStatus: true,
   };
 
   await typeAccount.add(typeAccountMock);
@@ -88,14 +88,12 @@ const createUserAdmin = async () => {
     gerROs: true,
     delROs: true,
     updateRos: true,
-    addStatus: true
+    addStatus: true,
   };
   await userDomain.user_Create(userAdmin);
 
   await StockBase.create({ stockBase: "EMPRESTIMO" });
-  await StockBase.create({ stockBase: "REALPONTO" });
-  await StockBase.create({ stockBase: "NOVAREAL" });
-  await StockBase.create({ stockBase: "PONTOREAL" });
+  await StockBase.create({ stockBase: "ESTOQUE" });
 
   await statusExpeditionDomain.add({ status: "venda" });
 };
@@ -105,5 +103,5 @@ module.exports = {
   forceCreateTables,
   dropAndDisconnectDatabase,
   dropAllTable,
-  createUserAdmin
+  createUserAdmin,
 };

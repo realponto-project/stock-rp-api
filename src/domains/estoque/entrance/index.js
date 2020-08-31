@@ -71,7 +71,7 @@ module.exports = class EntranceDomain {
       message.amountAdded = "Não é permitido letras.";
     }
 
-    const stockBaseArray = ["REALPONTO", "NOVAREAL", "PONTOREAL", "EMPRESTIMO"];
+    const stockBaseArray = ["ESTOQUE", "EMPRESTIMO"];
 
     if (entranceNotHasProp("stockBase") || !entrance.stockBase) {
       errors = true;
@@ -349,7 +349,7 @@ module.exports = class EntranceDomain {
       message.amountAdded = "Não é permitido letras.";
     }
 
-    const stockBaseArray = ["REALPONTO", "NOVAREAL", "PONTOREAL", "EMPRESTIMO"];
+    const stockBaseArray = ["ESTOQUE", "EMPRESTIMO"];
 
     if (entranceNotHasProp("stockBase") || !entrance.stockBase) {
       errors = true;

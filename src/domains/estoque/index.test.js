@@ -1,72 +1,72 @@
 // const R = require('ramda')
 
-const StockDomain = require('.')
-const MarkDomain = require('./product/mark')
-const CompanyDomain = require('../general/company')
-const ProductDomain = require('../estoque/product')
-const EntranceDomain = require('../estoque/entrance')
+const StockDomain = require(".");
+const MarkDomain = require("./product/mark");
+const CompanyDomain = require("../general/company");
+const ProductDomain = require("../estoque/product");
+const EntranceDomain = require("../estoque/entrance");
 
 // const { FieldValidationError } = require('../../helpers/errors')
 
 // const partDomain = new PartDomain()
-const stockDomain = new StockDomain()
-const markDomain = new MarkDomain()
-const companyDomain = new CompanyDomain()
-const productDomain = new ProductDomain()
-const entranceDomain = new EntranceDomain()
-describe('stockDomain', () => {
+const stockDomain = new StockDomain();
+const markDomain = new MarkDomain();
+const companyDomain = new CompanyDomain();
+const productDomain = new ProductDomain();
+const entranceDomain = new EntranceDomain();
+describe("stockDomain", () => {
   beforeAll(async () => {
     const mark = {
-      mark: 'MARCA X',
-      responsibleUser: 'modrp',
-    }
+      mark: "MARCA X",
+      responsibleUser: "modrp",
+    };
 
-    await markDomain.add(mark)
+    await markDomain.add(mark);
 
     const companyMock = {
-      razaoSocial: 'teste entrada get',
-      cnpj: '01200864000110',
-      street: 'jadaisom rodrigues',
-      number: '6969',
-      city: 'São Paulo',
-      state: 'UF',
-      neighborhood: 'JD. Avelino',
-      zipCode: '09930-210',
-      telphone: '(11)0965-4568',
-      nameContact: 'joseildom',
-      email: 'josealdo@gmasi.com',
-      responsibleUser: 'modrp',
-      relation: 'fornecedor',
-    }
+      razaoSocial: "teste entrada get",
+      cnpj: "01200864000110",
+      street: "jadaisom rodrigues",
+      number: "6969",
+      city: "São Paulo",
+      state: "UF",
+      neighborhood: "JD. Avelino",
+      zipCode: "09930-210",
+      telphone: "(11)0965-4568",
+      nameContact: "joseildom",
+      email: "josealdo@gmasi.com",
+      responsibleUser: "modrp",
+      relation: "fornecedor",
+    };
 
-    const companyCreated = await companyDomain.add(companyMock)
+    const companyCreated = await companyDomain.add(companyMock);
 
     const productMock = {
-      category: 'peca',
-      SKU: 'PC-00043',
-      description: '',
-      minimumStock: '10',
-      mark: 'MARCA X',
-      name: 'FONT 3 V',
+      category: "peca",
+      SKU: "PC-00043",
+      description: "",
+      minimumStock: "10",
+      mark: "MARCA X",
+      name: "FONT 3 V",
       serial: false,
-      responsibleUser: 'modrp',
-    }
+      responsibleUser: "modrp",
+    };
 
-    const productCreated = await productDomain.add(productMock)
+    const productCreated = await productDomain.add(productMock);
 
     const entranceMock = {
-      amountAdded: '4',
-      stockBase: 'PONTOREAL',
+      amountAdded: "4",
+      stockBase: "ESTOQUE",
       productId: productCreated.id,
       companyId: companyCreated.id,
-      responsibleUser: 'modrp',
-    }
+      responsibleUser: "modrp",
+    };
 
-    await entranceDomain.add(entranceMock)
-  })
-  test('getAll', async () => {
-    const strocks = await stockDomain.getAll()
+    await entranceDomain.add(entranceMock);
+  });
+  test("getAll", async () => {
+    const strocks = await stockDomain.getAll();
 
-    expect(strocks.rows.length > 0).toBeTruthy()
-  })
-})
+    expect(strocks.rows.length > 0).toBeTruthy();
+  });
+});

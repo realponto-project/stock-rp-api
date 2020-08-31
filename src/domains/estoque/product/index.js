@@ -38,7 +38,6 @@ module.exports = class ProductDomain {
     const field = {
       name: false,
       category: false,
-      SKU: false,
       serial: false,
       modulo: false,
       minimumStock: false,
@@ -52,7 +51,6 @@ module.exports = class ProductDomain {
     const message = {
       name: "",
       category: "",
-      SKU: "",
       serial: "",
       modulo: "",
       minimumStock: "",
@@ -99,25 +97,6 @@ module.exports = class ProductDomain {
       message.category = "categoria inválida";
 
       throw new FieldValidationError([{ field, message }]);
-    }
-
-    if (productNotHasProp("SKU") || !product.SKU) {
-      errors = true;
-      field.codigo = true;
-      message.codigo = "Informe o código.";
-    } else {
-      const { SKU } = product;
-
-      const productHasExist = await Product.findOne({
-        where: { SKU },
-        transaction,
-      });
-
-      if (productHasExist) {
-        errors = true;
-        field.codigo = true;
-        message.codigo = "SKU já cadastrado.";
-      }
     }
 
     if (productNotHasProp("minimumStock") || !product.minimumStock) {
@@ -247,7 +226,6 @@ module.exports = class ProductDomain {
     const field = {
       name: false,
       category: false,
-      SKU: false,
       serial: false,
       minimumStock: false,
       mark: false,
@@ -260,7 +238,6 @@ module.exports = class ProductDomain {
     const message = {
       name: "",
       category: "",
-      SKU: "",
       serial: "",
       minimumStock: "",
       mark: "",
@@ -312,25 +289,6 @@ module.exports = class ProductDomain {
       message.category = "categoria inválida";
 
       throw new FieldValidationError([{ field, message }]);
-    }
-
-    if (productNotHasProp("SKU") || !product.SKU) {
-      errors = true;
-      field.codigo = true;
-      message.codigo = "Informe o código.";
-    } else {
-      const { SKU } = product;
-
-      const productHasExist = await Product.findOne({
-        where: { SKU },
-        transaction,
-      });
-
-      if (productHasExist && productHasExist.id !== bodyData.id) {
-        errors = true;
-        field.name = true;
-        message.name = "código já cadastrado.";
-      }
     }
 
     if (productNotHasProp("minimumStock") || !product.minimumStock) {
@@ -491,10 +449,10 @@ module.exports = class ProductDomain {
     const formatData = R.map((product) => {
       const resp = {
         id: product.id,
+        sku: product.SKU,
         amount: product.amount,
         category: product.category,
         description: product.description,
-        sku: product.SKU,
         minimumStock: product.minimumStock,
         mark: product.mark.mark,
         name: product.name,

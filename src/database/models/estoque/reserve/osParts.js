@@ -59,11 +59,6 @@ module.exports = (sequelize) => {
       type: Sequelize.ARRAY(Sequelize.STRING),
       allowNull: true,
     },
-
-    // stockBase: {
-    //   type: Sequelize.ENUM(['REALPONTO', 'NOVAREAL', 'PONTOREAL']),
-    //   allowNull: false,
-    // },
   });
 
   osParts.associate = (models) => {

@@ -31,7 +31,7 @@ describe("reserveOsDomain", () => {
   beforeAll(async () => {
     const mark = {
       mark: "DC",
-      responsibleUser: "modrp"
+      responsibleUser: "modrp",
     };
 
     await markDomain.add(mark);
@@ -44,7 +44,7 @@ describe("reserveOsDomain", () => {
       mark: "DC",
       name: "TAMPA",
       serial: false,
-      responsibleUser: "modrp"
+      responsibleUser: "modrp",
     };
 
     productCreated = await productDomain.add(productMock);
@@ -62,17 +62,17 @@ describe("reserveOsDomain", () => {
       nameContact: "joseildom",
       email: "josealdo@gmasi.com",
       responsibleUser: "modrp",
-      relation: "fornecedor"
+      relation: "fornecedor",
     };
 
     const companyCreated = await companyDomain.add(companyMock);
 
     const entranceMock = {
       amountAdded: "64",
-      stockBase: "REALPONTO",
+      stockBase: "ESTOQUE",
       productId: productCreated.id,
       companyId: companyCreated.id,
-      responsibleUser: "modrp"
+      responsibleUser: "modrp",
     };
 
     await entranceDomain.add(entranceMock);
@@ -80,7 +80,7 @@ describe("reserveOsDomain", () => {
     const carMock = {
       model: "GOL",
       year: "2007",
-      plate: "RST-1234"
+      plate: "RST-1234",
     };
 
     await carDomain.add(carMock);
@@ -89,17 +89,17 @@ describe("reserveOsDomain", () => {
       name: "MARCOS BOLADÃO",
       CNH: "01/01/2000",
       plate: "RST-1234",
-      external: false
+      external: false,
     };
 
     technicianCreated = await technicianDomain.add(technicianMock);
 
     productBase = await ProductBase.findOne({
       where: {
-        productId: productCreated.id
+        productId: productCreated.id,
       },
-      include: [{ model: StockBase, where: { stockBase: "REALPONTO" } }],
-      transacition: null
+      include: [{ model: StockBase, where: { stockBase: "ESTOQUE" } }],
+      transacition: null,
     });
   });
 
@@ -113,9 +113,9 @@ describe("reserveOsDomain", () => {
         {
           productBaseId: productBase.id,
           amount: "5",
-          status: "venda"
-        }
-      ]
+          status: "venda",
+        },
+      ],
     };
     const reserveCreated = await osDomain.add(reserveMock);
 
@@ -134,9 +134,9 @@ describe("reserveOsDomain", () => {
         {
           productBaseId: productBase.id,
           amount: "1",
-          status: "venda"
-        }
-      ]
+          status: "venda",
+        },
+      ],
     };
     const reserveCreated = await osDomain.add(reserveMock);
 
@@ -154,23 +154,23 @@ describe("reserveOsDomain", () => {
         {
           productBaseId: productBase.id,
           amount: "4",
-          status: "venda"
-        }
-      ]
+          status: "venda",
+        },
+      ],
     };
     const reserveCreated = await osDomain.add(reserveMock);
 
     const osParts = await OsParts.findOne({
       where: {
-        oId: reserveCreated.id
+        oId: reserveCreated.id,
       },
-      transacition: null
+      transacition: null,
     });
 
     const reserveUpdate = {
       ...JSON.parse(JSON.stringify(reserveCreated)),
       os: "7895465",
-      osParts: [{ id: osParts.id, amount: "6", status: "venda" }]
+      osParts: [{ id: osParts.id, amount: "6", status: "venda" }],
     };
 
     await osDomain.update(reserveUpdate);
@@ -194,9 +194,9 @@ describe("reserveOsDomain", () => {
         {
           productBaseId: productBase.id,
           amount: "3",
-          status: "venda"
-        }
-      ]
+          status: "venda",
+        },
+      ],
     };
 
     await osDomain.add(reserveMock);
@@ -217,17 +217,17 @@ describe("reserveOsDomain", () => {
         {
           productBaseId: productBase.id,
           amount: "6",
-          status: "venda"
-        }
-      ]
+          status: "venda",
+        },
+      ],
     };
     const reserveCreated = await osDomain.add(reserveMock);
 
     const output = {
       osPartsId: reserveCreated.productBases[0].osParts.id,
       add: {
-        output: "2"
-      }
+        output: "2",
+      },
     };
 
     await osDomain.output(output);

@@ -4,41 +4,36 @@ module.exports = {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true
+        primaryKey: true,
       },
 
       stockBase: {
-        type: Sequelize.ENUM([
-          "REALPONTO",
-          "NOVAREAL",
-          "PONTOREAL",
-          "EMPRESTIMO"
-        ]),
-        allowNull: false
+        type: Sequelize.ENUM(["ESTOQUE", "EMPRESTIMO"]),
+        allowNull: false,
       },
 
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
 
-    stockBase.associate = models => {
+    stockBase.associate = (models) => {
       stockBase.belongsToMany(models.product, { through: "productBase" });
     };
 
     return stockBase;
   },
 
-  down: queryInterface => queryInterface.dropTable("stockBase")
+  down: (queryInterface) => queryInterface.dropTable("stockBase"),
 };

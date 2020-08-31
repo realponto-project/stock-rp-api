@@ -73,7 +73,7 @@ describe("reserveController", () => {
 
     const entranceMock = {
       amountAdded: "50",
-      stockBase: "REALPONTO",
+      stockBase: "ESTOQUE",
       productId: product.body.id,
       companyId: company.body.id,
       responsibleUser: "modrp",
@@ -104,7 +104,7 @@ describe("reserveController", () => {
       where: {
         productId: product.body.id,
       },
-      include: [{ model: StockBase, where: { stockBase: "REALPONTO" } }],
+      include: [{ model: StockBase, where: { stockBase: "ESTOQUE" } }],
       transacition: null,
     });
 

@@ -23,7 +23,8 @@ module.exports = {
       },
 
       SKU: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
         allowNull: false,
       },
 

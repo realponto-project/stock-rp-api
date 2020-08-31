@@ -840,7 +840,6 @@ module.exports = class OsDomain {
     //   )
     // );
 
-    console.log(getWhere("equip"));
     // console.log(Sequelize.fn("os", Sequelize.col("id")));
     const os = await Os.findAndCountAll({
       where: getWhere("os"),
@@ -880,8 +879,6 @@ module.exports = class OsDomain {
       paranoid,
       transaction,
     });
-
-    console.log("tese");
 
     const { rows } = os;
 
@@ -980,9 +977,6 @@ module.exports = class OsDomain {
           !!notDelet[index];
         let equips = [];
 
-        console.log("item");
-        console.log(JSON.parse(JSON.stringify(item)));
-
         const serial = item.product.serial;
 
         if (
@@ -1020,8 +1014,6 @@ module.exports = class OsDomain {
           quantMax,
           status: status && status.status,
         };
-
-        console.log(resp);
 
         return resp;
       }, productBases);

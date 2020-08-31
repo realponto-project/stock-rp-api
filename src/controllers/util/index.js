@@ -229,11 +229,7 @@ const getBug = async (req, res, next) => {
     //   })
     // );
 
-    console.log(JSON.parse(JSON.stringify(producBase)));
-
     await producBase.update({ amount: "0" }, { transaction });
-
-    console.log(JSON.parse(JSON.stringify(producBase)));
 
     await transaction.commit();
     res.json("response");
@@ -446,8 +442,6 @@ const pdfStock = async (req, res, next) => {
       ],
       transaction,
     });
-
-    console.log(JSON.parse(JSON.stringify(equips)));
 
     await Promise.all(
       equips.map(async (equip) => {

@@ -12,7 +12,6 @@ const { auth } = require("./middlewares/authentic");
 
 const app = Express();
 
-console.log(process.env.ORIGIN);
 /** MIDDLEWARES */
 app.use(logger("dev"));
 app.use(
@@ -20,7 +19,7 @@ app.use(
     origin: process.env.ORIGIN || "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     preflightContinue: false,
-    optionsSuccessStatus: 204
+    optionsSuccessStatus: 204,
   })
 );
 app.use(Express.static("public"));
