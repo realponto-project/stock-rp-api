@@ -118,27 +118,23 @@ module.exports = class OsDomain {
       throw new FieldValidationError([{ field, message }]);
     }
 
-    // const reserveHasExist = await Os.findOne({
-    //   where: {
-    //     date: {
-    //       [operators.gte]: moment(reserve.date)
-    //         .startOf("day")
-    //         .toString(),
-    //       [operators.lte]: moment(reserve.date)
-    //         .endOf("day")
-    //         .toString()
-    //     },
-    //     razaoSocial: reserve.razaoSocial,
-    //     cnpj: reserve.cnpj.replace(/\D/g, "")
-    //   },
-    //   transaction
-    // });
+    const reserveHasExist = await Os.findOne({
+      where: {
+        date: {
+          [operators.gte]: moment(reserve.date).startOf("day").toString(),
+          [operators.lte]: moment(reserve.date).endOf("day").toString(),
+        },
+        razaoSocial: reserve.razaoSocial,
+        cnpj: reserve.cnpj.replace(/\D/g, ""),
+      },
+      transaction,
+    });
 
-    // if (reserveHasExist && process.env.NODE_ENV !== "test") {
-    //   field.message = true;
-    //   message.message = "Há uma reserva nesta data para esta empresa";
-    //   throw new FieldValidationError([{ field, message }]);
-    // }
+    if (reserveHasExist) {
+      field.message = true;
+      message.message = "Há uma reserva nesta data para esta empresa";
+      throw new FieldValidationError([{ field, message }]);
+    }
 
     const reserveAll = await Os.findAll({ paranoid: false, transaction });
 
@@ -261,15 +257,6 @@ module.exports = class OsDomain {
                   },
                   { transaction }
                 );
-
-                // const equip1 = await Equip.findOne({
-                //   where: {
-                //     serialNumber,
-                //     reserved: false,
-                //     productBaseId: productBase.id,
-                //   },
-                //   transaction,
-                // })
               });
             }
           }
@@ -292,18 +279,6 @@ module.exports = class OsDomain {
             message.productBaseUpdate = "Número negativo não é valido";
             throw new FieldValidationError([{ field, message }]);
           }
-
-          // if (
-          //   parseInt(productBaseUpdate.available, 10)
-          //   < parseInt(productBase.product.minimumStock, 10)
-          // ) {
-          //   const messageNotification = `${productBase.product.name} está abaixo da quantidade mínima disponível no estoque, que é de ${productBase.product.minimumStock} unidades`
-
-          //   await Notification.create(
-          //     { message: messageNotification },
-          //     { transaction },
-          //   )
-          // }
 
           await productBase.update(productBaseUpdate, { transaction });
         }

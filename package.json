@@ -51,6 +51,7 @@
     "uuid": "^3.3.2",
     "validator": "^10.11.0",
     "web-push": "^3.4.1",
+    "xlsx": "^0.16.6",
     "yarn": "^1.12.3"
   },
   "devDependencies": {

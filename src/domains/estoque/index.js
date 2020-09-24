@@ -16,6 +16,7 @@ const StockBase = database.model("stockBase");
 const ProductBase = database.model("productBase");
 const Notification = database.model("notification");
 const Equip = database.model("equip");
+const EquipType = database.model("equipType");
 
 module.exports = class StockDomain {
   async getAll(options = {}) {
@@ -55,6 +56,10 @@ module.exports = class StockDomain {
               where: getWhere("mark"),
               attributes: ["mark"],
               required: true,
+            },
+            {
+              model: EquipType,
+              where: getWhere("equipType"),
             },
           ],
           required: true,
