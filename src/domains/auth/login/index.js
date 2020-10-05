@@ -48,19 +48,6 @@ class LoginDomain {
       ]);
     }
 
-    const authorizedStock = R.filter(R.propEq("stock", true), [
-      typeAccount,
-      login.user.typeAccount,
-    ]);
-    const authorizedLabTec = R.filter(R.propEq("labTec", true), [
-      typeAccount,
-      login.user.typeAccount,
-    ]);
-
-    if (authorizedStock.length !== 2 && authorizedLabTec.length !== 2) {
-      throw new UnauthorizedError();
-    }
-
     const checkPwd = await login.checkPassword(password);
 
     // const checkPwd = await bcrypt.compare(password, login.password)
@@ -79,6 +66,34 @@ class LoginDomain {
     const session = await sessionDomain.createSession(login.id, {
       transaction,
     });
+
+    console.log(JSON.parse(JSON.stringify(session)));
+
+    if (login.user.tecnico) {
+      return {
+        token: session[0].id,
+        userId: login.user.id,
+        technicianId: login.user.technicianId,
+        username: login.user.username,
+        tecnico: login.user.tecnico,
+        modulo: login.user.modulo,
+        typeAccount: null,
+        active: session[0].active,
+      };
+    }
+
+    const authorizedStock = R.filter(R.propEq("stock", true), [
+      typeAccount,
+      login.user.typeAccount,
+    ]);
+    const authorizedLabTec = R.filter(R.propEq("labTec", true), [
+      typeAccount,
+      login.user.typeAccount,
+    ]);
+
+    if (authorizedStock.length !== 2 && authorizedLabTec.length !== 2) {
+      throw new UnauthorizedError();
+    }
 
     const user = await User.findByPk(login.user.id, {
       transaction,
@@ -180,12 +195,13 @@ class LoginDomain {
 
     const response = {
       ...resource,
-      token: session.id,
+      token: session[0].id,
       userId: user.id,
       username: user.username,
+      tecnico: login.user.tecnico,
       modulo: user.modulo,
       typeAccount: user.typeAccount.typeName,
-      active: session.active,
+      active: session[0].active,
     };
 
     return response;

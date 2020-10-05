@@ -43,6 +43,10 @@ const getOneBySerialNumber = async (req, res, next) => {
   try {
     const { serialNumber = null, paranoid = false } = req.query;
 
+    if (!serialNumber) {
+      return res.status(401).json({ message: "serialNumber cannot null" });
+    }
+
     const equip = await equipDomain.getOneBySerialNumber(serialNumber, {
       paranoid,
       transaction,

@@ -691,9 +691,7 @@ module.exports = class EntranceDomain {
       let available = parseInt(productBase.available, 10);
 
       if (deletEntrance.analysis) {
-        preAnalysis = (
-          preAnalysis - parseInt(deletEntrance.amountAdded, 10)
-        ).toString();
+        preAnalysis = preAnalysis - parseInt(deletEntrance.amountAdded, 10);
       } else {
         amount = (amount - parseInt(deletEntrance.amountAdded, 10)).toString();
         available = (
@@ -705,7 +703,7 @@ module.exports = class EntranceDomain {
         ...productBase,
         amount,
         available,
-        preAnalysis,
+        preAnalysis: preAnalysis.toString(),
       };
 
       if (preAnalysis < 0 || amount < 0 || available < 0) {

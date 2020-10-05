@@ -10,6 +10,7 @@ const { Op } = Sequelize;
 const formatQuery = require("../../../../helpers/lazyLoad");
 const database = require("../../../../database");
 const { FieldValidationError } = require("../../../../helpers/errors");
+const { or } = require("sequelize");
 
 const Os = database.model("os");
 const OsParts = database.model("osParts");
@@ -22,6 +23,7 @@ const KitOut = database.model("kitOut");
 const KitParts = database.model("kitParts");
 // const Notification = database.model('notification')
 const StatusExpedition = database.model("statusExpedition");
+const TechnicianReserve = database.model("technicianReserve");
 
 const { Op: operators } = Sequelize;
 
@@ -211,7 +213,10 @@ module.exports = class OsDomain {
         });
 
         if (item.status !== "CONSERTO") {
-          if (productBase.product.serial) {
+          if (
+            productBase.product.serial &&
+            productBase.product.category !== "peca"
+          ) {
             const { serialNumberArray } = item;
 
             if (serialNumberArray.length !== parseInt(item.amount, 10)) {
@@ -816,6 +821,7 @@ module.exports = class OsDomain {
     // );
 
     // console.log(Sequelize.fn("os", Sequelize.col("id")));
+
     const os = await Os.findAndCountAll({
       where: getWhere("os"),
       include: [
@@ -830,21 +836,12 @@ module.exports = class OsDomain {
             {
               model: Product,
               where: getWhere("product"),
-              // required: false,
             },
-            // {
-            //   model: Equip,
-            //   where: {
-            //     ...getWhere("equip"),
-            //     // id: Sequelize.col("id"),
-            //     osPartId: { [operators.col]: "osPartId" },
-            //   },
-            //   required: false,
-            // },
           ],
           required: false,
           through: {
             paranoid,
+            where: getWhere("osParts"),
           },
         },
       ],
@@ -856,6 +853,8 @@ module.exports = class OsDomain {
     });
 
     const { rows } = os;
+
+    console.log(JSON.parse(JSON.stringify(rows)));
 
     if (rows.length === 0) {
       return {
@@ -1142,7 +1141,10 @@ module.exports = class OsDomain {
       throw new FieldValidationError([{ field, message }]);
     }
 
-    const osPart = await OsParts.findByPk(bodyData.osPartsId, { transaction });
+    const osPart = await OsParts.findByPk(bodyData.osPartsId, {
+      include: [{ model: Os }],
+      transaction,
+    });
 
     const { add } = bodyData;
 
@@ -1214,8 +1216,28 @@ module.exports = class OsDomain {
                 reserved: true,
                 productBaseId: productBase.id,
               },
+              include: [{ model: TechnicianReserve }],
               transaction,
             });
+
+            // const technicianReserves = await TechnicianReserve.findAll({
+            //   transaction,
+            // });
+            // console.log(JSON.parse(JSON.stringify(technicianReserves)));
+
+            const technicianReserve = await TechnicianReserve.findByPk(
+              equip.technicianReserveId,
+              { transaction }
+            );
+
+            await technicianReserve.update(
+              { amountAux: technicianReserve.amountAux - 1 },
+              { transaction }
+            );
+
+            if (technicianReserve.amountAux === 0) {
+              await technicianReserve.destroy({ transaction });
+            }
 
             if (key === "return") {
               await equip.update(
@@ -1239,6 +1261,27 @@ module.exports = class OsDomain {
               );
             }
           });
+        }
+      } else {
+        const technicianReserve = await TechnicianReserve.findOne({
+          where: {
+            productId: productBase.productId,
+            technicianId: osPart.o.technicianId,
+            data: {
+              [Op.gte]: moment(osPart.o.date).startOf("day").toString(),
+              [Op.lte]: moment(osPart.o.date).endOf("day").toString(),
+            },
+          },
+          transaction,
+        });
+
+        await technicianReserve.update(
+          { amountAux: technicianReserve.amountAux - value },
+          { transaction }
+        );
+
+        if (technicianReserve.amountAux === 0) {
+          await technicianReserve.destroy({ transaction });
         }
       }
 
@@ -1298,6 +1341,7 @@ module.exports = class OsDomain {
     };
 
     await osPart.update(osPartUpdate, { transaction });
+
     const osPartsUpdate = await OsParts.findByPk(bodyData.osPartsId, {
       transaction,
     });
@@ -1325,5 +1369,247 @@ module.exports = class OsDomain {
 
     // throw new FieldValidationError([{ field, message }]);
     return response;
+  }
+
+  async getAllOsPartsByParams(options = {}) {
+    const { query = null, transaction = null } = options;
+
+    const newQuery = Object.assign({}, query);
+
+    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
+
+    const products = await ProductBase.findAndCountAll({
+      include: [
+        {
+          model: Os,
+          required: true,
+          where: getWhere("os"),
+          include: [{ model: Technician, where: getWhere("technician") }],
+        },
+        {
+          model: Product,
+        },
+      ],
+      transaction,
+    });
+
+    let equipamentos = [];
+
+    const formatedProducts = R.map(async (item) => {
+      if (item.product.serial) {
+        if (item.product.category === "peca") {
+          let amount = 0;
+
+          item.os.map((os) => {
+            amount = amount + parseInt(os.osParts.amount, 10);
+          });
+
+          const equips = await Equip.findAll({
+            include: [
+              {
+                model: TechnicianReserve,
+                where: {
+                  ...getWhere("technicianReserve"),
+                  productId: item.product.id,
+                  technicianId: item.os[0].technician.id,
+                },
+              },
+            ],
+            transaction,
+          });
+
+          amount = amount - equips.length;
+
+          if (amount) {
+            return {
+              id: item.product.id,
+              amount,
+              os: "-",
+              tecnico: item.os[0].technician.name,
+              produto: item.product.name,
+              serial: item.product.serial,
+            };
+          }
+          return { id: null };
+        } else {
+          await Promise.all(
+            item.os.map(async (os) => {
+              const equips = await Equip.findAll({
+                where: { osPartId: os.osParts.id },
+                transaction,
+              });
+
+              equips.map((equip) => {
+                if (!equip.technicianReserveId) {
+                  equipamentos.push({
+                    id: item.product.id,
+                    amount: 1,
+                    os: os.os,
+                    tecnico: item.os[0].technician.name,
+                    produto: item.product.name,
+                    serial: item.product.serial,
+                    serialNumber: equip.serialNumber,
+                  });
+                }
+              });
+            })
+          );
+          return { id: null };
+
+          // console.log(JSON.parse(JSON.stringify(item)));
+        }
+      } else {
+        let amount = 0;
+
+        item.os.map((os) => {
+          amount = amount + parseInt(os.osParts.amount, 10);
+        });
+
+        const technicianReserve = await TechnicianReserve.findOne({
+          attributes: ["amount", "productId", "technicianId", "createdAt"],
+          where: {
+            createdAt: {
+              [Op.gte]: moment().startOf("day").toString(),
+              [Op.lte]: moment().endOf("day").toString(),
+            },
+            productId: item.product.id,
+            technicianId: item.os[0].technician.id,
+          },
+          transaction,
+        });
+        console.log(JSON.parse(JSON.stringify(item)));
+
+        if (technicianReserve) {
+          amount = amount - technicianReserve.amount;
+        }
+
+        if (amount) {
+          return {
+            id: item.product.id,
+            amount,
+            os: "-",
+            tecnico: item.os[0].technician.name,
+            produto: item.product.name,
+            serial: item.product.serial,
+          };
+        }
+        return { id: null };
+      }
+    });
+
+    const rows = await Promise.all(formatedProducts(products.rows));
+
+    return {
+      rows: [...rows.filter((item) => item.id), ...equipamentos],
+      count: products.count,
+      page: pageResponse,
+      show: R.min(limit, products.count),
+    };
+  }
+
+  async getAllOsPartsByParamsForReturn(options = {}) {
+    const { query = null, transaction = null } = options;
+
+    const newQuery = Object.assign({}, query);
+
+    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
+
+    const os = await Os.findAll({
+      where: getWhere("os"),
+      include: [
+        { model: Technician, where: getWhere("technician") },
+        {
+          model: ProductBase,
+          include: [
+            { model: StockBase, where: { stockBase: "ESTOQUE" } },
+            { model: Product, where: getWhere("product") },
+          ],
+        },
+      ],
+      transaction,
+    });
+    // console.log(JSON.parse(JSON.stringify(os)));
+    // console.log(JSON.parse(JSON.stringify(os[0].productBases)));
+
+    const formatedProducts = R.map(async (item) => {
+      console.log(JSON.parse(JSON.stringify(item)));
+      return {
+        // osPartsId:
+        oId: item.id,
+        os: item.os,
+        razaoSocial: item.razaoSocial,
+      };
+    });
+
+    const rows = await Promise.all(formatedProducts(os));
+
+    return {
+      rows,
+    };
+  }
+
+  async getAllOsParts(options = {}) {
+    const { query = null, transaction = null } = options;
+
+    const newQuery = Object.assign({}, query);
+
+    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
+
+    let where = {};
+
+    if (R.has("or", newQuery) && newQuery.or)
+      where = {
+        [Op.or]: {
+          return: { [Op.ne]: "0" },
+          output: { [Op.ne]: "0" },
+          missOut: { [Op.ne]: "0" },
+        },
+      };
+
+    const osParts = await OsParts.findAll({
+      where,
+      include: [
+        {
+          model: Os,
+          required: true,
+          where: getWhere("os"),
+          include: [{ model: Technician, where: getWhere("technician") }],
+          paranoid: false,
+        },
+        {
+          model: ProductBase,
+          include: [{ model: Product, where: getWhere("product") }],
+          required: true,
+        },
+      ],
+      paranoid: false,
+      transaction,
+    });
+
+    console.log(JSON.parse(JSON.stringify(osParts)));
+
+    const formatedProducts = R.map(async (item) => {
+      return {
+        amount: parseInt(item.amount, 10),
+        return: parseInt(item.return, 10),
+        output: parseInt(item.output, 10),
+        missOut: parseInt(item.missOut, 10),
+        os: item.o.os,
+        tecnico: item.o.technician.name,
+        produto: item.productBase.product.name,
+        id: item.productBase.product.id,
+        osPartId: item.id,
+        serial: item.productBase.product.serial,
+      };
+    });
+
+    const rows = await Promise.all(formatedProducts(osParts));
+
+    return {
+      rows: [...rows.filter((item) => item.id)],
+      count: osParts.length,
+      page: pageResponse,
+      show: R.min(limit, osParts.length),
+    };
   }
 };

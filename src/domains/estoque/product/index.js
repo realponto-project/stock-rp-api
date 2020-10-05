@@ -580,14 +580,13 @@ module.exports = class ProductDomain {
       transaction,
     });
 
-    // console.log(JSON.parse(JSON.stringify(productBases)));
-
     const response = productBases.map((productBase) => {
       const resp = {
         id: productBase.id,
         available: productBase.available,
         name: productBase.product.name,
         serial: productBase.product.serial,
+        category: productBase.product.category,
       };
       return resp;
     });

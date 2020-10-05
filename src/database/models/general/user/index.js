@@ -21,6 +21,12 @@ module.exports = (sequelize) => {
       type: Sequelize.BOOLEAN,
       defaultValue: false,
     },
+
+    tecnico: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+    },
+
     responsibleUser: {
       type: Sequelize.STRING,
       allowNull: false,
@@ -30,6 +36,7 @@ module.exports = (sequelize) => {
   user.associate = (models) => {
     user.belongsTo(models.login);
     user.belongsTo(models.resources);
+    user.belongsTo(models.technician);
     user.belongsTo(models.typeAccount, {
       // foreignKey: {
       //   allowNull: false,

@@ -909,7 +909,7 @@ module.exports = class EquipDomain {
           include: [
             {
               model: Product,
-              attributes: ["name"],
+              attributes: ["name", "category", "serial"],
             },
           ],
         },

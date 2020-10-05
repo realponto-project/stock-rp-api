@@ -15,7 +15,10 @@ class SessionDomain {
   async createSession(loginId, options = {}) {
     const { transaction = null } = options;
 
-    const session = await Session.create({ loginId }, { transaction });
+    const session = await Session.findOrCreate({
+      where: { loginId },
+      transaction,
+    });
 
     return session;
   }
@@ -34,7 +37,7 @@ class SessionDomain {
     await sessionInstance.update({ lastActivity });
 
     const sessionUpdated = await Session.findByPk(sessionInstance.id, {
-      transaction
+      transaction,
     });
 
     return sessionUpdated;
@@ -54,7 +57,7 @@ class SessionDomain {
     await sessionInstance.destroy({ force: true });
 
     const sessionUpdated = await Session.findByPk(sessionInstance.id, {
-      transaction
+      transaction,
     });
 
     return sessionUpdated;
@@ -71,10 +74,10 @@ class SessionDomain {
       include: [
         {
           model: User,
-          where: { username }
-        }
+          where: { username },
+        },
       ],
-      transaction
+      transaction,
     });
 
     if (!login) {
@@ -92,24 +95,24 @@ class SessionDomain {
         createdAt: {
           [Op.and]: [
             { [Op.gte]: moment().startOf("day") },
-            { [Op.lte]: moment().endOf("day") }
-          ]
-        }
+            { [Op.lte]: moment().endOf("day") },
+          ],
+        },
       },
-      transaction
+      transaction,
     });
 
     if (!session) {
       const sessions = await Session.findAll({
         where: {
           id,
-          loginId: login.id
+          loginId: login.id,
         },
-        transaction
+        transaction,
       });
 
       await Promise.all(
-        sessions.map(session => session.destroy({ force: true, transaction }))
+        sessions.map((session) => session.destroy({ force: true, transaction }))
       );
       return false;
     }

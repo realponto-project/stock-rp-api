@@ -12,12 +12,14 @@ const Technician = database.model("technician");
 const Kit = database.model("kit");
 const KitParts = database.model("kitParts");
 const ProductBase = database.model("productBase");
+const User = database.model("user");
+const Login = database.model("login");
 
 module.exports = class TechnicianDomain {
   async add(bodyData, options = {}) {
     const { transaction = null } = options;
 
-    const technician = R.omit(["id", "plate"], bodyData);
+    const technician = R.omit(["id", "plate", "responsibleUser"], bodyData);
 
     const technicianNotHasProp = (prop) => R.not(R.has(prop, technician));
     const bodyDataNotHasProp = (prop) => R.not(R.has(prop, bodyData));
@@ -112,6 +114,34 @@ module.exports = class TechnicianDomain {
     const technicianCreated = await Technician.create(technician, {
       transaction,
     });
+
+    if (technicianCreated.external) {
+      const formatBody = R.evolve({
+        username: R.pipe(R.toLower(), R.trim()),
+      });
+
+      const user = formatBody({
+        username: technicianCreated.name.replace(/\W/gi, ""),
+      });
+
+      const password = R.prop("username", user);
+
+      const userFormatted = {
+        ...user,
+        technicianId: technicianCreated.id,
+        customized: false,
+        tecnico: true,
+        responsibleUser: bodyData.responsibleUser,
+        login: {
+          password,
+        },
+      };
+
+      await User.create(userFormatted, {
+        include: [Login],
+        transaction,
+      });
+    }
 
     await car.addTechnician(technicianCreated, { transaction });
 
@@ -367,7 +397,25 @@ module.exports = class TechnicianDomain {
       ...technician,
     };
 
+    const formatUsername = R.evolve({
+      username: R.pipe(R.toLower(), R.trim()),
+    });
+
+    const userTechnician = await User.findOne({
+      where: formatUsername({
+        username: oldTechnician.name.replace(/\W/gi, ""),
+      }),
+      transaction,
+    });
+
     await oldTechnician.update(newTechnician, { transaction });
+
+    await userTechnician.update(
+      formatUsername({
+        username: newTechnician.name.replace(/\W/gi, ""),
+      }),
+      { transaction }
+    );
 
     const response = await Technician.findByPk(bodyData.id, {
       include: [
