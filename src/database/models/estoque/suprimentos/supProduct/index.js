@@ -40,6 +40,11 @@ module.exports = (sequelize) => {
         min: 1,
       },
     },
+
+    esporadico: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
   });
 
   supProduct.associate = (models) => {

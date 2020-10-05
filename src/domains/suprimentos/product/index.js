@@ -25,6 +25,7 @@ module.exports = class SupProductDomain {
       unit: false,
       manufacturerId: false,
       minimumQuantity: false,
+      esporadico: false,
     };
 
     const message = {
@@ -32,7 +33,14 @@ module.exports = class SupProductDomain {
       unit: "",
       manufacturerId: "",
       minimumQuantity: "",
+      esporadico: false,
     };
+
+    if (notHasProp("esporadico")) {
+      errors = true;
+      field.esporadico = true;
+      message.esporadico = "esporadico cannot undefined";
+    }
 
     if (notHasProp("name") || !supProduct.name) {
       errors = true;
@@ -112,6 +120,7 @@ module.exports = class SupProductDomain {
           minimumQuantity: {
             [operators.gt]: { [operators.col]: "supProduct.amount" },
           },
+          esporadico: false,
         }
       : getWhere("supProduct");
 
