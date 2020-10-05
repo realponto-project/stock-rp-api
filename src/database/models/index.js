@@ -27,6 +27,9 @@ const technician = require("./estoque/technician");
 const productBase = require("./estoque/stockBase/productBase");
 const statusExpedition = require("./estoque/reserve/statusExpedition");
 const emprestimo = require("./estoque/emprestimo");
+const reservaInterno = require("./estoque/reserve/reservaInterno");
+const reservaInternoParts = require("./estoque/reserve/reservaInternoParts");
+const technicianReserve = require("./estoque/reserve/technicianReserve");
 
 const supEntrance = require("./estoque/suprimentos/supEntrance");
 const supProduct = require("./estoque/suprimentos/supProduct");
@@ -72,4 +75,8 @@ module.exports = [
   supProvider,
   supOut,
   supContact,
+
+  reservaInterno,
+  reservaInternoParts,
+  technicianReserve,
 ];

@@ -1,10 +1,28 @@
 const router = require("express").Router({ mergeParams: true });
 const reserveController = require("../../../controllers/estoque/reserve");
 
+router.post("/RInterno", reserveController.createReservaInterno);
+router.get("/RInterno", reserveController.getAllReservaInterno);
+router.post("/reservaTecnico", reserveController.createReservaTecnico);
+router.get("/reservaTecnico", reserveController.getAllReservaTecnico);
+router.put(
+  "/reservaTecnico/associarEquipParaOsPart",
+  reserveController.associarEquipParaOsPart
+);
+router.get(
+  "/reservaTecnico/return",
+  reserveController.getAllReservaTecnicoForReturn
+);
 router.post("/OS", reserveController.addOs);
 router.put("/OS", reserveController.updateOs);
 router.delete("/OS", reserveController.deleteOs);
 router.get("/OS", reserveController.getAllOs);
+router.get("/getAllOsPartsByParams", reserveController.getAllOsPartsByParams);
+router.get("/getAllOsParts", reserveController.getAllOsParts);
+router.get(
+  "/getAllOsPartsByParams/return",
+  reserveController.getAllOsPartsByParamsForReturn
+);
 router.get("/getOsByOs", reserveController.getOsByOs);
 router.put("/output", reserveController.output);
 router.post("/kit", reserveController.addKit);

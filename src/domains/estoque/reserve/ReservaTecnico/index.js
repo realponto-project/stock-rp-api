@@ -1,0 +1,398 @@
+const R = require("ramda");
+const moment = require("moment");
+const Sequelize = require("sequelize");
+const database = require("../../../../database");
+const Technician = database.model("technician");
+const Product = database.model("product");
+const TechnicianReserve = database.model("technicianReserve");
+const Equip = database.model("equip");
+const OsParts = database.model("osParts");
+const Os = database.model("os");
+const { FieldValidationError } = require("../../../../helpers/errors");
+const formatQuery = require("../../../../helpers/lazyLoad");
+
+const { Op } = Sequelize;
+
+class ReservaTecnicoDomain {
+  async create(body, options = {}) {
+    const { transaction = null } = options;
+
+    const reservaTecnicoNotHasProp = (prop) => R.not(R.has(prop, body));
+
+    const field = {
+      technician: false,
+    };
+
+    const message = {
+      technician: "",
+    };
+
+    let errors = false;
+
+    let technicianId = "";
+
+    if (reservaTecnicoNotHasProp("data") || !body.data) {
+      field.data = true;
+      message.data = "data cannot null";
+      errors = true;
+    }
+
+    if (reservaTecnicoNotHasProp("technician") || !body.technician) {
+      field.technician = true;
+      message.technician = "technician cannot null";
+      errors = true;
+    } else {
+      const tecnico = await Technician.findOne({
+        where: { name: body.technician },
+        transaction,
+      });
+
+      if (!tecnico) {
+        field.technician = true;
+        message.technician = "técnico inválido";
+        errors = true;
+      } else {
+        technicianId = tecnico.id;
+      }
+    }
+
+    if (reservaTecnicoNotHasProp("rows") || !body.rows) {
+      field.rows = true;
+      message.rows = "rows cannot null";
+      errors = true;
+    }
+
+    if (errors) {
+      throw new FieldValidationError([{ field, message }]);
+    }
+
+    const { rows } = body;
+
+    await Promise.all(
+      rows.map(async (row) => {
+        const rowNotHasProp = (prop) => R.not(R.has(prop, row));
+
+        let productId = "";
+
+        if (rowNotHasProp("produto") || !row.produto) {
+          throw new FieldValidationError([{ field, message }]);
+        } else {
+          const produto = await Product.findOne({
+            where: {
+              name: row.produto,
+            },
+            transaction,
+          });
+
+          if (produto) {
+            productId = produto.id;
+          } else {
+            throw new FieldValidationError([{ field, message }]);
+          }
+        }
+
+        if (rowNotHasProp("amount") || !row.amount) {
+          throw new FieldValidationError([{ field, message }]);
+        }
+
+        if (rowNotHasProp("serial")) {
+          throw new FieldValidationError([{ field, message }]);
+        }
+
+        const technicianReserve = await TechnicianReserve.findOne({
+          where: {
+            productId,
+            technicianId,
+            createdAt: {
+              [Op.gte]: moment(body.data).startOf("day").toString(),
+              [Op.lte]: moment(body.data).endOf("day").toString(),
+            },
+          },
+          transaction,
+        });
+
+        console.log(JSON.parse(JSON.stringify(technicianReserve)));
+        console.log(row);
+
+        let technicianReserveId = null;
+
+        if (technicianReserve) {
+          technicianReserveId = technicianReserve.id;
+
+          await technicianReserve.update(
+            { amount: row.amount, amountAux: row.amount },
+            { transaction }
+          );
+        } else {
+          const technicianReserveCreated = await TechnicianReserve.create(
+            {
+              productId,
+              technicianId,
+              data: body.data,
+              amount: row.amount,
+              amountAux: row.amount,
+            },
+            { transaction }
+          );
+
+          technicianReserveId = technicianReserveCreated.id;
+        }
+
+        if (row.serial) {
+          if (rowNotHasProp("serialNumbers") || !row.serialNumbers) {
+            throw new FieldValidationError([{ field, message }]);
+          }
+
+          await Promise.all(
+            row.serialNumbers.map(async (item) => {
+              const { serialNumber } = item;
+
+              const equip = await Equip.findOne({
+                where: {
+                  serialNumber,
+                },
+                transaction,
+              });
+
+              if (!equip) {
+                throw new FieldValidationError([{ field, message }]);
+              }
+
+              await equip.update(
+                { technicianReserveId, reserved: true },
+                {
+                  transaction,
+                }
+              );
+            })
+          );
+        }
+      })
+    );
+    return;
+  }
+
+  async getAll(options = {}) {
+    const { query = null, transaction = null } = options;
+
+    const newQuery = Object.assign({}, query);
+    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
+
+    const technicianReserve = await TechnicianReserve.findAll({
+      where: getWhere("technicianReserve"),
+      include: [
+        { model: Technician, where: getWhere("technician") },
+        {
+          model: Product,
+        },
+      ],
+      transaction,
+    });
+
+    // console.log(JSON.parse(JSON.stringify(technicianReserve)));
+
+    const formatted = R.map(async (item) => {
+      const equips = await Equip.findAll({
+        where: {
+          technicianReserveId: item.id,
+        },
+        transaction,
+      });
+
+      return {
+        id: item.product.id,
+        amount: item.amount,
+        os: "-",
+        tecnico: item.technician.name,
+        produto: item.product.name,
+        serial: item.product.serial,
+        serialNumber:
+          item.product.category === "equipamento" && item.product.serial
+            ? equips[0].serialNumber
+            : undefined,
+        serialNumbers: equips.map((equip) => {
+          return {
+            serialNumber: equip.serialNumber,
+          };
+        }),
+      };
+    });
+
+    return await Promise.all(formatted(technicianReserve));
+  }
+
+  async getAllForReturn(options = {}) {
+    const { query = null, transaction = null } = options;
+
+    const newQuery = Object.assign({}, query);
+    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
+
+    console.log(getWhere("technician"));
+
+    const technicianReserve = await TechnicianReserve.findAll({
+      where: getWhere("technicianReserve"),
+      include: [
+        { model: Technician, where: getWhere("technician") },
+        {
+          model: Product,
+        },
+      ],
+      transaction,
+    });
+
+    let rows = [];
+
+    console.log(JSON.parse(JSON.stringify(technicianReserve)));
+
+    const formatted = R.map(async (item) => {
+      const equips = await Equip.findAll({
+        include: [{ model: OsParts, include: [{ model: Os }] }],
+        where: {
+          technicianReserveId: item.id,
+        },
+        transaction,
+      });
+
+      console.log(JSON.parse(JSON.stringify(equips)));
+      console.log("sd as hdblsaçdsjlçad sabkjdças lk");
+      console.log(item.amountAux);
+
+      if (item.product.serial) {
+        equips.map((equip) => {
+          rows.push({
+            technicianReserveId: item.id,
+            createdAt: item.createdAt,
+            id: item.product.id,
+            amount: 1,
+            os: equip.osPartId ? equip.osPart.o.os : "-",
+            tecnico: item.technician.name,
+            produto: item.product.name,
+            serial: item.product.serial,
+            serialNumber: equip.serialNumber,
+            osPartsId: equip.osPartId,
+          });
+        });
+        return { id: null };
+      }
+
+      return {
+        createdAt: item.createdAt,
+        id: item.product.id,
+        amount: item.amountAux,
+        os: "-",
+        tecnico: item.technician.name,
+        produto: item.product.name,
+        serial: item.product.serial,
+        serialNumber:
+          item.product.category === "equipamento" && item.product.serial
+            ? equips[0].serialNumber
+            : undefined,
+        serialNumbers: equips.map((equip) => {
+          return {
+            serialNumber: equip.serialNumber,
+          };
+        }),
+      };
+    });
+
+    return [
+      ...(await Promise.all(formatted(technicianReserve))),
+      ...rows,
+    ].filter((item) => item.id);
+  }
+
+  async associarEquipParaOsPart(body, options = {}) {
+    const { transaction = null } = options;
+
+    const bodyNotHasProp = (prop) => R.not(R.has(prop, body));
+
+    if (bodyNotHasProp("tecnico") || !body.tecnico) {
+      throw new FieldValidationError([
+        { field: { tecnico: true }, message: "tecnico cannot null" },
+      ]);
+    } else if (
+      !(await Technician.findOne({
+        where: { name: body.tecnico },
+        transaction,
+      }))
+    ) {
+      throw new FieldValidationError([
+        {
+          field: { tecnico: true },
+          message: "tecnico invalid",
+        },
+      ]);
+    }
+
+    if (bodyNotHasProp("serialNumber") || !body.serialNumber) {
+      throw new FieldValidationError([
+        { field: { serialNumber: true }, message: "serialNumber cannot null" },
+      ]);
+    } else if (
+      !(await Equip.findOne({
+        where: { serialNumber: body.serialNumber },
+        transaction,
+      }))
+    ) {
+      throw new FieldValidationError([
+        {
+          field: { serialNumber: true },
+          message: "serialNumber invalid",
+        },
+      ]);
+    }
+
+    if (bodyNotHasProp("technicianReserveId") || !body.technicianReserveId) {
+      throw new FieldValidationError([
+        {
+          field: { technicianReserveId: true },
+          message: "technicianReserveId cannot null",
+        },
+      ]);
+    } else if (
+      !(await TechnicianReserve.findByPk(body.technicianReserveId, {
+        transaction,
+      }))
+    ) {
+      throw new FieldValidationError([
+        {
+          field: { technicianReserveId: true },
+          message: "technicianReserveId invalid",
+        },
+      ]);
+    }
+
+    if (bodyNotHasProp("oId") || !body.oId) {
+      throw new FieldValidationError([
+        { field: { oId: true }, message: "oId cannot null" },
+      ]);
+    } else if (
+      !(await Os.findByPk(body.oId, {
+        transaction,
+      }))
+    ) {
+      throw new FieldValidationError([
+        {
+          field: { technicianReserveId: true },
+          message: "technicianReserveId invalid",
+        },
+      ]);
+    }
+
+    const equip = await Equip.findOne({
+      where: { serialNumber: body.serialNumber },
+      transaction,
+    });
+
+    const osPart = await OsParts.findOne({
+      where: { productBaseId: equip.productBaseId, oId: body.oId },
+      transaction,
+    });
+    console.log(body);
+    console.log(JSON.parse(JSON.stringify(osPart)));
+
+    await equip.update({ osPartId: osPart.id }, { transaction });
+  }
+}
+
+module.exports = new ReservaTecnicoDomain();

@@ -107,6 +107,8 @@ module.exports = (sequelize) => {
     });
     equip.belongsTo(models.osParts);
     equip.belongsTo(models.freeMarketParts);
+    equip.belongsTo(models.reservaInternoParts);
+    equip.belongsTo(models.technicianReserve);
     // equip.hasMany(models.emprestimo);
   };
 

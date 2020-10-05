@@ -1,10 +1,12 @@
 const R = require("ramda");
 
+const ReservaTecnicoDomain = require("../../../domains/estoque/reserve/ReservaTecnico");
 const OsDomain = require("../../../domains/estoque/reserve/os");
 const KitDomain = require("../../../domains/estoque/reserve/kit");
 const KitOutDomain = require("../../../domains/estoque/reserve/kit/kitOut");
 const FreeMarketDomain = require("../../../domains/estoque/reserve/freeMarket");
 const StatusExpeditionDomain = require("../../../domains/estoque/reserve/os/statusExpedition");
+const ReservaInternoDomain = require("../../../domains/estoque/reserve/interno");
 const database = require("../../../database");
 
 const osDomain = new OsDomain();
@@ -12,6 +14,124 @@ const kitDomain = new KitDomain();
 const kitOutDomain = new KitOutDomain();
 const freeMarketDomain = new FreeMarketDomain();
 const statusExpeditionDomain = new StatusExpeditionDomain();
+const reservaInternoDomain = new ReservaInternoDomain();
+
+const createReservaInterno = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    const reservaInterno = await reservaInternoDomain.add(req.body, {
+      transaction,
+    });
+
+    await transaction.commit();
+    res.json(reservaInterno);
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
+};
+
+const associarEquipParaOsPart = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    const reservaTecnico = await ReservaTecnicoDomain.associarEquipParaOsPart(
+      req.body,
+      {
+        transaction,
+      }
+    );
+
+    await transaction.commit();
+    res.json(reservaTecnico);
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
+};
+
+const createReservaTecnico = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    const reservaTecnico = await ReservaTecnicoDomain.create(req.body, {
+      transaction,
+    });
+
+    await transaction.commit();
+    res.json(reservaTecnico);
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
+};
+
+const getAllReservaTecnico = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    let query;
+    if (R.has("query", req)) {
+      if (R.has("query", req.query)) {
+        query = JSON.parse(req.query.query);
+      }
+    }
+
+    const reservaTecnicos = await ReservaTecnicoDomain.getAll({
+      query,
+      transaction,
+    });
+
+    await transaction.commit();
+    res.json(reservaTecnicos);
+  } catch (error) {
+    await transaction.rollback();
+    next();
+  }
+};
+
+const getAllReservaInterno = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    let query;
+    if (R.has("query", req)) {
+      if (R.has("query", req.query)) {
+        query = JSON.parse(req.query.query);
+      }
+    }
+
+    const reservaInternos = await reservaInternoDomain.getAll({
+      query,
+      transaction,
+    });
+
+    await transaction.commit();
+    res.json(reservaInternos);
+  } catch (error) {
+    await transaction.rollback();
+    next();
+  }
+};
+
+const getAllReservaTecnicoForReturn = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    let query;
+    if (R.has("query", req)) {
+      if (R.has("query", req.query)) {
+        query = JSON.parse(req.query.query);
+      }
+    }
+
+    const reservaTecnicos = await ReservaTecnicoDomain.getAllForReturn({
+      query,
+      transaction,
+    });
+
+    await transaction.commit();
+    res.json(reservaTecnicos);
+  } catch (error) {
+    await transaction.rollback();
+    next();
+  }
+};
 
 const addOs = async (req, res, next) => {
   const transaction = await database.transaction();
@@ -207,6 +327,73 @@ const getAllOs = async (req, res, next) => {
   }
 };
 
+const getAllOsPartsByParams = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    let query;
+    if (R.has("query", req)) {
+      if (R.has("query", req.query)) {
+        query = JSON.parse(req.query.query);
+      }
+    }
+
+    const osParts = await osDomain.getAllOsPartsByParams({
+      query,
+      transaction,
+    });
+
+    await transaction.commit();
+    res.json(osParts);
+  } catch (error) {
+    await transaction.rollback();
+    next();
+  }
+};
+const getAllOsParts = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    let query;
+    if (R.has("query", req)) {
+      if (R.has("query", req.query)) {
+        query = JSON.parse(req.query.query);
+      }
+    }
+
+    const osParts = await osDomain.getAllOsParts({
+      query,
+      transaction,
+    });
+
+    await transaction.commit();
+    res.json(osParts);
+  } catch (error) {
+    await transaction.rollback();
+    next();
+  }
+};
+const getAllOsPartsByParamsForReturn = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    let query;
+    if (R.has("query", req)) {
+      if (R.has("query", req.query)) {
+        query = JSON.parse(req.query.query);
+      }
+    }
+
+    const osParts = await osDomain.getAllOsPartsByParamsForReturn({
+      query,
+      transaction,
+    });
+
+    await transaction.commit();
+    res.json(osParts);
+  } catch (error) {
+    await transaction.rollback();
+    next();
+  }
+};
+
 const getOsByOs = async (req, res, next) => {
   const transaction = await database.transaction();
   try {
@@ -288,6 +475,12 @@ const getAllStatusExpedition = async (req, res, next) => {
 };
 
 module.exports = {
+  createReservaInterno,
+  getAllReservaTecnico,
+  getAllReservaTecnicoForReturn,
+  getAllReservaInterno,
+  createReservaTecnico,
+  associarEquipParaOsPart,
   addOs,
   output,
   updateOs,
@@ -300,6 +493,9 @@ module.exports = {
   addFreeMarket,
   getAllFreeMarket,
   getAllOs,
+  getAllOsPartsByParams,
+  getAllOsParts,
+  getAllOsPartsByParamsForReturn,
   getOsByOs,
   addStatusExpedition,
   updateStatusExpedition,
