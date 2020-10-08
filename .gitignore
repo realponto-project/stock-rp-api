@@ -9,3 +9,7 @@ backup
 MAPA ESTOQUE*
 
 xlxs.js
+
+dump_*
+
+/src/fixDb.js

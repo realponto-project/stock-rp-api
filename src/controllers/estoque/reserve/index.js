@@ -48,6 +48,23 @@ const associarEquipParaOsPart = async (req, res, next) => {
     next(error);
   }
 };
+const associarEquipsParaOsPart = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    const reservaTecnico = await ReservaTecnicoDomain.associarEquipsParaOsPart(
+      req.body,
+      {
+        transaction,
+      }
+    );
+
+    await transaction.commit();
+    res.json(reservaTecnico);
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
+};
 
 const createReservaTecnico = async (req, res, next) => {
   const transaction = await database.transaction();
@@ -481,6 +498,7 @@ module.exports = {
   getAllReservaInterno,
   createReservaTecnico,
   associarEquipParaOsPart,
+  associarEquipsParaOsPart,
   addOs,
   output,
   updateOs,

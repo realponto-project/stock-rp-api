@@ -43,7 +43,7 @@ module.exports = (sequelize) => {
 
     esporadico: {
       type: Sequelize.BOOLEAN,
-      allowNull: false,
+      defaultValue: false,
     },
   });
 

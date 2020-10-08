@@ -9,6 +9,10 @@ router.put(
   "/reservaTecnico/associarEquipParaOsPart",
   reserveController.associarEquipParaOsPart
 );
+router.put(
+  "/reservaTecnico/associarEquipsParaOsPart",
+  reserveController.associarEquipsParaOsPart
+);
 router.get(
   "/reservaTecnico/return",
   reserveController.getAllReservaTecnicoForReturn

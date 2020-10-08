@@ -9,6 +9,10 @@ const Equip = database.model("equip");
 const OsParts = database.model("osParts");
 const Os = database.model("os");
 const { FieldValidationError } = require("../../../../helpers/errors");
+
+const OsDomain = require("../os");
+
+const osDomain = new OsDomain();
 const formatQuery = require("../../../../helpers/lazyLoad");
 
 const { Op } = Sequelize;
@@ -111,9 +115,6 @@ class ReservaTecnicoDomain {
           transaction,
         });
 
-        console.log(JSON.parse(JSON.stringify(technicianReserve)));
-        console.log(row);
-
         let technicianReserveId = null;
 
         if (technicianReserve) {
@@ -139,36 +140,39 @@ class ReservaTecnicoDomain {
         }
 
         if (row.serial) {
-          if (rowNotHasProp("serialNumbers") || !row.serialNumbers) {
-            throw new FieldValidationError([{ field, message }]);
-          }
+          if (!rowNotHasProp("serialNumbers")) {
+            if (row.serialNumbers) {
+              await Promise.all(
+                row.serialNumbers.map(async (item) => {
+                  const { serialNumber } = item;
 
-          await Promise.all(
-            row.serialNumbers.map(async (item) => {
-              const { serialNumber } = item;
+                  const equip = await Equip.findOne({
+                    where: {
+                      serialNumber,
+                    },
+                    transaction,
+                  });
 
-              const equip = await Equip.findOne({
-                where: {
-                  serialNumber,
-                },
-                transaction,
-              });
+                  if (!equip) {
+                    throw new FieldValidationError([{ field, message }]);
+                  }
 
-              if (!equip) {
-                throw new FieldValidationError([{ field, message }]);
-              }
-
-              await equip.update(
-                { technicianReserveId, reserved: true },
-                {
-                  transaction,
-                }
+                  await equip.update(
+                    { technicianReserveId, reserved: true },
+                    {
+                      transaction,
+                    }
+                  );
+                })
               );
-            })
-          );
+            } else {
+              throw new FieldValidationError([{ field, message }]);
+            }
+          }
         }
       })
     );
+    // throw new FieldValidationError([{ field, message }]);
     return;
   }
 
@@ -180,6 +184,7 @@ class ReservaTecnicoDomain {
 
     const technicianReserve = await TechnicianReserve.findAll({
       where: getWhere("technicianReserve"),
+      // paranoid: false,
       include: [
         { model: Technician, where: getWhere("technician") },
         {
@@ -189,15 +194,18 @@ class ReservaTecnicoDomain {
       transaction,
     });
 
-    // console.log(JSON.parse(JSON.stringify(technicianReserve)));
-
     const formatted = R.map(async (item) => {
+      // console.log(JSON.parse(JSON.stringify(item)));
       const equips = await Equip.findAll({
         where: {
           technicianReserveId: item.id,
         },
+        paranoid: false,
         transaction,
       });
+
+      if (item.product.category === "equipamento" && item.product.serial) {
+      }
 
       return {
         id: item.product.id,
@@ -207,7 +215,9 @@ class ReservaTecnicoDomain {
         produto: item.product.name,
         serial: item.product.serial,
         serialNumber:
-          item.product.category === "equipamento" && item.product.serial
+          item.product.category === "equipamento" &&
+          item.product.serial &&
+          equips.length > 0
             ? equips[0].serialNumber
             : undefined,
         serialNumbers: equips.map((equip) => {
@@ -227,8 +237,6 @@ class ReservaTecnicoDomain {
     const newQuery = Object.assign({}, query);
     const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
 
-    console.log(getWhere("technician"));
-
     const technicianReserve = await TechnicianReserve.findAll({
       where: getWhere("technicianReserve"),
       include: [
@@ -242,24 +250,33 @@ class ReservaTecnicoDomain {
 
     let rows = [];
 
-    console.log(JSON.parse(JSON.stringify(technicianReserve)));
-
     const formatted = R.map(async (item) => {
       const equips = await Equip.findAll({
-        include: [{ model: OsParts, include: [{ model: Os }] }],
-        where: {
-          technicianReserveId: item.id,
+        include: [
+          {
+            model: OsParts,
+            include: [{ model: Os, paranoid: false }],
+            paranoid: false,
+          },
+        ],
+        through: {
+          paranoid: false,
         },
+        where:
+          newQuery.osPartsId === undefined
+            ? {
+                technicianReserveId: item.id,
+              }
+            : {
+                technicianReserveId: item.id,
+                osPartId: null,
+              },
         transaction,
       });
-
-      console.log(JSON.parse(JSON.stringify(equips)));
-      console.log("sd as hdblsaçdsjlçad sabkjdças lk");
-      console.log(item.amountAux);
-
       if (item.product.serial) {
         equips.map((equip) => {
           rows.push({
+            // technicianReserveId: item.technicianReserveId,
             technicianReserveId: item.id,
             createdAt: item.createdAt,
             id: item.product.id,
@@ -269,6 +286,7 @@ class ReservaTecnicoDomain {
             produto: item.product.name,
             serial: item.product.serial,
             serialNumber: equip.serialNumber,
+            serialNumbers: [equip.serialNumber],
             osPartsId: equip.osPartId,
           });
         });
@@ -388,10 +406,73 @@ class ReservaTecnicoDomain {
       where: { productBaseId: equip.productBaseId, oId: body.oId },
       transaction,
     });
-    console.log(body);
-    console.log(JSON.parse(JSON.stringify(osPart)));
 
     await equip.update({ osPartId: osPart.id }, { transaction });
+  }
+
+  async associarEquipsParaOsPart(body, options = {}) {
+    const { transaction = null } = options;
+
+    const bodyNotHasProp = (prop) => R.not(R.has(prop, body));
+
+    if (bodyNotHasProp("technicianId") || !body.technicianId) {
+      throw new FieldValidationError([
+        { field: { technicianId: true }, message: "technicianId cannot null" },
+      ]);
+    } else if (
+      !(await Technician.findByPk(body.technicianId, {
+        transaction,
+      }))
+    ) {
+      throw new FieldValidationError([
+        {
+          field: { technicianId: true },
+          message: "tecnico invalid",
+        },
+      ]);
+    }
+
+    if (bodyNotHasProp("osParts") || !body.osParts) {
+      throw new FieldValidationError([
+        {
+          field: { osParts: true },
+          message: "osParts cannot null",
+        },
+      ]);
+    }
+
+    const { osParts } = body;
+    await Promise.all(
+      osParts.map(async (osPart) => {
+        const { serial, osPartId } = osPart;
+
+        if (serial) {
+          const { serialNumersSelects } = osPart;
+
+          await Promise.all(
+            serialNumersSelects.map(async (serialNumber) => {
+              const equip = await Equip.findOne({
+                where: { serialNumber },
+                transaction,
+              });
+
+              await equip.update({ osPartId }, { transaction });
+            })
+          );
+        } else {
+          await osDomain.output(
+            {
+              osPartsId: osPart.osPartId,
+              add: {
+                output: osPart.quantidadeSaida,
+              },
+              serialNumberArray: null,
+            },
+            { transaction }
+          );
+        }
+      })
+    );
   }
 }
 

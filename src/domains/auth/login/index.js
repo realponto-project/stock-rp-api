@@ -62,23 +62,24 @@ class LoginDomain {
         },
       ]);
     }
+    // console.log(JSON.parse(JSON.stringify(login)));
 
     const session = await sessionDomain.createSession(login.id, {
       transaction,
     });
 
-    console.log(JSON.parse(JSON.stringify(session)));
+    // console.log(JSON.parse(JSON.stringify(session)));
 
     if (login.user.tecnico) {
       return {
-        token: session[0].id,
+        token: session.id,
         userId: login.user.id,
         technicianId: login.user.technicianId,
         username: login.user.username,
         tecnico: login.user.tecnico,
         modulo: login.user.modulo,
         typeAccount: null,
-        active: session[0].active,
+        active: session.active,
       };
     }
 
@@ -195,13 +196,13 @@ class LoginDomain {
 
     const response = {
       ...resource,
-      token: session[0].id,
+      token: session.id,
       userId: user.id,
       username: user.username,
       tecnico: login.user.tecnico,
       modulo: user.modulo,
       typeAccount: user.typeAccount.typeName,
-      active: session[0].active,
+      active: session.active,
     };
 
     return response;

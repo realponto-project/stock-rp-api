@@ -7,7 +7,7 @@ module.exports = {
           "esporadico",
           {
             type: Sequelize.BOOLEAN,
-            allowNull: false,
+            defaultValue: false,
           },
           { transaction: t }
         ),

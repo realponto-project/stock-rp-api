@@ -186,6 +186,7 @@ module.exports = class SupProductDomain {
       unit: false,
       manufacturerId: false,
       minimumQuantity: false,
+      esporadico: false,
     };
 
     const message = {
@@ -193,7 +194,14 @@ module.exports = class SupProductDomain {
       unit: "",
       manufacturerId: "",
       minimumQuantity: "",
+      esporadico: "",
     };
+
+    if (notHasProp("esporadico")) {
+      errors = true;
+      field.esporadico = true;
+      message.esporadico = "esporadico cannot undefined";
+    }
 
     if (notHasProp("name") || !supProduct.name) {
       errors = true;
