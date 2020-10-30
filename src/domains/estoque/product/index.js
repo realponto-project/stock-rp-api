@@ -566,7 +566,7 @@ module.exports = class ProductDomain {
       include: [
         {
           model: StockBase,
-          // where: getWhere("stockBase"),
+          where: getWhere("stockBase"),
           required: !!newQuery.stockBaseId,
         },
         {

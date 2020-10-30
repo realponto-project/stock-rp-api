@@ -66,6 +66,22 @@ const associarEquipsParaOsPart = async (req, res, next) => {
   }
 };
 
+const finalizarCheckout = async (req, res, next) => {
+  const transaction = await database.transaction();
+
+  try {
+    for (i = 0; i < req.body.length; i++) {
+      await osDomain.finalizarCheckout(req.body[i], { transaction });
+    }
+
+    await transaction.commit();
+    res.json({ message: "sucess" });
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
+};
+
 const createReservaTecnico = async (req, res, next) => {
   const transaction = await database.transaction();
   try {
@@ -189,10 +205,36 @@ const output = async (req, res, next) => {
   }
 };
 
+const returnOutput = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    const Os = await osDomain.returnOutput(req.body, { transaction });
+
+    await transaction.commit();
+    res.json(Os);
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
+};
+
 const deleteOs = async (req, res, next) => {
   const transaction = await database.transaction();
   try {
     const Os = await osDomain.delete(req.query.osId, { transaction });
+
+    await transaction.commit();
+    res.json(Os);
+  } catch (error) {
+    await transaction.rollback();
+    next(error);
+  }
+};
+
+const deleteOsPart = async (req, res, next) => {
+  const transaction = await database.transaction();
+  try {
+    const Os = await osDomain.deleteOsPart(req.query, { transaction });
 
     await transaction.commit();
     res.json(Os);
@@ -499,10 +541,15 @@ module.exports = {
   createReservaTecnico,
   associarEquipParaOsPart,
   associarEquipsParaOsPart,
+
+  finalizarCheckout,
+
   addOs,
   output,
+  returnOutput,
   updateOs,
   deleteOs,
+  deleteOsPart,
   addKit,
   getAllKit,
   getKitDefaultValue,

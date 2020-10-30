@@ -20,7 +20,9 @@ router.get(
 router.post("/OS", reserveController.addOs);
 router.put("/OS", reserveController.updateOs);
 router.delete("/OS", reserveController.deleteOs);
+router.delete("/OsPart", reserveController.deleteOsPart);
 router.get("/OS", reserveController.getAllOs);
+router.put("/OS/finalizarCheckout", reserveController.finalizarCheckout);
 router.get("/getAllOsPartsByParams", reserveController.getAllOsPartsByParams);
 router.get("/getAllOsParts", reserveController.getAllOsParts);
 router.get(
@@ -29,6 +31,7 @@ router.get(
 );
 router.get("/getOsByOs", reserveController.getOsByOs);
 router.put("/output", reserveController.output);
+router.put("/returnOutput", reserveController.returnOutput);
 router.post("/kit", reserveController.addKit);
 router.get("/kit", reserveController.getAllKit);
 router.get("/kitDefaultValue", reserveController.getKitDefaultValue);

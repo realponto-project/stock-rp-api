@@ -97,6 +97,12 @@ module.exports = (sequelize) => {
       type: Sequelize.BOOLEAN,
       defaultValue: false,
     },
+
+    prevAction: {
+      type: Sequelize.STRING,
+      allowNull: true,
+      defaultValue: null,
+    },
   });
 
   equip.associate = (models) => {

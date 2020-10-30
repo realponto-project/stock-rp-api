@@ -89,7 +89,6 @@ class SessionDomain {
     if (!login.id) {
       return false;
     }
-    console.log(JSON.parse(JSON.stringify(login)));
 
     const session = await Session.findOne({
       where: {
@@ -104,7 +103,6 @@ class SessionDomain {
       },
       transaction,
     });
-    console.log(JSON.parse(JSON.stringify(session)));
 
     if (!session) {
       const sessions = await Session.findAll({

@@ -18,7 +18,7 @@ module.exports = (sequelize) => {
       allowNull: false,
     },
 
-    data: { defaultValue: Sequelize.NOW, type: Sequelize.DATE },
+    data: { allowNull: true, type: Sequelize.DATE },
   });
 
   technicianReserve.associate = (models) => {

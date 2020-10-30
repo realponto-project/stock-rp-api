@@ -44,6 +44,16 @@ module.exports = {
           },
           { transaction: t }
         ),
+        queryInterface.addColumn(
+          "equip",
+          "prevAction",
+          {
+            type: Sequelize.STRING,
+            allowNull: true,
+            defaultValue: null,
+          },
+          { transaction: t }
+        ),
       ]);
     });
   },
@@ -58,6 +68,9 @@ module.exports = {
           transaction: t,
         }),
         queryInterface.removeColumn("user", "technicianId", {
+          transaction: t,
+        }),
+        queryInterface.removeColumn("equip", "prevAction", {
           transaction: t,
         }),
       ]);

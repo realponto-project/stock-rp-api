@@ -121,7 +121,7 @@ module.exports = class TechnicianDomain {
       });
 
       const user = formatBody({
-        username: technicianCreated.name.replace(/\W/gi, ""),
+        username: technicianCreated.name.replace(/\W/gi, "."),
       });
 
       const password = R.prop("username", user);
