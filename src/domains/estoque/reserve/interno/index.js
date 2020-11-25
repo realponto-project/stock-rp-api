@@ -1,25 +1,28 @@
 /* eslint-disable max-len */
-const R = require('ramda')
-const moment = require('moment')
+const R = require("ramda")
+const moment = require("moment")
 
-const formatQuery = require('../../../../helpers/lazyLoad')
-const database = require('../../../../database')
+const formatQuery = require("../../../../helpers/lazyLoad")
+const database = require("../../../../database")
 
-const { FieldValidationError } = require('../../../../helpers/errors')
+const { FieldValidationError } = require("../../../../helpers/errors")
 
-const Equip = database.model('equip')
-const Product = database.model('product')
-const Technician = database.model('technician')
-const ProductBase = database.model('productBase')
-const StockBase = database.model('stockBase')
-const ReservaInterno = database.model('reservaInterno')
-const ReservaInternoParts = database.model('reservaInternoParts')
+const Equip = database.model("equip")
+const Product = database.model("product")
+const Technician = database.model("technician")
+const ProductBase = database.model("productBase")
+const StockBase = database.model("stockBase")
+const ReservaInterno = database.model("reservaInterno")
+const ReservaInternoParts = database.model("reservaInternoParts")
 
 module.exports = class ReservaInternoDomain {
   async add(bodyData, options = {}) {
     const { transaction = null } = options
 
-    const reserveInterno = R.omit(['id', 'reserveInternoParts'], bodyData)
+    const reserveInterno = R.omit([
+      "id",
+      "reserveInternoParts"
+    ], bodyData)
 
     const reserveInternoNotHasProp = prop => R.not(R.has(prop, reserveInterno))
 
@@ -29,56 +32,54 @@ module.exports = class ReservaInternoDomain {
       razaoSocial: false,
       data: false,
       reserveInternoParts: false,
-      technicianId: false,
+      technicianId: false
     }
 
     const message = {
-      razaoSocial: '',
-      data: '',
-      reserveInternoParts: '',
-      technicianId: '',
+      razaoSocial: "",
+      data: "",
+      reserveInternoParts: "",
+      technicianId: ""
     }
 
     let errors = false
 
     if (
-      reserveInternoNotHasProp('razaoSocial')
+      reserveInternoNotHasProp("razaoSocial")
       || !reserveInterno.razaoSocial
     ) {
       errors = true
       field.razaoSocial = true
-      message.razaoSocial = 'Digite o nome ou razão social.'
+      message.razaoSocial = "Digite o nome ou razão social."
     }
 
-    if (reserveInternoNotHasProp('date') || !reserveInterno.date) {
+    if (reserveInternoNotHasProp("date") || !reserveInterno.date) {
       errors = true
       field.data = true
-      message.data = 'Por favor a data de atendimento.'
+      message.data = "Por favor a data de atendimento."
     }
 
-    if (!bodyHasProp('reserveInternoParts') || !bodyData.reserveInternoParts) {
+    if (!bodyHasProp("reserveInternoParts") || !bodyData.reserveInternoParts) {
       errors = true
       field.reserveInternoParts = true
-      message.reserveInternoParts = 'Deve haver ao menos um peça associada.'
+      message.reserveInternoParts = "Deve haver ao menos um peça associada."
     }
 
     if (
-      reserveInternoNotHasProp('technicianId')
+      reserveInternoNotHasProp("technicianId")
       || !reserveInterno.technicianId
     ) {
       errors = true
       field.technician = true
-      message.technician = 'Por favor o ID do tecnico'
+      message.technician = "Por favor o ID do tecnico"
     } else {
       const { technicianId } = bodyData
-      const technicianExist = await Technician.findByPk(technicianId, {
-        transaction,
-      })
+      const technicianExist = await Technician.findByPk(technicianId, { transaction })
 
       if (!technicianExist) {
         errors = true
         field.technician = true
-        message.technician = 'Técnico não encomtrado'
+        message.technician = "Técnico não encomtrado"
       }
     }
 
@@ -86,46 +87,40 @@ module.exports = class ReservaInternoDomain {
       throw new FieldValidationError([{ field, message }])
     }
 
-    const reservaInternoCreated = await ReservaInterno.create(reserveInterno, {
-      transaction,
-    })
+    const reservaInternoCreated = await ReservaInterno.create(reserveInterno, { transaction })
 
     const { reserveInternoParts } = bodyData
 
     const reserveInternoPartsCreatedPromises = reserveInternoParts.map(
       async (item) => {
-        const product = await Product.findByPk(item.productId, {
-          transaction,
-        })
+        const product = await Product.findByPk(item.productId, { transaction })
 
         const productBase = await ProductBase.findOne({
           where: { productId: item.productId },
           include: [{ model: StockBase, required: true }],
-          transaction,
+          transaction
         })
 
         if (!product) {
           field.peca = true
-          message.peca = 'produto foi encontrado'
+          message.peca = "produto foi encontrado"
           throw new FieldValidationError([{ field, message }])
         }
 
         if (!productBase) {
           field.productBase = true
-          message.productBase = 'este produto não const na base de estoque'
+          message.productBase = "este produto não const na base de estoque"
           throw new FieldValidationError([{ field, message }])
         }
 
         const reserveInternoPartsForCreate = {
           ...item,
-          reservaInternoId: reservaInternoCreated.id,
+          reservaInternoId: reservaInternoCreated.id
         }
 
         const reserveInternoPartsCreated = await ReservaInternoParts.create(
           reserveInternoPartsForCreate,
-          {
-            transaction,
-          },
+          { transaction }
         )
 
         if (product.serial) {
@@ -134,7 +129,7 @@ module.exports = class ReservaInternoDomain {
           if (serialNumberArray.length !== parseInt(item.amount, 10)) {
             errors = true
             field.serialNumbers = true
-            message.serialNumbers = 'quantidade adicionada nãop condiz com a quantidade de números de série.'
+            message.serialNumbers = "quantidade adicionada nãop condiz com a quantidade de números de série."
           }
 
           if (serialNumberArray.length > 0) {
@@ -143,9 +138,9 @@ module.exports = class ReservaInternoDomain {
                 where: {
                   serialNumber,
                   reserved: false,
-                  productId: product.id,
+                  productId: product.id
                 },
-                transaction,
+                transaction
               })
 
               if (!equip) {
@@ -161,18 +156,18 @@ module.exports = class ReservaInternoDomain {
                 where: {
                   serialNumber,
                   reserved: false,
-                  productId: product.id,
+                  productId: product.id
                 },
-                transaction,
+                transaction
               })
 
               await equip.update(
                 {
                   ...equip,
                   reservaInternoPartsId: reserveInternoPartsCreated.id,
-                  reserved: true,
+                  reserved: true
                 },
-                { transaction },
+                { transaction }
               )
               await equip.destroy({ transaction })
             })
@@ -186,7 +181,7 @@ module.exports = class ReservaInternoDomain {
           ).toString(),
           amount: (
             parseInt(productBase.amount, 10) - parseInt(item.amount, 10)
-          ).toString(),
+          ).toString()
         }
 
         if (
@@ -194,13 +189,13 @@ module.exports = class ReservaInternoDomain {
           || parseInt(productUpdate.available, 10) < 0
         ) {
           field.productUpdate = true
-          message.productUpdate = 'Número negativo não é valido'
+          message.productUpdate = "Número negativo não é valido"
           throw new FieldValidationError([{ field, message }])
         }
 
 
         await productBase.update(productUpdate, { transaction })
-      },
+      }
     )
 
     await Promise.all(reserveInternoPartsCreatedPromises)
@@ -210,12 +205,8 @@ module.exports = class ReservaInternoDomain {
     }
 
     const response = await ReservaInterno.findByPk(reservaInternoCreated.id, {
-      include: [
-        {
-          model: Product,
-        },
-      ],
-      transaction,
+      include: [{ model: Product }],
+      transaction
     })
 
     return response
@@ -223,31 +214,32 @@ module.exports = class ReservaInternoDomain {
 
   async getAll(options = {}) {
     const inicialOrder = {
-      field: 'createdAt',
+      field: "createdAt",
       acendent: true,
-      direction: 'DESC',
+      direction: "DESC"
     }
     const { query = null, transaction = null } = options
     const newQuery = Object.assign({}, query)
-    const {
-      getWhere, limit, offset, pageResponse,
-    } = formatQuery(newQuery)
+    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery)
 
     const reservaInterno = await ReservaInterno.findAndCountAll({
-      where: getWhere('reservaInterno'),
+      where: getWhere("reservaInterno"),
       include: [
         {
           model: Technician,
-          where: getWhere('technician'),
+          where: getWhere("technician")
         },
-        {
-          model: Product,
-        },
+        { model: Product }
       ],
-      order: [[inicialOrder.field, inicialOrder.direction]],
+      order: [
+        [
+          inicialOrder.field,
+          inicialOrder.direction
+        ]
+      ],
       limit,
       offset,
-      transaction,
+      transaction
     })
 
     const { rows, count } = reservaInterno
@@ -257,7 +249,7 @@ module.exports = class ReservaInternoDomain {
         page: null,
         show: 0,
         count,
-        rows: [],
+        rows: []
       }
     }
 
@@ -267,7 +259,7 @@ module.exports = class ReservaInternoDomain {
       const resp = {
         name: item.name,
         serial: item.serial,
-        amount,
+        amount
       }
 
       return resp
@@ -278,11 +270,11 @@ module.exports = class ReservaInternoDomain {
         id: item.id,
         razaoSocial: item.razaoSocial,
         date: item.date,
-        formatedDate: moment(item.date).format('L'),
+        formatedDate: moment(item.date).format("L"),
         technician: item.technician.name,
         technicianId: item.technicianId,
         createdAt: item.createdAt,
-        products: [...(await Promise.all(formatProduct(item.products)))],
+        products: [...(await Promise.all(formatProduct(item.products)))]
       }
       return resp
     })
@@ -293,7 +285,7 @@ module.exports = class ReservaInternoDomain {
       page: pageResponse,
       show: R.min(count, limit),
       count,
-      rows: reservaInternoList,
+      rows: reservaInternoList
     }
     return response
   }

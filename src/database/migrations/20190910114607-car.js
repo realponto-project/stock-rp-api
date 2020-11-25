@@ -1,51 +1,49 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const car = queryInterface.createTable('car', {
+    const car = queryInterface.createTable("car", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
       },
 
       model: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
 
       year: {
         type: Sequelize.STRING,
-        allowNull: true,
+        allowNull: true
       },
 
       plate: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
+        unique: true
       },
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
-      },
+        type: Sequelize.DATE
+      }
     })
 
     car.associate = (models) => {
-      car.belongsToMany(models.technician, {
-        through: 'technicianCar',
-      })
+      car.belongsToMany(models.technician, { through: "technicianCar" })
     }
     return car
   },
 
-  down: queryInterface => queryInterface.dropTable('car'),
+  down: queryInterface => queryInterface.dropTable("car")
 }

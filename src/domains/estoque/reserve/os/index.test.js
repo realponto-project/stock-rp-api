@@ -1,40 +1,40 @@
 // const R = require('ramda')
 
-const OsDomain = require(".");
-const MarkDomain = require("../../product/mark");
-const ProductDomain = require("../../product");
-const EntranceDomain = require("../../entrance");
-const CompanyDomain = require("../../../general/company");
-const CarDomain = require("../../technician/car");
-const TechnicianDomain = require("../../technician");
+const OsDomain = require(".")
+const MarkDomain = require("../../product/mark")
+const ProductDomain = require("../../product")
+const EntranceDomain = require("../../entrance")
+const CompanyDomain = require("../../../general/company")
+const CarDomain = require("../../technician/car")
+const TechnicianDomain = require("../../technician")
 
-const database = require("../../../../database");
-// const { FieldValidationError } = require('../../../helpers/errors')
+const database = require("../../../../database")
 
-const osDomain = new OsDomain();
-const markDomain = new MarkDomain();
-const productDomain = new ProductDomain();
-const entranceDomain = new EntranceDomain();
-const companyDomain = new CompanyDomain();
-const carDomain = new CarDomain();
-const technicianDomain = new TechnicianDomain();
+const osDomain = new OsDomain()
+const markDomain = new MarkDomain()
+const productDomain = new ProductDomain()
+const entranceDomain = new EntranceDomain()
+const companyDomain = new CompanyDomain()
+const carDomain = new CarDomain()
+const technicianDomain = new TechnicianDomain()
 
-const OsParts = database.model("osParts");
-const ProductBase = database.model("productBase");
-const StockBase = database.model("stockBase");
+const OsParts = database.model("osParts")
+const ProductBase = database.model("productBase")
+const StockBase = database.model("stockBase")
 
 describe("reserveOsDomain", () => {
-  let productCreated = null;
-  let technicianCreated = null;
-  let productBase = null;
+  let productCreated = null
+  let technicianCreated = null
+  let productBase = null
 
+  // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     const mark = {
       mark: "DC",
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    await markDomain.add(mark);
+    await markDomain.add(mark)
 
     const productMock = {
       category: "peca",
@@ -44,10 +44,10 @@ describe("reserveOsDomain", () => {
       mark: "DC",
       name: "TAMPA",
       serial: false,
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    productCreated = await productDomain.add(productMock);
+    productCreated = await productDomain.add(productMock)
 
     const companyMock = {
       razaoSocial: "teste saida",
@@ -62,48 +62,47 @@ describe("reserveOsDomain", () => {
       nameContact: "joseildom",
       email: "josealdo@gmasi.com",
       responsibleUser: "modrp",
-      relation: "fornecedor",
-    };
+      relation: "fornecedor"
+    }
 
-    const companyCreated = await companyDomain.add(companyMock);
+    const companyCreated = await companyDomain.add(companyMock)
 
     const entranceMock = {
       amountAdded: "64",
       stockBase: "ESTOQUE",
       productId: productCreated.id,
       companyId: companyCreated.id,
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    await entranceDomain.add(entranceMock);
+    await entranceDomain.add(entranceMock)
 
     const carMock = {
       model: "GOL",
       year: "2007",
-      plate: "RST-1234",
-    };
+      plate: "RST-1234"
+    }
 
-    await carDomain.add(carMock);
+    await carDomain.add(carMock)
 
     const technicianMock = {
       name: "MARCOS BOLADÃO",
       CNH: "01/01/2000",
       plate: "RST-1234",
-      external: false,
-    };
+      external: false
+    }
 
-    technicianCreated = await technicianDomain.add(technicianMock);
+    technicianCreated = await technicianDomain.add(technicianMock)
 
     productBase = await ProductBase.findOne({
-      where: {
-        productId: productCreated.id,
-      },
+      where: { productId: productCreated.id },
       include: [{ model: StockBase, where: { stockBase: "ESTOQUE" } }],
-      transacition: null,
-    });
-  });
+      transacition: null
+    })
+  })
 
-  test("create reserve OS", async () => {
+  it("create reserve OS", async () => {
+    expect.hasAssertions()
     const reserveMock = {
       razaoSocial: "test Company",
       cnpj: "47629199000185",
@@ -113,18 +112,18 @@ describe("reserveOsDomain", () => {
         {
           productBaseId: productBase.id,
           amount: "5",
-          status: "venda",
-        },
-      ],
-    };
-    const reserveCreated = await osDomain.add(reserveMock);
+          status: "venda"
+        }
+      ]
+    }
+    const reserveCreated = await osDomain.add(reserveMock)
 
-    expect(reserveCreated.razaoSocial).toBe(reserveMock.razaoSocial);
-    expect(reserveCreated.cnpj).toBe(reserveMock.cnpj);
-    // expect(reserveCreated.date).toBe(reserveMock.date)
-  });
+    expect(reserveCreated.razaoSocial).toBe(reserveMock.razaoSocial)
+    expect(reserveCreated.cnpj).toBe(reserveMock.cnpj)
+  })
 
-  test("Delete reserve OS", async () => {
+  it("delete reserve OS", async () => {
+    expect.hasAssertions()
     const reserveMock = {
       razaoSocial: "test Company",
       cnpj: "47629199000185",
@@ -134,16 +133,17 @@ describe("reserveOsDomain", () => {
         {
           productBaseId: productBase.id,
           amount: "1",
-          status: "venda",
-        },
-      ],
-    };
-    const reserveCreated = await osDomain.add(reserveMock);
+          status: "venda"
+        }
+      ]
+    }
+    const reserveCreated = await osDomain.add(reserveMock)
 
-    expect(await osDomain.delete(reserveCreated.id)).toBe("sucesso");
-  });
+    expect(await osDomain.delete(reserveCreated.id)).toBe("sucesso")
+  })
 
-  test("Update reserve OS", async () => {
+  it("update reserve OS", async () => {
+    expect.hasAssertions()
     const reserveMock = {
       os: "3146348",
       razaoSocial: "test Company",
@@ -154,37 +154,37 @@ describe("reserveOsDomain", () => {
         {
           productBaseId: productBase.id,
           amount: "4",
-          status: "venda",
-        },
-      ],
-    };
-    const reserveCreated = await osDomain.add(reserveMock);
+          status: "venda"
+        }
+      ]
+    }
+    const reserveCreated = await osDomain.add(reserveMock)
 
     const osParts = await OsParts.findOne({
-      where: {
-        oId: reserveCreated.id,
-      },
-      transacition: null,
-    });
+      where: { oId: reserveCreated.id },
+      transacition: null
+    })
 
     const reserveUpdate = {
       ...JSON.parse(JSON.stringify(reserveCreated)),
       os: "7895465",
-      osParts: [{ id: osParts.id, amount: "6", status: "venda" }],
-    };
+      osParts: [{ id: osParts.id, amount: "6", status: "venda" }]
+    }
 
-    await osDomain.update(reserveUpdate);
+    await osDomain.update(reserveUpdate)
 
     // expect(await osDomain.delete(reserveCreated.id)).toBe('sucesso')
-  });
+  })
 
-  test("getAll", async () => {
-    const osList = await osDomain.getAll();
+  it("getAll", async () => {
+    expect.hasAssertions()
+    const osList = await osDomain.getAll()
 
-    expect(osList.rows.length > 0).toBeTruthy();
-  });
+    expect(osList.rows.length > 0).toBeTruthy()
+  })
 
-  test("getAll", async () => {
+  it("get os by os number", async () => {
+    expect.hasAssertions()
     const reserveMock = {
       razaoSocial: "test Company",
       cnpj: "47629199000185",
@@ -194,19 +194,20 @@ describe("reserveOsDomain", () => {
         {
           productBaseId: productBase.id,
           amount: "3",
-          status: "venda",
-        },
-      ],
-    };
+          status: "venda"
+        }
+      ]
+    }
 
-    await osDomain.add(reserveMock);
+    await osDomain.add(reserveMock)
 
-    const os = await osDomain.getOsByOs(reserveMock.razaoSocial);
+    const os = await osDomain.getOsByOs(reserveMock.razaoSocial)
 
-    expect(os).toBeTruthy();
-  });
+    expect(os).toBeTruthy()
+  })
 
-  test("output", async () => {
+  it("output", async () => {
+    expect.hasAssertions()
     const reserveMock = {
       os: "400253",
       razaoSocial: "test Company",
@@ -217,19 +218,17 @@ describe("reserveOsDomain", () => {
         {
           productBaseId: productBase.id,
           amount: "6",
-          status: "venda",
-        },
-      ],
-    };
-    const reserveCreated = await osDomain.add(reserveMock);
+          status: "venda"
+        }
+      ]
+    }
+    const reserveCreated = await osDomain.add(reserveMock)
 
     const output = {
       osPartsId: reserveCreated.productBases[0].osParts.id,
-      add: {
-        output: "2",
-      },
-    };
+      add: { output: "2" }
+    }
 
-    await osDomain.output(output);
-  });
-});
+    await osDomain.output(output)
+  })
+})

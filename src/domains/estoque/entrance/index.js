@@ -1,33 +1,30 @@
-const R = require("ramda");
-const moment = require("moment");
-const Sequelize = require("sequelize");
+const R = require("ramda")
+const moment = require("moment")
+const Sequelize = require("sequelize")
 
-const { Op: operators } = Sequelize;
+const { Op: operators } = Sequelize
 
-const formatQuery = require("../../../helpers/lazyLoad");
-const database = require("../../../database");
+const formatQuery = require("../../../helpers/lazyLoad")
+const database = require("../../../database")
 
-const { FieldValidationError } = require("../../../helpers/errors");
+const { FieldValidationError } = require("../../../helpers/errors")
 
-// const Mark = database.model('mark')
-const Company = database.model("company");
-const Entrance = database.model("entrance");
-const Product = database.model("product");
-const User = database.model("user");
-const Mark = database.model("mark");
-// const Part = database.model('part')
-// const EquipModel = database.model('equipModel')
-const StockBase = database.model("stockBase");
-const ProductBase = database.model("productBase");
-const Equip = database.model("equip");
+const Company = database.model("company")
+const Entrance = database.model("entrance")
+const Product = database.model("product")
+const User = database.model("user")
+const Mark = database.model("mark")
+const StockBase = database.model("stockBase")
+const ProductBase = database.model("productBase")
+const Equip = database.model("equip")
 
 module.exports = class EntranceDomain {
   async add(bodyData, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
-    const entrance = R.omit(["id"], bodyData);
+    const entrance = R.omit(["id"], bodyData)
 
-    const entranceNotHasProp = (prop) => R.not(R.has(prop, entrance));
+    const entranceNotHasProp = prop => R.not(R.has(prop, entrance))
     // const bodyDataNotHasProp = prop => R.not(R.has(prop, bodyData))
 
     const field = {
@@ -37,8 +34,8 @@ module.exports = class EntranceDomain {
       companyId: false,
       message: false,
       responsibleUser: false,
-      analysis: false,
-    };
+      analysis: false
+    }
     const message = {
       amountAdded: "",
       stockBase: "",
@@ -46,153 +43,153 @@ module.exports = class EntranceDomain {
       companyId: "",
       message: "",
       responsibleUser: "",
-      analysis: "",
-    };
+      analysis: ""
+    }
 
-    let errors = false;
+    let errors = false
 
     if (entranceNotHasProp("analysis") || !entrance.analysis) {
-      errors = true;
-      field.analysis = true;
-      message.analysis = "analysis cannot undefined";
+      errors = true
+      field.analysis = true
+      message.analysis = "analysis cannot undefined"
     } else if (/\D/gi.test(entrance.analysis)) {
-      errors = true;
-      field.analysis = true;
-      message.analysis = "Não é permitido letras.";
+      errors = true
+      field.analysis = true
+      message.analysis = "Não é permitido letras."
     }
 
     if (entranceNotHasProp("amountAdded") || !entrance.amountAdded) {
-      errors = true;
-      field.amountAdded = true;
-      message.amountAdded = "Por favor informar a quantidade adicionada.";
+      errors = true
+      field.amountAdded = true
+      message.amountAdded = "Por favor informar a quantidade adicionada."
     } else if (/\D/gi.test(entrance.amountAdded)) {
-      errors = true;
-      field.amountAdded = true;
-      message.amountAdded = "Não é permitido letras.";
+      errors = true
+      field.amountAdded = true
+      message.amountAdded = "Não é permitido letras."
     }
 
-    const stockBaseArray = ["ESTOQUE", "EMPRESTIMO"];
+    const stockBaseArray = [
+      "ESTOQUE",
+      "EMPRESTIMO"
+    ]
 
     if (entranceNotHasProp("stockBase") || !entrance.stockBase) {
-      errors = true;
-      field.stockBase = true;
-      message.stockBase = "Por favor informar a base de estoque.";
+      errors = true
+      field.stockBase = true
+      message.stockBase = "Por favor informar a base de estoque."
     } else if (
-      !stockBaseArray.filter((value) => value === entrance.stockBase)
+      !stockBaseArray.filter(value => value === entrance.stockBase)
     ) {
-      errors = true;
-      field.stockBase = true;
-      message.stockBase = "Base de estoque inválida.";
+      errors = true
+      field.stockBase = true
+      message.stockBase = "Base de estoque inválida."
     }
 
     if (entranceNotHasProp("responsibleUser")) {
-      errors = true;
-      field.responsibleUser = true;
-      message.responsibleUser = "username não está sendo passado.";
+      errors = true
+      field.responsibleUser = true
+      message.responsibleUser = "username não está sendo passado."
     } else if (bodyData.responsibleUser) {
-      const { responsibleUser } = bodyData;
+      const { responsibleUser } = bodyData
 
       const user = await User.findOne({
         where: { username: responsibleUser },
-        transaction,
-      });
+        transaction
+      })
 
       if (!user) {
-        errors = true;
-        field.responsibleUser = true;
-        message.responsibleUser = "username inválido.";
+        errors = true
+        field.responsibleUser = true
+        message.responsibleUser = "username inválido."
       }
     } else {
-      errors = true;
-      field.responsibleUser = true;
-      message.responsibleUser = "username não pode ser nulo.";
+      errors = true
+      field.responsibleUser = true
+      message.responsibleUser = "username não pode ser nulo."
     }
 
     if (entranceNotHasProp("productId") || !entrance.productId) {
-      errors = true;
-      field.productId = true;
-      message.productId = "Por favor o produto.";
+      errors = true
+      field.productId = true
+      message.productId = "Por favor o produto."
     }
 
     if (entranceNotHasProp("companyId") || !entrance.companyId) {
-      errors = true;
-      field.companyId = true;
-      message.companyId = "Por favor informar o fornecedor.";
+      errors = true
+      field.companyId = true
+      message.companyId = "Por favor informar o fornecedor."
     } else {
       const fornecedor = await Company.findByPk(entrance.companyId, {
         where: { relation: "fornecedor" },
-        transaction,
-      });
+        transaction
+      })
 
       if (!fornecedor) {
-        errors = true;
-        field.companyId = true;
-        message.companyId = "Fornecedor não encontrado";
+        errors = true
+        field.companyId = true
+        message.companyId = "Fornecedor não encontrado"
       }
     }
 
-    const product = await Product.findByPk(entrance.productId, {
-      transaction,
-    });
+    const product = await Product.findByPk(entrance.productId, { transaction })
 
     if (!product) {
-      errors = true;
-      field.productId = true;
-      message.productId = "Produto não encontrado";
+      errors = true
+      field.productId = true
+      message.productId = "Produto não encontrado"
     }
 
     if (entrance.stockBase === "EMPRESTIMO" && !product.serial) {
-      errors = true;
-      field.stockBase = true;
-      message.stockBase = "deve conter numero de serie";
+      errors = true
+      field.stockBase = true
+      message.stockBase = "deve conter numero de serie"
     }
 
     if (product.serial && entrance.analysis === "0") {
       if (
-        entranceNotHasProp("serialNumbers") ||
-        entrance.serialNumbers.length === 0
+        entranceNotHasProp("serialNumbers")
+        || entrance.serialNumbers.length === 0
       ) {
-        errors = true;
-        field.message = true;
-        message.message = "Por favor ao menos um numero de série.";
+        errors = true
+        field.message = true
+        message.message = "Por favor ao menos um numero de série."
         // eslint-disable-next-line eqeqeq
       } else if (entrance.serialNumbers.length != entrance.amountAdded) {
-        errors = true;
-        field.message = true;
-        message.message =
-          "Quantidade adicionada não condiz com a quantidade de números de série.";
+        errors = true
+        field.message = true
+        message.message = "Quantidade adicionada não condiz com a quantidade de números de série."
       } else {
-        const { serialNumbers } = entrance;
+        const { serialNumbers } = entrance
 
         // eslint-disable-next-line max-len
         const filterSerialNumber = serialNumbers.filter(
           (este, i) => serialNumbers.indexOf(este) === i
-        );
+        )
 
         if (serialNumbers.length !== filterSerialNumber.length) {
-          errors = true;
-          field.message = true;
-          message.message = "Há números de série repetido.";
+          errors = true
+          field.message = true
+          message.message = "Há números de série repetido."
         }
       }
     }
 
     if (errors) {
-      throw new FieldValidationError([{ field, message }]);
+      throw new FieldValidationError([{ field, message }])
     }
 
     const stockBase = await StockBase.findOne({
       where: { stockBase: entrance.stockBase },
-      transaction,
-    });
+      transaction
+    })
 
     let productBase = await ProductBase.findOne({
       where: {
         productId: entrance.productId,
-        stockBaseId: stockBase.id,
+        stockBaseId: stockBase.id
       },
-      transaction,
-    });
+      transaction
+    })
 
     if (!productBase) {
       await ProductBase.create(
@@ -203,51 +200,51 @@ module.exports = class EntranceDomain {
           available: entrance.amountAdded,
           preAnalysis: entrance.analysis,
           reserved: "0",
-          analysis: "0",
+          analysis: "0"
         },
         { transaction }
-      );
+      )
 
-      entrance.oldAmount = "0";
+      entrance.oldAmount = "0"
     } else {
-      entrance.oldAmount = productBase.amount;
+      entrance.oldAmount = productBase.amount
 
       const preAnalysis = (
         parseInt(productBase.preAnalysis, 10) + parseInt(entrance.analysis, 10)
-      ).toString();
+      ).toString()
 
       // eslint-disable-next-line max-len
       const amount = (
         parseInt(productBase.amount, 10) + parseInt(entrance.amountAdded, 10)
-      ).toString();
+      ).toString()
       // eslint-disable-next-line max-len
       const available = (
         parseInt(productBase.available, 10) + parseInt(entrance.amountAdded, 10)
-      ).toString();
+      ).toString()
 
       const productBaseUpdate = {
         ...productBase,
         amount,
         available,
-        preAnalysis,
-      };
+        preAnalysis
+      }
 
-      await productBase.update(productBaseUpdate, { transaction });
+      await productBase.update(productBaseUpdate, { transaction })
     }
 
     productBase = await ProductBase.findOne({
       where: {
         productId: entrance.productId,
-        stockBaseId: stockBase.id,
+        stockBaseId: stockBase.id
       },
-      transaction,
-    });
+      transaction
+    })
 
     if (product.serial && entrance.analysis === "0") {
-      const { serialNumbers } = entrance;
+      const { serialNumbers } = entrance
 
       const serialNumbersFindPromises = serialNumbers.map(
-        async (item, index) => {
+        async (item) => {
           const serialNumberHasExist = await Equip.findOne({
             where: { serialNumber: item },
             // attributes: [],
@@ -259,65 +256,61 @@ module.exports = class EntranceDomain {
             //   },
             // ],
             paranoid: false,
-            transaction,
-          });
+            transaction
+          })
 
           if (serialNumberHasExist) {
-            if (serialNumberHasExist.deletedAt === null) {
-              field.serialNumbers = true;
-              message.serialNumbers = `${item} já está registrado`;
-              throw new FieldValidationError([{ field, message }]);
-            } else {
-              serialNumbers.splice(index, 1);
-              await serialNumberHasExist.restore({ transaction });
-            }
+            // if (serialNumberHasExist.deletedAt === null) {
+            field.serialNumbers = true
+            message.serialNumbers = `${item} já está registrado`
+            throw new FieldValidationError([{ field, message }])
+            // } else {
+            // serialNumbers.splice(index, 1)
+            // await serialNumberHasExist.restore({ transaction })
+            // }
           } else {
             const equipCreate = {
               productBaseId: productBase.id,
               serialNumber: item,
-              loan: entrance.stockBase === "EMPRESTIMO",
-            };
+              loan: entrance.stockBase === "EMPRESTIMO"
+            }
 
-            await Equip.create(equipCreate, { transaction });
+            await Equip.create(equipCreate, { transaction })
           }
         }
-      );
+      )
 
-      await Promise.all(serialNumbersFindPromises);
+      await Promise.all(serialNumbersFindPromises)
     }
 
     entrance.amountAdded = Math.max.apply(null, [
       entrance.analysis,
-      entrance.amountAdded,
-    ]);
+      entrance.amountAdded
+    ])
 
-    entrance.analysis = entrance.analysis !== "0";
+    entrance.analysis = entrance.analysis !== "0"
 
-    const entranceCreated = await Entrance.create(entrance, { transaction });
+    const entranceCreated = await Entrance.create(entrance, { transaction })
 
     const response = await Entrance.findByPk(entranceCreated.id, {
       include: [
-        {
-          model: Company,
-        },
-        {
-          model: Product,
-        },
+        { model: Company },
+        { model: Product }
       ],
-      transaction,
-    });
+      transaction
+    })
 
-    return response;
+    return response
   }
 
   async update(bodyData, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
-    const entrance = R.omit(["id"], bodyData);
+    const entrance = R.omit(["id"], bodyData)
 
-    const oldEntrance = await Entrance.findByPk(bodyData.id, { transaction });
+    const oldEntrance = await Entrance.findByPk(bodyData.id, { transaction })
 
-    const entranceNotHasProp = (prop) => R.not(R.has(prop, entrance));
+    const entranceNotHasProp = prop => R.not(R.has(prop, entrance))
     // const bodyDataNotHasProp = prop => R.not(R.has(prop, bodyData))
 
     const field = {
@@ -326,191 +319,191 @@ module.exports = class EntranceDomain {
       productId: false,
       companyId: false,
       message: false,
-      responsibleUser: false,
-    };
+      responsibleUser: false
+    }
     const message = {
       amountAdded: "",
       stockBase: "",
       productId: "",
       companyId: "",
       message: "",
-      responsibleUser: "",
-    };
-
-    let errors = false;
-
-    if (entranceNotHasProp("amountAdded") || !entrance.amountAdded) {
-      errors = true;
-      field.amountAdded = true;
-      message.amountAdded = "Por favor informar a quantidade adicionada.";
-    } else if (/\D/gi.test(entrance.amountAdded)) {
-      errors = true;
-      field.amountAdded = true;
-      message.amountAdded = "Não é permitido letras.";
+      responsibleUser: ""
     }
 
-    const stockBaseArray = ["ESTOQUE", "EMPRESTIMO"];
+    let errors = false
+
+    if (entranceNotHasProp("amountAdded") || !entrance.amountAdded) {
+      errors = true
+      field.amountAdded = true
+      message.amountAdded = "Por favor informar a quantidade adicionada."
+    } else if (/\D/gi.test(entrance.amountAdded)) {
+      errors = true
+      field.amountAdded = true
+      message.amountAdded = "Não é permitido letras."
+    }
+
+    const stockBaseArray = [
+      "ESTOQUE",
+      "EMPRESTIMO"
+    ]
 
     if (entranceNotHasProp("stockBase") || !entrance.stockBase) {
-      errors = true;
-      field.stockBase = true;
-      message.stockBase = "Por favor informar a base de estoque.";
+      errors = true
+      field.stockBase = true
+      message.stockBase = "Por favor informar a base de estoque."
     } else if (
-      !stockBaseArray.filter((value) => value === entrance.stockBase)
+      !stockBaseArray.filter(value => value === entrance.stockBase)
     ) {
-      errors = true;
-      field.stockBase = true;
-      message.stockBase = "Base de estoque inválida.";
+      errors = true
+      field.stockBase = true
+      message.stockBase = "Base de estoque inválida."
     }
 
     if (entranceNotHasProp("responsibleUser")) {
-      errors = true;
-      field.responsibleUser = true;
-      message.responsibleUser = "username não está sendo passado.";
+      errors = true
+      field.responsibleUser = true
+      message.responsibleUser = "username não está sendo passado."
     } else if (bodyData.responsibleUser) {
-      const { responsibleUser } = bodyData;
+      const { responsibleUser } = bodyData
 
       const user = await User.findOne({
         where: { username: responsibleUser },
-        transaction,
-      });
+        transaction
+      })
 
       if (!user) {
-        errors = true;
-        field.responsibleUser = true;
-        message.responsibleUser = "username inválido.";
+        errors = true
+        field.responsibleUser = true
+        message.responsibleUser = "username inválido."
       }
     } else {
-      errors = true;
-      field.responsibleUser = true;
-      message.responsibleUser = "username não pode ser nulo.";
+      errors = true
+      field.responsibleUser = true
+      message.responsibleUser = "username não pode ser nulo."
     }
 
     if (entranceNotHasProp("productId") || !entrance.productId) {
-      errors = true;
-      field.productId = true;
-      message.productId = "Por favor o produto.";
+      errors = true
+      field.productId = true
+      message.productId = "Por favor o produto."
     }
 
     if (entranceNotHasProp("companyId") || !entrance.companyId) {
-      errors = true;
-      field.companyId = true;
-      message.companyId = "Por favor informar o fornecedor.";
+      errors = true
+      field.companyId = true
+      message.companyId = "Por favor informar o fornecedor."
     } else {
       const fornecedor = await Company.findByPk(entrance.companyId, {
         where: { relation: "fornecedor" },
-        transaction,
-      });
+        transaction
+      })
 
       if (!fornecedor) {
-        errors = true;
-        field.companyId = true;
-        message.companyId = "Fornecedor não encontrado";
+        errors = true
+        field.companyId = true
+        message.companyId = "Fornecedor não encontrado"
       }
     }
 
-    const product = await Product.findByPk(entrance.productId, {
-      transaction,
-    });
+    const product = await Product.findByPk(entrance.productId, { transaction })
 
     if (!product) {
-      errors = true;
-      field.productId = true;
-      message.productId = "Produto não encontrado";
+      errors = true
+      field.productId = true
+      message.productId = "Produto não encontrado"
     }
 
     if (product.serial) {
       if (
-        entranceNotHasProp("serialNumbers") ||
-        entrance.serialNumbers.length === 0
+        entranceNotHasProp("serialNumbers")
+        || entrance.serialNumbers.length === 0
       ) {
-        errors = true;
-        field.message = true;
-        message.message = "Por favor ao menos um numero de série.";
+        errors = true
+        field.message = true
+        message.message = "Por favor ao menos um numero de série."
         // eslint-disable-next-line eqeqeq
       } else if (entrance.serialNumbers.length != entrance.amountAdded) {
-        errors = true;
-        field.message = true;
-        message.message =
-          "Quantidade adicionada não condiz com a quantidade de números de série.";
+        errors = true
+        field.message = true
+        message.message = "Quantidade adicionada não condiz com a quantidade de números de série."
       } else {
-        const { serialNumbers } = entrance;
+        const { serialNumbers } = entrance
 
         // eslint-disable-next-line max-len
         const filterSerialNumber = serialNumbers.filter(
           (este, i) => serialNumbers.indexOf(este) === i
-        );
+        )
 
         if (serialNumbers.length !== filterSerialNumber.length) {
-          errors = true;
-          field.message = true;
-          message.message = "Há números de série repetido.";
+          errors = true
+          field.message = true
+          message.message = "Há números de série repetido."
         }
       }
     }
 
     if (errors) {
-      throw new FieldValidationError([{ field, message }]);
+      throw new FieldValidationError([{ field, message }])
     }
 
     const stockBase = await StockBase.findOne({
       where: { stockBase: entrance.stockBase },
-      transaction,
-    });
+      transaction
+    })
 
     const oldStockBase = await StockBase.findOne({
       where: { stockBase: oldEntrance.stockBase },
-      transaction,
-    });
-
-    let productBase = await ProductBase.findOne({
-      where: {
-        productId: entrance.productId,
-        stockBaseId: stockBase.id,
-      },
-      transaction,
-    });
+      transaction
+    })
 
     const oldProductBase = await ProductBase.findOne({
       where: {
         productId: oldEntrance.productId,
-        stockBaseId: oldStockBase.id,
+        stockBaseId: oldStockBase.id
       },
-      transaction,
-    });
+      transaction
+    })
 
     if (!oldProductBase) {
-      field.message = true;
-      message.message = "ProductBase não encontrada.";
-      throw new FieldValidationError([{ field, message }]);
+      field.message = true
+      message.message = "ProductBase não encontrada."
+      throw new FieldValidationError([{ field, message }])
     } else {
       // eslint-disable-next-line max-len
       const amount = (
-        parseInt(oldProductBase.amount, 10) -
-        parseInt(oldEntrance.amountAdded, 10)
-      ).toString();
+        parseInt(oldProductBase.amount, 10)
+        - parseInt(oldEntrance.amountAdded, 10)
+      ).toString()
       // eslint-disable-next-line max-len
       const available = (
-        parseInt(oldProductBase.available, 10) -
-        parseInt(oldEntrance.amountAdded, 10)
-      ).toString();
+        parseInt(oldProductBase.available, 10)
+        - parseInt(oldEntrance.amountAdded, 10)
+      ).toString()
 
       const oldProductBaseUpdate = {
         ...oldProductBase,
         amount,
-        available,
-      };
+        available
+      }
 
       if (
-        parseInt(oldProductBaseUpdate.amount, 10) < 0 ||
-        parseInt(oldProductBaseUpdate.available, 10) < 0
+        parseInt(oldProductBaseUpdate.amount, 10) < 0
+        || parseInt(oldProductBaseUpdate.available, 10) < 0
       ) {
-        field.oldProductBaseUpdate = true;
-        message.oldProductBaseUpdate = "Número negativo não é valido";
-        throw new FieldValidationError([{ field, message }]);
+        field.oldProductBaseUpdate = true
+        message.oldProductBaseUpdate = "Número negativo não é valido"
+        throw new FieldValidationError([{ field, message }])
       }
-      await oldProductBase.update(oldProductBaseUpdate, { transaction });
+      await oldProductBase.update(oldProductBaseUpdate, { transaction })
     }
+
+    let productBase = await ProductBase.findOne({
+      where: {
+        productId: entrance.productId,
+        stockBaseId: stockBase.id
+      },
+      transaction
+    })
 
     if (!productBase) {
       await ProductBase.create(
@@ -519,139 +512,131 @@ module.exports = class EntranceDomain {
           stockBaseId: stockBase.id,
           amount: entrance.amountAdded,
           available: entrance.amountAdded,
-          reserved: "0",
+          reserved: "0"
         },
         { transaction }
-      );
+      )
 
-      entrance.oldAmount = "0";
+      entrance.oldAmount = "0"
     } else {
       entrance.oldAmount = (
         parseInt(productBase.amount, 10) - parseInt(oldEntrance.amountAdded, 10)
-      ).toString();
+      ).toString()
 
       // eslint-disable-next-line max-len
       const amount = (
         parseInt(productBase.amount, 10) + parseInt(entrance.amountAdded, 10)
-      ).toString();
+      ).toString()
       // eslint-disable-next-line max-len
       const available = (
         parseInt(productBase.available, 10) + parseInt(entrance.amountAdded, 10)
-      ).toString();
+      ).toString()
 
       const productBaseUpdate = {
         ...productBase,
         amount,
-        available,
-      };
-
-      if (
-        parseInt(productBaseUpdate.amount, 10) < 0 ||
-        parseInt(productBaseUpdate.available, 10) < 0
-      ) {
-        field.productBaseUpdate = true;
-        message.productBaseUpdate = "Número negativo não é valido";
-        throw new FieldValidationError([{ field, message }]);
+        available
       }
 
-      await productBase.update(productBaseUpdate, { transaction });
+      if (
+        parseInt(productBaseUpdate.amount, 10) < 0
+        || parseInt(productBaseUpdate.available, 10) < 0
+      ) {
+        field.productBaseUpdate = true
+        message.productBaseUpdate = "Número negativo não é valido"
+        throw new FieldValidationError([{ field, message }])
+      }
+
+      await productBase.update(productBaseUpdate, { transaction })
     }
 
     productBase = await ProductBase.findOne({
       where: {
         productId: entrance.productId,
-        stockBaseId: stockBase.id,
+        stockBaseId: stockBase.id
       },
-      transaction,
-    });
+      transaction
+    })
 
     if (product.serial) {
-      const { serialNumbers } = entrance;
+      const { serialNumbers } = entrance
 
       const serialNumbersFindPromises = serialNumbers.map(async (item) => {
         const equip = await Equip.findOne({
           where: {
             serialNumber: item,
-            reserved: false,
+            reserved: false
           },
           include: [
             {
               model: ProductBase,
               where: { id: oldProductBase.id },
-              attributes: [],
-            },
+              attributes: []
+            }
           ],
-          transaction,
-        });
+          transaction
+        })
 
         if (!equip) {
-          field.serialNumbers = true;
-          message.serialNumbers = `${item} não está registrado`;
-          throw new FieldValidationError([{ field, message }]);
+          field.serialNumbers = true
+          message.serialNumbers = `${item} não está registrado`
+          throw new FieldValidationError([{ field, message }])
         }
 
         const equipUpdate = {
           ...equip,
-          productBaseId: productBase.id,
-        };
+          productBaseId: productBase.id
+        }
 
-        await equip.update(equipUpdate, { transaction });
-      });
-      await Promise.all(serialNumbersFindPromises);
+        await equip.update(equipUpdate, { transaction })
+      })
+      await Promise.all(serialNumbersFindPromises)
     }
 
     const newEntrance = {
       ...oldEntrance,
-      ...entrance,
-    };
+      ...entrance
+    }
 
-    await oldEntrance.update(newEntrance, { transaction });
+    await oldEntrance.update(newEntrance, { transaction })
 
     const response = await Entrance.findByPk(bodyData.id, {
       include: [
-        {
-          model: Company,
-        },
-        {
-          model: Product,
-        },
+        { model: Company },
+        { model: Product }
       ],
-      transaction,
-    });
+      transaction
+    })
 
-    return response;
+    return response
   }
 
   async delete(id, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
-    const deletEntrance = await Entrance.findByPk(id, { transaction });
+    const deletEntrance = await Entrance.findByPk(id, { transaction })
 
-    const field = {
-      id: false,
-    };
-    const message = {
-      id: "",
-    };
+    const field = { id: false }
+    const message = { id: "" }
 
     if (!deletEntrance) {
-      field.id = true;
-      message.id = "entrada não econtrada";
-      throw new FieldValidationError([{ field, message }]);
+      field.id = true
+      message.id = "entrada não econtrada"
+      throw new FieldValidationError([{ field, message }])
     }
 
     const stockBase = await StockBase.findOne({
       where: { stockBase: deletEntrance.stockBase },
-      transaction,
-    });
+      transaction
+    })
 
     const productBase = await ProductBase.findOne({
       where: {
         productId: deletEntrance.productId,
-        stockBaseId: stockBase.id,
+        stockBaseId: stockBase.id
       },
-      transaction,
-    });
+      transaction
+    })
 
     const equips = await Equip.findAll({
       where: {
@@ -661,83 +646,88 @@ module.exports = class EntranceDomain {
             .toString(),
           [operators.lte]: moment(deletEntrance.createdAt)
             .add(3, "seconds")
-            .toString(),
+            .toString()
         },
-        productBaseId: productBase.id,
+        productBaseId: productBase.id
       },
-      order: [["serialNumber", "ASC"]],
+      order: [
+        [
+          "serialNumber",
+          "ASC"
+        ]
+      ],
       paranoid: false,
-      transaction,
-    });
+      transaction
+    })
 
     const equipDeletePromise = equips.map(async (item) => {
       if (item.deletedAt !== null || item.reserved === true) {
-        field.reserved = true;
-        message.reserved = "Há equipamento liberado ou reservado";
-        throw new FieldValidationError([{ field, message }]);
+        field.reserved = true
+        message.reserved = "Há equipamento liberado ou reservado"
+        throw new FieldValidationError([{ field, message }])
       }
-      await item.destroy({ force: true, transaction });
-    });
+      await item.destroy({ force: true, transaction })
+    })
 
-    await Promise.all(equipDeletePromise);
+    await Promise.all(equipDeletePromise)
 
     if (!productBase) {
-      field.message = true;
-      message.message = "ProductBase não encontrada.";
-      throw new FieldValidationError([{ field, message }]);
+      field.message = true
+      message.message = "ProductBase não encontrada."
+      throw new FieldValidationError([{ field, message }])
     } else {
-      let preAnalysis = parseInt(productBase.preAnalysis, 10);
-      let amount = parseInt(productBase.amount, 10);
-      let available = parseInt(productBase.available, 10);
+      let preAnalysis = parseInt(productBase.preAnalysis, 10)
+      let amount = parseInt(productBase.amount, 10)
+      let available = parseInt(productBase.available, 10)
 
       if (deletEntrance.analysis) {
-        preAnalysis = preAnalysis - parseInt(deletEntrance.amountAdded, 10);
+        preAnalysis -= parseInt(deletEntrance.amountAdded, 10)
       } else {
-        amount = (amount - parseInt(deletEntrance.amountAdded, 10)).toString();
+        amount = (amount - parseInt(deletEntrance.amountAdded, 10)).toString()
         available = (
           available - parseInt(deletEntrance.amountAdded, 10)
-        ).toString();
+        ).toString()
       }
 
       const productBaseUpdate = {
         ...productBase,
         amount,
         available,
-        preAnalysis: preAnalysis.toString(),
-      };
+        preAnalysis: preAnalysis.toString()
+      }
 
       if (preAnalysis < 0 || amount < 0 || available < 0) {
-        field.productBaseUpdate = true;
-        message.productBaseUpdate = "Número negativo não é valido";
-        throw new FieldValidationError([{ field, message }]);
+        field.productBaseUpdate = true
+        message.productBaseUpdate = "Número negativo não é valido"
+        throw new FieldValidationError([{ field, message }])
       }
-      await productBase.update(productBaseUpdate, { transaction });
+      await productBase.update(productBaseUpdate, { transaction })
     }
 
-    await deletEntrance.destroy({ force: true, transaction });
+    await deletEntrance.destroy({ force: true, transaction })
 
-    return "sucesso";
+    return "sucesso"
   }
 
   async getAll(options = {}) {
     const inicialOrder = {
       field: "createdAt",
       acendent: true,
-      direction: "DESC",
-    };
-
-    const { query = null, transaction = null } = options;
-
-    const newQuery = Object.assign({}, query);
-    const newOrder = query && query.order ? query.order : inicialOrder;
-
-    if (newOrder.acendent) {
-      newOrder.direction = "DESC";
-    } else {
-      newOrder.direction = "ASC";
+      direction: "DESC"
     }
 
-    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
+    const { query = null, transaction = null } = options
+
+    const newQuery = Object.assign({}, query)
+    const newOrder = query && query.order ? query.order : inicialOrder
+
+    if (newOrder.acendent) {
+      newOrder.direction = "DESC"
+    } else {
+      newOrder.direction = "ASC"
+    }
+
+    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery)
 
     const entrances = await Entrance.findAndCountAll({
       where: getWhere("entrance"),
@@ -748,39 +738,40 @@ module.exports = class EntranceDomain {
           where: getWhere("product"),
           // where: { include: [{ model: Part, where: { name: 'FONT 3 V' } }] },
           // where: getWhere('product'),
-          include: [
-            {
-              model: Mark,
-            },
-          ],
+          include: [{ model: Mark }],
           // or: true,
-          required: true,
-        },
+          required: true
+        }
       ],
-      order: [[newOrder.field, newOrder.direction]],
+      order: [
+        [
+          newOrder.field,
+          newOrder.direction
+        ]
+      ],
       limit,
       offset,
-      transaction,
-    });
+      transaction
+    })
 
-    const { rows } = entrances;
+    const { rows } = entrances
 
     if (rows.length === 0) {
       return {
         page: null,
         show: 0,
         count: entrances.count,
-        rows: [],
-      };
+        rows: []
+      }
     }
 
     const formatDateFunct = (date) => {
-      moment.locale("pt-br");
-      const formatDate = moment(date).format("L");
-      const formatHours = moment(date).format("LT");
-      const dateformated = `${formatDate} ${formatHours}`;
-      return dateformated;
-    };
+      moment.locale("pt-br")
+      const formatDate = moment(date).format("L")
+      const formatHours = moment(date).format("LT")
+      const dateformated = `${formatDate} ${formatHours}`
+      return dateformated
+    }
 
     // eslint-disable-next-line consistent-return
     const formatData = R.map((entrance) => {
@@ -804,31 +795,27 @@ module.exports = class EntranceDomain {
           // eslint-disable-next-line max-len
           name: entrance.product.name,
           createdAtNotFormatted: entrance.createdAt,
-          createdAt: formatDateFunct(entrance.createdAt),
-        };
-        return resp;
+          createdAt: formatDateFunct(entrance.createdAt)
+        }
+        return resp
       }
-      return "";
-    });
+      return ""
+    })
 
-    const entrancesList = formatData(rows);
+    const entrancesList = formatData(rows)
 
-    // const entrancesList = formatData(rows).filter((item) => {
-    //   if (item.name.indexOf(query.filters.name.toUpperCase()) !== -1) return item
-    // })
-
-    let show = limit;
+    let show = limit
     if (entrances.count < show) {
-      show = entrances.count;
+      show = entrances.count
     }
 
     const response = {
       page: pageResponse,
       show,
       count: entrances.count,
-      rows: entrancesList,
-    };
+      rows: entrancesList
+    }
 
-    return response;
+    return response
   }
-};
+}

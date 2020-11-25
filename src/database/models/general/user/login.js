@@ -1,9 +1,9 @@
-const Sequelize = require('sequelize')
-const bcrypt = require('bcrypt')
+const Sequelize = require("sequelize")
+const bcrypt = require("bcrypt")
 
 const getHash = plainPassoword => bcrypt.hash(plainPassoword, 10)
 
-const shouldMakeAHash = login => login.changed('password')
+const shouldMakeAHash = login => login.changed("password")
 
 const makeHashPasswordHook = async (login) => {
   if (shouldMakeAHash(login)) {
@@ -14,24 +14,20 @@ const makeHashPasswordHook = async (login) => {
 
 
 module.exports = (sequelize) => {
-  const login = sequelize.define('login', {
+  const login = sequelize.define("login", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
+      primaryKey: true
     },
     password: {
       type: Sequelize.STRING,
-      allowNull: false,
-    },
+      allowNull: false
+    }
   })
 
   login.associate = (models) => {
-    login.hasMany(models.session, {
-      foreignKey: {
-        allowNull: false,
-      },
-    })
+    login.hasMany(models.session, { foreignKey: { allowNull: false } })
 
     login.hasOne(models.user)
   }

@@ -1,5 +1,5 @@
-const CarDomain = require('../../../../domains/estoque/technician/car')
-const database = require('../../../../database')
+const CarDomain = require("../../../../domains/estoque/technician/car")
+const database = require("../../../../database")
 
 const carDomain = new CarDomain()
 
@@ -31,5 +31,5 @@ const getAll = async (req, res, next) => {
 
 module.exports = {
   add,
-  getAll,
+  getAll
 }

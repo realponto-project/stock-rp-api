@@ -1,6 +1,6 @@
-const Sequelize = require("sequelize");
+const Sequelize = require("sequelize")
 
-module.exports = sequelize => {
+module.exports = (sequelize) => {
   const manufacturer = sequelize.define("manufacturer", {
     id: {
       type: Sequelize.UUID,
@@ -12,6 +12,6 @@ module.exports = sequelize => {
       type: Sequelize.STRING,
       allowNull: false
     }
-  });
-  return manufacturer;
-};
+  })
+  return manufacturer
+}

@@ -1,26 +1,28 @@
 /**
  * Inspired by: https://github.com/pagarme/superbowleto/blob/master/test/helpers/request.js
  */
-const Promise = require('bluebird')
-const axios = require('axios')
-const {
-  applySpec, defaultTo, pick, prop, toLower,
-} = require('ramda')
+const Promise = require("bluebird")
+const axios = require("axios")
+const { applySpec, defaultTo, pick, prop, toLower } = require("ramda")
 
 const defaultToEmptyObject = defaultTo({})
-const pickValuesFromResponse = pick(['data', 'status', 'headers'])
+const pickValuesFromResponse = pick([
+  "data",
+  "status",
+  "headers"
+])
 const transformResponseProps = applySpec({
-  body: prop('data'),
-  statusCode: prop('status'),
-  headers: prop('headers'),
+  body: prop("data"),
+  statusCode: prop("status"),
+  headers: prop("headers")
 })
 
 const getRequest = (config = {}) => {
   const defaultConfig = {
-    baseURL: 'http://localhost:5312',
+    baseURL: "http://localhost:5312",
     headers: defaultToEmptyObject(),
     params: defaultToEmptyObject(),
-    timeout: 10000,
+    timeout: 10000
   }
 
   const axiosConfig = { ...defaultConfig, ...config }
@@ -28,39 +30,39 @@ const getRequest = (config = {}) => {
 
   const makeRequest = (
     url,
-    method = 'get',
+    method = "get",
     data = {},
     params = {},
-    headers = {},
+    headers = {}
   ) => Promise.resolve({
     url,
     method: toLower(method),
     data,
     params,
-    headers,
+    headers
   })
     .then(axiosIntance.request)
     .then(pickValuesFromResponse)
-    .catch(prop('response'))
+    .catch(prop("response"))
     .then(transformResponseProps)
 
   const requestWithoutBody = methodName => (
     url,
-    { headers = {}, params = {} } = {},
+    { headers = {}, params = {} } = {}
   ) => makeRequest(url, methodName, null, params, headers)
 
   const requestWithBody = methodName => (
     url,
     body = {},
-    { headers = {}, params = {} } = {},
+    { headers = {}, params = {} } = {}
   ) => makeRequest(url, methodName, body, params, headers)
 
   return {
-    get: requestWithoutBody('get'),
-    post: requestWithBody('post'),
-    put: requestWithBody('put'),
-    delete: requestWithoutBody('delete'),
-    patch: requestWithBody('patch'),
+    get: requestWithoutBody("get"),
+    post: requestWithBody("post"),
+    put: requestWithBody("put"),
+    delete: requestWithoutBody("delete"),
+    patch: requestWithBody("patch")
   }
 }
 

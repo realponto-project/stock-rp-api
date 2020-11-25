@@ -1,35 +1,37 @@
-require('./fakeDatabase')
-const Sequelize = require('sequelize')
-const moment = require('moment')
+require("./fakeDatabase")
+const Sequelize = require("sequelize")
+const moment = require("moment")
 
-const { MaliciousError } = require('../errors')
+const { MaliciousError } = require("../errors")
 
 const { Op: operators } = Sequelize
 
-const formatQuery = require('./')
+const formatQuery = require("./")
 
-describe('Test about lazyLoad, total and pages', () => {
-  test('Test total and page case 1', () => {
+describe("test about lazyLoad, total and pages", () => {
+  it("total and page case 1", () => {
+    expect.hasAssertions()
     const query = {
       page: 2,
-      total: 20,
+      total: 20
     }
 
     const { getWhere, limit, offset } = formatQuery(query)
 
     const expectedWhere = { }
 
-    const where = getWhere('table1')
+    const where = getWhere("table1")
 
-    expect(where).toEqual(expectedWhere)
+    expect(where).toStrictEqual(expectedWhere)
     expect(limit).toBe(20)
     expect(offset).toBe(20)
   })
 
-  test('Test total and page case 2', () => {
+  it("total and page case 2", () => {
+    expect.hasAssertions()
     const query = {
       page: 3,
-      total: 150,
+      total: 150
     }
 
     const { limit, offset } = formatQuery(query)
@@ -38,10 +40,11 @@ describe('Test about lazyLoad, total and pages', () => {
     expect(offset).toBe(200)
   })
 
-  test('Test total and page case 3', () => {
+  it("total and page case 3", () => {
+    expect.hasAssertions()
     const query = {
       page: 3,
-      total: -150,
+      total: -150
     }
 
     const { limit, offset } = formatQuery(query)
@@ -50,10 +53,11 @@ describe('Test about lazyLoad, total and pages', () => {
     expect(offset).toBe(50)
   })
 
-  test('Test total and page case 4', () => {
+  it("total and page case 4", () => {
+    expect.hasAssertions()
     const query = {
       page: 0,
-      total: 0,
+      total: 0
     }
 
     const { limit, offset } = formatQuery(query)
@@ -62,10 +66,11 @@ describe('Test about lazyLoad, total and pages', () => {
     expect(offset).toBe(0)
   })
 
-  test('Test total and page case 5', () => {
+  it("total and page case 5", () => {
+    expect.hasAssertions()
     const query = {
       page: -5,
-      total: -150,
+      total: -150
     }
 
     const { limit, offset } = formatQuery(query)
@@ -74,10 +79,9 @@ describe('Test about lazyLoad, total and pages', () => {
     expect(offset).toBe(0)
   })
 
-  test('Test total miss', () => {
-    const query = {
-      page: -5,
-    }
+  it("total miss", () => {
+    expect.hasAssertions()
+    const query = { page: -5 }
 
     const { limit, offset } = formatQuery(query)
 
@@ -85,10 +89,9 @@ describe('Test about lazyLoad, total and pages', () => {
     expect(offset).toBe(0)
   })
 
-  test('Test page miss', () => {
-    const query = {
-      total: 0,
-    }
+  it("page miss", () => {
+    expect.hasAssertions()
+    const query = { total: 0 }
 
     const { limit, offset } = formatQuery(query)
 
@@ -98,248 +101,256 @@ describe('Test about lazyLoad, total and pages', () => {
 })
 
 
-describe('Test about lazyLoad, global search', () => {
-  test('Test fields in global', () => {
+describe("test about lazyLoad, global search", () => {
+  it("fields in global", () => {
+    expect.hasAssertions()
     const query = {
       filters: {
         table1: {
           global: {
-            fields: ['name', 'motherName', 'fatherName'],
-            value: 'string',
-          },
-        },
-      },
+            fields: [
+              "name",
+              "motherName",
+              "fatherName"
+            ],
+            value: "string"
+          }
+        }
+      }
     }
 
     const { getWhere, limit, offset } = formatQuery(query)
 
     const expectedWhere = {
-      [operators.or]: [{
-        name: {
-          [operators.iRegexp]: 'string',
-        },
-      },
-      {
-        motherName: {
-          [operators.iRegexp]: 'string',
-        },
-      },
-      {
-        fatherName: {
-          [operators.iRegexp]: 'string',
-        },
-      }],
+      [operators.or]: [
+        { name: { [operators.iRegexp]: "string" } },
+        { motherName: { [operators.iRegexp]: "string" } },
+        { fatherName: { [operators.iRegexp]: "string" } }
+      ]
     }
 
-    const where = getWhere('table1')
+    const where = getWhere("table1")
 
-    expect(where).toEqual(expectedWhere)
+    expect(where).toStrictEqual(expectedWhere)
     expect(limit).toBe(25)
     expect(offset).toBe(0)
   })
 })
 
-describe('Test about lazyLoad, specific search', () => {
-  test('Test fields in specific with string', () => {
+describe("test about lazyLoad, specific search", () => {
+  it("fields in specific with string", () => {
+    expect.hasAssertions()
     const query = {
       filters: {
         table1: {
           specific: {
-            name: 'maria',
-            motherName: 'abrey',
-          },
-        },
-      },
+            name: "maria",
+            motherName: "abrey"
+          }
+        }
+      }
     }
 
     const { getWhere, limit, offset } = formatQuery(query)
 
     const expectedWhere = {
-      name: {
-        [operators.iRegexp]: 'maria',
-      },
-      motherName: {
-        [operators.iRegexp]: 'abrey',
-      },
+      name: { [operators.iRegexp]: "maria" },
+      motherName: { [operators.iRegexp]: "abrey" }
     }
 
-    const where = getWhere('table1')
+    const where = getWhere("table1")
 
-    expect(where).toEqual(expectedWhere)
+    expect(where).toStrictEqual(expectedWhere)
     expect(limit).toBe(25)
     expect(offset).toBe(0)
   })
 
-  test('Test fields in specific with date', () => {
+  it("fields in specific with date", () => {
+    expect.hasAssertions()
     const query = {
       filters: {
         table1: {
           specific: {
-            name: 'Vitor',
+            name: "Vitor",
             birthday: {
-              start: new Date('05-29-1944'),
-              end: new Date('02-28-1989'),
-            },
-          },
-        },
-      },
+              start: new Date("05-29-1944"),
+              end: new Date("02-28-1989")
+            }
+          }
+        }
+      }
     }
 
     const { getWhere, limit, offset } = formatQuery(query)
 
     const expectedWhere = {
-      name: {
-        [operators.iRegexp]: 'Vitor',
-      },
+      name: { [operators.iRegexp]: "Vitor" },
       birthday: {
-        [operators.gte]: moment('05-29-1944', 'MM-DD-YYYY').startOf('day').toString(),
-        [operators.lte]: moment('02-28-1989', 'MM-DD-YYYY').endOf('day').toString(),
-      },
+        [operators.gte]: moment("05-29-1944", "MM-DD-YYYY").startOf("day").toString(),
+        [operators.lte]: moment("02-28-1989", "MM-DD-YYYY").endOf("day").toString()
+      }
     }
 
-    const where = getWhere('table1')
+    const where = getWhere("table1")
 
-    expect(where).toEqual(expectedWhere)
+    expect(where).toStrictEqual(expectedWhere)
     expect(limit).toBe(25)
     expect(offset).toBe(0)
   })
 })
 
-describe('Test about empty query', () => {
-  test('Test pass empty query, should be returned default lazyload and no search filters', () => {
+describe("test about empty query", () => {
+  it("pass empty query, should be returned default lazyload and no search filters", () => {
+    expect.hasAssertions()
     const { getWhere, limit, offset } = formatQuery()
 
     const expectedWhere = { }
-    const where = getWhere('table1')
+    const where = getWhere("table1")
 
-    expect(where).toEqual(expectedWhere)
+    expect(where).toStrictEqual(expectedWhere)
     expect(limit).toBe(25)
     expect(offset).toBe(0)
   })
 
-  test('Test pass null query, should be returned default lazyload and no search filters', () => {
+  it("pass null query, should be returned default lazyload and no search filters", () => {
+    expect.hasAssertions()
     const { getWhere, limit, offset } = formatQuery(null)
 
     const expectedWhere = { }
-    const where = getWhere('table1')
+    const where = getWhere("table1")
 
-    expect(where).toEqual(expectedWhere)
+    expect(where).toStrictEqual(expectedWhere)
     expect(limit).toBe(25)
     expect(offset).toBe(0)
   })
 
-  test('Test pass emmpyObject query, should be returned default lazyload and no search filters', () => {
+  it("pass emmpyObject query, should be returned default lazyload and no search filters", () => {
+    expect.hasAssertions()
     const { getWhere, limit, offset } = formatQuery({})
 
     const expectedWhere = { }
-    const where = getWhere('table1')
+    const where = getWhere("table1")
 
-    expect(where).toEqual(expectedWhere)
+    expect(where).toStrictEqual(expectedWhere)
     expect(limit).toBe(25)
     expect(offset).toBe(0)
   })
 
-  test('Test pass emmpyArray query, should be returned default lazyload and no search filters', () => {
+  it("pass emmpyArray query, should be returned default lazyload and no search filters", () => {
+    expect.hasAssertions()
     const { getWhere, limit, offset } = formatQuery([])
 
     const expectedWhere = { }
-    const where = getWhere('table1')
+    const where = getWhere("table1")
 
-    expect(where).toEqual(expectedWhere)
+    expect(where).toStrictEqual(expectedWhere)
     expect(limit).toBe(25)
     expect(offset).toBe(0)
   })
 
-  test('Test pass undefined query, should be returned default lazyload and no search filters', () => {
+  it("pass undefined query, should be returned default lazyload and no search filters", () => {
+    expect.hasAssertions()
     const { getWhere, limit, offset } = formatQuery(undefined)
 
     const expectedWhere = { }
-    const where = getWhere('table1')
+    const where = getWhere("table1")
 
-    expect(where).toEqual(expectedWhere)
+    expect(where).toStrictEqual(expectedWhere)
     expect(limit).toBe(25)
     expect(offset).toBe(0)
   })
 })
 
 
-describe('Test about lazyLoad, errors', () => {
-  test('Test malicius search in specific', () => {
+describe("test about lazyLoad, errors", () => {
+  it("malicius search in specific", () => {
+    expect.hasAssertions()
     const query = {
       filters: {
         table1: {
           specific: {
-            password: 'maria',
-            motherName: 'abrey',
-          },
-        },
-      },
+            password: "maria",
+            motherName: "abrey"
+          }
+        }
+      }
     }
     const { getWhere } = formatQuery(query)
 
-    const testFormatter = () => getWhere('table1')
+    const testFormatter = () => getWhere("table1")
     expect(testFormatter).toThrow(new MaliciousError())
   })
 
-  test('Test malicius search in global', () => {
+  it("malicius search in global", () => {
+    expect.hasAssertions()
     const query = {
       filters: {
         table1: {
           global: {
-            fields: ['name', 'motherName', 'password'],
-            value: 'string',
-          },
-        },
-      },
+            fields: [
+              "name",
+              "motherName",
+              "password"
+            ],
+            value: "string"
+          }
+        }
+      }
     }
     const { getWhere } = formatQuery(query)
 
-    const testFormatter = () => getWhere('table1')
+    const testFormatter = () => getWhere("table1")
     expect(testFormatter).toThrow(new MaliciousError())
   })
 
-  test('Test fields global in that are not part of the table', async () => {
+  it("fields global in that are not part of the table", async () => {
+    expect.hasAssertions()
     const query = {
       filters: {
         table1: {
           global: {
-            fields: ['name1', 'motherName2', 'fatherName3'],
-            value: 'string',
-          },
-        },
-      },
+            fields: [
+              "name1",
+              "motherName2",
+              "fatherName3"
+            ],
+            value: "string"
+          }
+        }
+      }
     }
 
     const { getWhere, limit, offset } = formatQuery(query)
 
     const expectedWhere = { }
 
-    const where = getWhere('table1')
+    const where = getWhere("table1")
 
-    expect(where).toEqual(expectedWhere)
+    expect(where).toStrictEqual(expectedWhere)
     expect(limit).toBe(25)
     expect(offset).toBe(0)
   })
 
-  test('Test fields especific in that are not part of the table', async () => {
+  it("fields especific in that are not part of the table", async () => {
+    expect.hasAssertions()
     const query = {
       filters: {
         table1: {
           specific: {
-            motherName2: 'maria',
-            fatherName3: 'abrey',
-          },
-        },
-      },
+            motherName2: "maria",
+            fatherName3: "abrey"
+          }
+        }
+      }
     }
 
     const { getWhere, limit, offset } = formatQuery(query)
 
     const expectedWhere = { }
 
-    const where = getWhere('table1')
+    const where = getWhere("table1")
 
-    expect(where).toEqual(expectedWhere)
+    expect(where).toStrictEqual(expectedWhere)
     expect(limit).toBe(25)
     expect(offset).toBe(0)
   })

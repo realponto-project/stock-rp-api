@@ -1,22 +1,22 @@
-const Sequelize = require('sequelize')
+const Sequelize = require("sequelize")
 
 module.exports = (sequelize) => {
-  const notification = sequelize.define('notification', {
+  const notification = sequelize.define("notification", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
+      primaryKey: true
     },
 
     message: {
       type: Sequelize.TEXT,
-      allowNull: false,
+      allowNull: false
     },
 
     viewed: {
       type: Sequelize.BOOLEAN,
-      defaultValue: true,
-    },
+      defaultValue: true
+    }
   })
 
   return notification

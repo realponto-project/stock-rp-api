@@ -1,40 +1,42 @@
-const EmprestimoDomain = require(".");
-const ProductDomain = require("../product");
-const MarkDomain = require("../product/mark");
-const EquipDomain = require("../product/equip");
-const EquipModelDomain = require("../product/equip/equipModel");
-const EntranceDomain = require("../entrance");
-const CompanyDomain = require("../../general/company");
-const TechnicianDomain = require("../technician");
-const CarDomain = require("../technician/car");
+const EmprestimoDomain = require(".")
+const ProductDomain = require("../product")
+const MarkDomain = require("../product/mark")
+const EquipDomain = require("../product/equip")
+const EquipModelDomain = require("../product/equip/equipType")
+const EntranceDomain = require("../entrance")
+const CompanyDomain = require("../../general/company")
+const TechnicianDomain = require("../technician")
+const CarDomain = require("../technician/car")
 
-const emprestimoDomain = new EmprestimoDomain();
-const productDomain = new ProductDomain();
-const equipDomain = new EquipDomain();
-const equipModelDomain = new EquipModelDomain();
-const markDomain = new MarkDomain();
-const companyDomain = new CompanyDomain();
-const entranceDomain = new EntranceDomain();
-const technicianDomain = new TechnicianDomain();
-const carDomain = new CarDomain();
+const emprestimoDomain = new EmprestimoDomain()
+const productDomain = new ProductDomain()
+const equipDomain = new EquipDomain()
+const equipModelDomain = new EquipModelDomain()
+const markDomain = new MarkDomain()
+const companyDomain = new CompanyDomain()
+const entranceDomain = new EntranceDomain()
+const technicianDomain = new TechnicianDomain()
+const carDomain = new CarDomain()
 
 describe("emprestimoDomain", () => {
-  let equip = null;
-  let technicianCreated = null;
+  let equip = null
+  let technicianCreated = null
+
+  // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     const mark = {
       mark: "Almost",
       responsibleUser: "modrp"
-    };
+    }
 
-    await markDomain.add(mark);
+    await markDomain.add(mark)
 
     const type = {
       type: "Maple",
       responsibleUser: "modrp"
-    };
+    }
 
-    await equipModelDomain.addType(type);
+    await equipModelDomain.addType(type)
 
     const productMock = {
       name: "Deck",
@@ -46,8 +48,8 @@ describe("emprestimoDomain", () => {
       type: "Maple",
       serial: true,
       responsibleUser: "modrp"
-    };
-    const productCreated = await productDomain.add(productMock);
+    }
+    const productCreated = await productDomain.add(productMock)
 
     const companyMock = {
       razaoSocial: "teste emprestimo",
@@ -63,9 +65,9 @@ describe("emprestimoDomain", () => {
       email: "josealdo@gmasi.com",
       responsibleUser: "modrp",
       relation: "fornecedor"
-    };
+    }
 
-    const companyCreated = await companyDomain.add(companyMock);
+    const companyCreated = await companyDomain.add(companyMock)
 
     const entranceMock = {
       amountAdded: "1",
@@ -74,39 +76,41 @@ describe("emprestimoDomain", () => {
       companyId: companyCreated.id,
       serialNumbers: ["0001212"],
       responsibleUser: "modrp"
-    };
+    }
 
-    await entranceDomain.add(entranceMock);
+    await entranceDomain.add(entranceMock)
 
-    equip = await equipDomain.getOneBySerialNumber("0001212");
+    // eslint-disable-next-line no-unused-vars
+    equip = await equipDomain.getOneBySerialNumber("0001212")
 
     const carMock = {
       model: "GOL",
       year: "2007",
       plate: "AWR-4484"
-    };
+    }
 
-    await carDomain.add(carMock);
+    await carDomain.add(carMock)
 
     const technicianMock = {
       name: "VÉIO OLINTO",
       CNH: "01/01/2000",
       plate: "AWR-4484",
       external: false
-    };
+    }
 
-    technicianCreated = await technicianDomain.add(technicianMock);
-  });
+    technicianCreated = await technicianDomain.add(technicianMock)
+  })
 
-  test("create", async () => {
+  it("create", async () => {
+    expect.hasAssertions()
     const emprestimoMock = {
       cnpj: "37331737000105",
       razaoSocial: "emprestimoDomain",
       dateExpedition: new Date(),
       technicianId: technicianCreated.id,
       serialNumber: "0001212"
-    };
+    }
 
-    await emprestimoDomain.add(emprestimoMock);
-  });
-});
+    await emprestimoDomain.add(emprestimoMock)
+  })
+})

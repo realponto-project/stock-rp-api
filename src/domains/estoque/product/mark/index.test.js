@@ -1,45 +1,43 @@
 // const R = require('ramda')
 
-const MarkDomain = require('./index')
-const ProductDomain = require('../')
-
-// const { FieldValidationError } = require('../../../../helpers/errors')
+const MarkDomain = require("./index")
+const ProductDomain = require("../")
 
 const markDomain = new MarkDomain()
 const productDomain = new ProductDomain()
 
 
-describe('MarkDomain', () => {
+describe("markDomain", () => {
   let markMock = null
 
+  // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     markMock = {
-      mark: 'HP',
-      responsibleUser: 'modrp',
+      mark: "HP",
+      responsibleUser: "modrp"
     }
   })
 
-  test('create', async () => {
+  it("create", async () => {
+    expect.hasAssertions()
     const markCreated = await markDomain.add(markMock)
 
     expect(markCreated.mark).toBe(markMock.mark)
     expect(markCreated.responsibleUser).toBe(markMock.responsibleUser)
-
-    // await expect(markDomain.add(markMock))
-    //   .rejects.toThrowError(new FieldValidationError())
   })
 
 
-  test('getAll', async () => {
+  it("getAll", async () => {
+    expect.hasAssertions()
     const productMock = {
-      category: 'peca',
-      SKU: 'PC-00046',
-      description: '',
-      minimumStock: '2',
-      mark: 'HP',
-      name: 'GET',
+      category: "peca",
+      SKU: "PC-00046",
+      description: "",
+      minimumStock: "2",
+      mark: "HP",
+      name: "GET",
       serial: true,
-      responsibleUser: 'modrp',
+      responsibleUser: "modrp"
     }
 
     await productDomain.add(productMock)

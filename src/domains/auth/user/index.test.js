@@ -1,12 +1,13 @@
-const UserDomain = require(".");
-const TypeAccount = require("./typeAccount");
+const UserDomain = require(".")
+const TypeAccount = require("./typeAccount")
 
-const userDomain = new UserDomain();
-const typeAccount = new TypeAccount();
+const userDomain = new UserDomain()
+const typeAccount = new TypeAccount()
 
 describe("create user", () => {
-  let typeAccountMock = null;
+  let typeAccountMock = null
 
+  // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     typeAccountMock = {
       typeName: "TECNICO",
@@ -39,8 +40,8 @@ describe("create user", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
-    await typeAccount.add(typeAccountMock);
+    }
+    await typeAccount.add(typeAccountMock)
 
     const userMock = {
       username: "teste01",
@@ -73,11 +74,12 @@ describe("create user", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
-    await userDomain.user_Create(userMock);
-  });
+    }
+    await userDomain.user_Create(userMock)
+  })
 
-  test("create", async () => {
+  it("create", async () => {
+    expect.hasAssertions()
     const userMock = {
       username: "teste1",
       typeName: "TECNICO",
@@ -109,17 +111,18 @@ describe("create user", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
-    const userCreated = await userDomain.user_Create(userMock);
+    }
+    const userCreated = await userDomain.user_Create(userMock)
 
-    expect(userCreated.username).toEqual(userMock.username);
-    expect(userCreated.typeAccount.typeName).toEqual(userMock.typeName);
+    expect(userCreated.username).toStrictEqual(userMock.username)
+    expect(userCreated.typeAccount.typeName).toStrictEqual(userMock.typeName)
 
-    expect(userCreated).not.toHaveProperty("login");
-    expect(userCreated).not.toHaveProperty("password");
-  });
+    expect(userCreated).not.toHaveProperty("login")
+    expect(userCreated).not.toHaveProperty("password")
+  })
 
-  test("getResourceByUsername", async () => {
+  it("getResourceByUsername", async () => {
+    expect.hasAssertions()
     const userMock = {
       username: "teste98",
       typeName: "TECNICO",
@@ -151,20 +154,21 @@ describe("create user", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
-    await userDomain.user_Create(userMock);
+    }
+    await userDomain.user_Create(userMock)
 
-    const username = "teste98";
+    const username = "teste98"
 
-    const userReturn = await userDomain.getResourceByUsername(username);
+    const userReturn = await userDomain.getResourceByUsername(username)
 
-    expect(userReturn.addCompany).toEqual(userMock.addCompany);
-    expect(userReturn.addPart).toEqual(userMock.addPart);
-    expect(userReturn.addAnalyze).toEqual(userMock.addAnalyze);
-    expect(userReturn.addEquip).toEqual(false);
-    expect(userReturn.addEntry).toEqual(false);
-  });
-  test("getResourceByUsername customized", async () => {
+    expect(userReturn.addCompany).toStrictEqual(userMock.addCompany)
+    expect(userReturn.addPart).toStrictEqual(userMock.addPart)
+    expect(userReturn.addAnalyze).toStrictEqual(userMock.addAnalyze)
+    expect(userReturn.addEquip).toStrictEqual(false)
+    expect(userReturn.addEntry).toStrictEqual(false)
+  })
+  it("getResourceByUsername customized", async () => {
+    expect.hasAssertions()
     const userMock = {
       username: "teste99",
       typeName: "TECNICO",
@@ -196,21 +200,22 @@ describe("create user", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
-    await userDomain.user_Create(userMock);
+    }
+    await userDomain.user_Create(userMock)
 
-    const username = "teste99";
+    const username = "teste99"
 
-    const userReturn = await userDomain.getResourceByUsername(username);
+    const userReturn = await userDomain.getResourceByUsername(username)
 
-    expect(userReturn.addCompany).toEqual(userMock.addCompany);
-    expect(userReturn.addPart).toEqual(userMock.addPart);
-    expect(userReturn.addAnalyze).toEqual(userMock.addAnalyze);
-    expect(userReturn.addEquip).toEqual(userMock.addEquip);
-    expect(userReturn.addEntry).toEqual(userMock.addEntry);
-  });
+    expect(userReturn.addCompany).toStrictEqual(userMock.addCompany)
+    expect(userReturn.addPart).toStrictEqual(userMock.addPart)
+    expect(userReturn.addAnalyze).toStrictEqual(userMock.addAnalyze)
+    expect(userReturn.addEquip).toStrictEqual(userMock.addEquip)
+    expect(userReturn.addEntry).toStrictEqual(userMock.addEntry)
+  })
 
-  test("criar usuario sem premissões", async () => {
+  it("criar usuario sem premissões", async () => {
+    expect.hasAssertions()
     const typeAccountTeste = {
       typeName: "NADINHA",
       addCompany: false,
@@ -242,8 +247,8 @@ describe("create user", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
-    await typeAccount.add(typeAccountTeste);
+    }
+    await typeAccount.add(typeAccountTeste)
 
     const userMock = {
       username: "nadinha",
@@ -276,130 +281,15 @@ describe("create user", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
-    const userReturn = await userDomain.user_Create(userMock);
+    }
+    const userReturn = await userDomain.user_Create(userMock)
 
-    expect(userReturn.username).toEqual(userMock.username);
-    // expect(await userDomain.findUsernameByPK(userReturn.id)).toBeTruthy()
-  });
+    expect(userReturn.username).toStrictEqual(userMock.username)
+  })
 
-  test("getAll", async () => {
-    const users = await userDomain.getAll();
-    expect(users.rows.length > 0).toBeTruthy();
-  });
-});
-
-// describe('update password', () => {
-//   let userMockGenerated = {}
-//   let counter = 1
-//   let userCreated = {}
-
-//   beforeEach(async () => {
-//     userMockGenerated = generateUser(`updatepassword_user_domain_${counter.toString()}`)
-//     counter += 1
-//     userCreated = await userDomain.user_Create(userMockGenerated)
-//   })
-
-//   test('update password', async () => {
-//     const login = await Login.findOne({
-//       include: [{
-//         model: User,
-//         where: { username: userCreated.username },
-//       }],
-//     })
-
-//     const checkPwd1 = await login.checkPassword(userCreated.username)
-//     const checkPwd2 = await login.checkPassword('senha')
-
-//     expect(checkPwd1).toBeTruthy()
-//     expect(checkPwd2).toBeFalsy()
-
-//     const body = {
-//       username: userCreated.username,
-//       oldPassword: userCreated.username,
-//       newPassword: 'senha',
-//     }
-
-//     await userDomain.user_PasswordUpdate(body)
-
-//     const login2 = await Login.findOne({
-//       include: [{
-//         model: User,
-//         where: { username: userCreated.username },
-//       }],
-//     })
-
-//     const checkPwd3 = await login2.checkPassword(userCreated.username)
-//     const checkPwd4 = await login2.checkPassword('senha')
-
-//     expect(checkPwd4).toBeTruthy()
-//     expect(checkPwd3).toBeFalsy()
-//   })
-// })
-
-//   describe('update user', () => {
-//     let userCreated = {}
-//     let counter = 1
-
-//     beforeEach(async () => {
-//       const userMock = generateUser(`update_user_domain_${counter.toString()}`)
-//       counter += 1
-//       userCreated = await userDomain.user_Create(userMock)
-//     })
-
-//     test('update name by id', async () => {
-//       const userMock = R.omit(['id', 'email', 'username'], userCreated)
-//       userMock.name = 'guiga lherme'
-
-//       const userUpdate = await userDomain.user_UpdateById(userCreated.id, userMock)
-
-//       expect(userUpdate.name).toEqual(userMock.name)
-//       expect(userUpdate.email).toEqual(userCreated.email)
-//       expect(userUpdate.username).toEqual(userCreated.username)
-//     })
-
-//     test('update email by id', async () => {
-//       const userMock = R.omit(['id', 'name', 'username'], userCreated)
-//       userMock.email = 'lindo@gmail.com'
-
-//       const userUpdate = await userDomain.user_UpdateById(userCreated.id, userMock)
-
-//       expect(userUpdate.name).toEqual(userCreated.name)
-//       expect(userUpdate.email).toEqual(userMock.email)
-//       expect(userUpdate.username).toEqual(userCreated.username)
-//     })
-
-//     test('update name and email by id', async () => {
-//       const userMock = R.omit(['id', 'username'], userCreated)
-//       userMock.email = 'lindaobonitoegostosao@gmail.com'
-//       userMock.name = 'lindo'
-
-//       const userUpdate = await userDomain.user_UpdateById(userCreated.id, userMock)
-
-//       expect(userUpdate.name).toEqual(userMock.name)
-//       expect(userUpdate.email).toEqual(userMock.email)
-//       expect(userUpdate.username).toEqual(userCreated.username)
-//     })
-//   })
-
-//   describe('checkPassword', () => {
-//     let userCreated = {}
-//     let counter = 1
-
-//     beforeEach(async () => {
-//       const userMock = generateUser(`checkpasssword_user_domain_${counter.toString()}`)
-//       counter += 1
-//       userCreated = await userDomain.user_Create(userMock)
-//     })
-
-//     test('checkPassword', async () => {
-//       // eslint-disable-next-line max-len
-//       const checkPwdValid = await userDomain.user_C
-// heckPassword(userCreated.id, userCreated.username)
-//       const checkPwdInvalid = await userDomain.user_CheckPassword(userCreated.id, '13132')
-
-//       expect(checkPwdValid).toBeTruthy()
-//       expect(checkPwdInvalid).toBeFalsy()
-//     })
-//   })
-// })
+  it("getAll", async () => {
+    expect.hasAssertions()
+    const users = await userDomain.getAll()
+    expect(users.rows.length > 0).toBeTruthy()
+  })
+})

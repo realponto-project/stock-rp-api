@@ -1,4 +1,4 @@
-"use strict";
+
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -12,9 +12,7 @@ module.exports = {
       amount: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        validate: {
-          min: 0
-        }
+        validate: { min: 0 }
       },
 
       solicitante: {
@@ -25,9 +23,7 @@ module.exports = {
       emailSolic: {
         type: Sequelize.STRING,
         allowNull: false,
-        validate: {
-          isEmail: true
-        }
+        validate: { isEmail: true }
       },
 
       emailResp: {
@@ -63,10 +59,10 @@ module.exports = {
         defaultValue: null,
         type: Sequelize.DATE
       }
-    });
+    })
 
-    return supOut;
+    return supOut
   },
 
   down: queryInterface => queryInterface.dropTable("supOut")
-};
+}

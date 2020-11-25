@@ -1,5 +1,5 @@
-const Sequelize = require("sequelize");
-const models = require("./models");
+const Sequelize = require("sequelize")
+const models = require("./models")
 
 const sequelize = new Sequelize({
   host: process.env.DB_HOST || "localhost",
@@ -13,19 +13,18 @@ const sequelize = new Sequelize({
   pool: {
     max: 5,
     min: 0,
-    acquire: 30000,
-    idle: 10000,
+    acquire: 1000000,
+    idle: 10000
   },
   define: {
     freezeTableName: true,
-    paranoid: true,
-  },
-});
+    paranoid: true
+  }
+})
 
-const modelInstances = models.map((model) => model(sequelize));
+const modelInstances = models.map(model => model(sequelize))
 modelInstances.forEach(
-  (modelInstance) =>
-    modelInstance.associate && modelInstance.associate(sequelize.models)
-);
+  modelInstance => modelInstance.associate && modelInstance.associate(sequelize.models)
+)
 
-module.exports = sequelize;
+module.exports = sequelize

@@ -1,17 +1,17 @@
-const Sequelize = require('sequelize')
+const Sequelize = require("sequelize")
 
 module.exports = (sequelize) => {
-  const kitParts = sequelize.define('kitParts', {
+  const kitParts = sequelize.define("kitParts", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
+      primaryKey: true
     },
 
     amount: {
       type: Sequelize.STRING,
-      allowNull: false,
-    },
+      allowNull: false
+    }
   })
 
   kitParts.associate = (models) => {
@@ -20,16 +20,8 @@ module.exports = (sequelize) => {
     //     allowNull: true,
     //   },
     // })
-    kitParts.belongsTo(models.productBase, {
-      foreignKey: {
-        allowNull: true,
-      },
-    })
-    kitParts.belongsTo(models.kit, {
-      foreignKey: {
-        allowNull: true,
-      },
-    })
+    kitParts.belongsTo(models.productBase, { foreignKey: { allowNull: true } })
+    kitParts.belongsTo(models.kit, { foreignKey: { allowNull: true } })
   }
 
   return kitParts

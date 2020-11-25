@@ -1,6 +1,4 @@
-require("dotenv").config({
-  path: process.env.NODE_ENV === "test" ? ".env.test" : ".env"
-});
+require("dotenv").config()
 
 module.exports = {
   host: process.env.DB_HOST,
@@ -16,4 +14,4 @@ module.exports = {
     // underscored: true,
     // underscoredAll: true
   }
-};
+}
