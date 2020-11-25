@@ -1,31 +1,32 @@
+/* eslint-disable jest/no-hooks */
 // const R = require('ramda')
 
-const CompanyDomain = require("../../general/company");
-const EntranceDomain = require(".");
-const ProductDomain = require("../product");
-const MarkDomain = require("../product/mark");
-const EquipModelDomain = require("../product/equip/equipModel");
+const CompanyDomain = require("../../general/company")
+const EntranceDomain = require(".")
+const ProductDomain = require("../product")
+const MarkDomain = require("../product/mark")
+const EquipModelDomain = require("../product/equip/equipType")
 
-const { FieldValidationError } = require("../../../helpers/errors");
+const { FieldValidationError } = require("../../../helpers/errors")
 
 // const partDomain = new PartDomain()
-const entranceDomain = new EntranceDomain();
-const companyDomain = new CompanyDomain();
-const productDomain = new ProductDomain();
-const markDomain = new MarkDomain();
-const equipModelDomain = new EquipModelDomain();
+const entranceDomain = new EntranceDomain()
+const companyDomain = new CompanyDomain()
+const productDomain = new ProductDomain()
+const markDomain = new MarkDomain()
+const equipModelDomain = new EquipModelDomain()
 
 describe("entranceDomain", () => {
-  let entranceMock = null;
-  let productCreated1 = null;
+  let entranceMock = null
+  let productCreated1 = null
 
   beforeAll(async () => {
     const mark = {
       mark: "DELL",
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    await markDomain.add(mark);
+    await markDomain.add(mark)
 
     const companyMock = {
       razaoSocial: "teste entrada",
@@ -40,10 +41,10 @@ describe("entranceDomain", () => {
       nameContact: "joseildom",
       email: "josealdo@gmasi.com",
       responsibleUser: "modrp",
-      relation: "fornecedor",
-    };
+      relation: "fornecedor"
+    }
 
-    const companyCreated = await companyDomain.add(companyMock);
+    const companyCreated = await companyDomain.add(companyMock)
 
     const productMock = {
       category: "peca",
@@ -53,15 +54,15 @@ describe("entranceDomain", () => {
       mark: "DELL",
       name: "FONT 12 V",
       serial: false,
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
     const type = {
       type: "TESTE TYPE 4",
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    await equipModelDomain.addType(type);
+    await equipModelDomain.addType(type)
 
     const productMock1 = {
       category: "equipamento",
@@ -72,74 +73,87 @@ describe("entranceDomain", () => {
       name: "DEDO BOM",
       serial: true,
       responsibleUser: "modrp",
-      type: "TESTE TYPE 4",
-    };
+      type: "TESTE TYPE 4"
+    }
 
-    const productCreated = await productDomain.add(productMock);
-    productCreated1 = await productDomain.add(productMock1);
+    const productCreated = await productDomain.add(productMock)
+    productCreated1 = await productDomain.add(productMock1)
 
     entranceMock = {
       amountAdded: "4",
       stockBase: "ESTOQUE",
       productId: productCreated.id,
       companyId: companyCreated.id,
-      responsibleUser: "modrp",
-    };
-  });
+      responsibleUser: "modrp"
+    }
+  })
 
-  test("create entrance part", async () => {
-    const entranceCreated = await entranceDomain.add(entranceMock);
+  it("create entrance part", async () => {
+    expect.hasAssertions()
+    const entranceCreated = await entranceDomain.add(entranceMock)
 
-    expect(entranceCreated.amountAdded).toBe(entranceMock.amountAdded);
-    expect(entranceCreated.stockBase).toBe(entranceMock.stockBase);
-    expect(entranceCreated.responsibleUser).toBe(entranceMock.responsibleUser);
-    expect(entranceCreated.company.relation).toBe("fornecedor");
-    expect(entranceCreated.product.SKU).toBe("PC-00006");
+    expect(entranceCreated.amountAdded).toBe(entranceMock.amountAdded)
+    expect(entranceCreated.stockBase).toBe(entranceMock.stockBase)
+    expect(entranceCreated.responsibleUser).toBe(entranceMock.responsibleUser)
+    expect(entranceCreated.company.relation).toBe("fornecedor")
+    expect(entranceCreated.product.SKU).toBe("PC-00006")
 
-    await entranceDomain.add(entranceMock);
+    await entranceDomain.add(entranceMock)
 
     const entranceMock1 = {
       ...entranceMock,
-      stockBase: "ESTOQUE",
-    };
+      stockBase: "ESTOQUE"
+    }
 
-    await entranceDomain.add(entranceMock1);
+    await entranceDomain.add(entranceMock1)
 
-    await expect(entranceDomain.add(entranceMock)).toBeTruthy();
-  });
+    await expect(entranceDomain.add(entranceMock)).toBeTruthy()
+  })
 
-  test("create entrance equipModel", async () => {
+  it("create entrance equipModel", async () => {
+    expect.hasAssertions()
     const entranceMock1 = {
       ...entranceMock,
       productId: productCreated1.id,
-      serialNumbers: ["1", "2", "3", "4"],
-    };
+      serialNumbers: [
+        "1",
+        "2",
+        "3",
+        "4"
+      ]
+    }
 
-    const entranceCreated = await entranceDomain.add(entranceMock1);
+    const entranceCreated = await entranceDomain.add(entranceMock1)
 
-    expect(entranceCreated.amountAdded).toBe(entranceMock.amountAdded);
-    expect(entranceCreated.stockBase).toBe(entranceMock.stockBase);
-    expect(entranceCreated.responsibleUser).toBe(entranceMock.responsibleUser);
-    expect(entranceCreated.company.relation).toBe("fornecedor");
-    expect(entranceCreated.product.SKU).toBe("EQ-00502");
+    expect(entranceCreated.amountAdded).toBe(entranceMock.amountAdded)
+    expect(entranceCreated.stockBase).toBe(entranceMock.stockBase)
+    expect(entranceCreated.responsibleUser).toBe(entranceMock.responsibleUser)
+    expect(entranceCreated.company.relation).toBe("fornecedor")
+    expect(entranceCreated.product.SKU).toBe("EQ-00502")
 
-    await expect(entranceDomain.add(entranceMock1)).rejects.toThrowError(
+    await expect(entranceDomain.add(entranceMock1)).rejects.toThrow(
       new FieldValidationError()
-    );
+    )
 
     const entranceMock2 = {
       ...entranceMock,
       productId: productCreated1.id,
-      serialNumbers: ["5", "6", "1", "1"],
-    };
+      serialNumbers: [
+        "5",
+        "6",
+        "1",
+        "1"
+      ]
+    }
 
-    await expect(entranceDomain.add(entranceMock2)).rejects.toThrowError(
+    await expect(entranceDomain.add(entranceMock2)).rejects.toThrow(
       new FieldValidationError()
-    );
-  });
+    )
+  })
 
-  test("getAll", async () => {
-    const entrances = await entranceDomain.getAll();
-    expect(entrances.rows.length > 0).toBeTruthy();
-  });
-});
+  it("getAll", async () => {
+    expect.hasAssertions()
+    const entrances = await entranceDomain.getAll()
+    expect(entrances.rows.length > 0).toBeTruthy()
+  })
+})

@@ -1,34 +1,32 @@
-const Sequelize = require('sequelize')
+const Sequelize = require("sequelize")
 
 module.exports = (sequelize) => {
-  const car = sequelize.define('car', {
+  const car = sequelize.define("car", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
+      primaryKey: true
     },
 
     model: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: false
     },
 
     year: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
 
     plate: {
       type: Sequelize.STRING,
       allowNull: false,
-      unique: true,
-    },
+      unique: true
+    }
   })
 
   car.associate = (models) => {
-    car.belongsToMany(models.technician, {
-      through: 'technicianCar',
-    })
+    car.belongsToMany(models.technician, { through: "technicianCar" })
 
     // car.belongsTo(models.part, {
     //   foreignKey: {

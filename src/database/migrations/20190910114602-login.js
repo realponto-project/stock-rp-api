@@ -13,39 +13,35 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const login = queryInterface.createTable('login', {
+    const login = queryInterface.createTable("login", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
       },
       password: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
 
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
-      },
+        type: Sequelize.DATE
+      }
     })
 
     login.associate = (models) => {
-      login.hasMany(models.session, {
-        foreignKey: {
-          allowNull: false,
-        },
-      })
+      login.hasMany(models.session, { foreignKey: { allowNull: false } })
 
       login.hasOne(models.user)
     }
@@ -59,5 +55,5 @@ module.exports = {
     return login
   },
 
-  down: queryInterface => queryInterface.dropTable('login'),
+  down: queryInterface => queryInterface.dropTable("login")
 }

@@ -1,10 +1,10 @@
-const router = require("express").Router({ mergeParams: true });
-const companyController = require("../../../controllers/company");
+const router = require("express").Router({ mergeParams: true })
+const companyController = require("../../../controllers/company")
 
-router.get("", companyController.getAll);
-router.get("/getallFornecedor", companyController.getAllFornecedor);
-router.post("", companyController.add);
-router.put("/update", companyController.update);
-router.get("/getOneByCnpj", companyController.getOneByCnpj);
+router.get("", companyController.getAll)
+router.get("/getallFornecedor", companyController.getAllFornecedor)
+router.post("", companyController.add)
+router.put("/update", companyController.update)
+router.get("/getOneByCnpj", companyController.getOneByCnpj)
 
-module.exports = router;
+module.exports = router

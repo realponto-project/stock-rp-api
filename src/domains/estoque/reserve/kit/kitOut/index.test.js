@@ -1,61 +1,59 @@
-// const R = require('ramda')
+const KitOutDomain = require(".")
+const TechnicianDomain = require("../../../technician")
+const CarDomain = require("../../../technician/car")
+const MarkDomain = require("../../../product/mark")
+const ProductDomain = require("../../../product")
+const CompanyDomain = require("../../../../general/company")
+const EntranceDomain = require("../../../entrance")
+const OsDomain = require("../../os")
+const KitDomain = require("../")
 
-const KitOutDomain = require(".");
-const TechnicianDomain = require("../../../technician");
-const CarDomain = require("../../../technician/car");
-const MarkDomain = require("../../../product/mark");
-const ProductDomain = require("../../../product");
-const CompanyDomain = require("../../../../general/company");
-const EntranceDomain = require("../../../entrance");
-const OsDomain = require("../../os");
-const KitDomain = require("../");
+const database = require("../../../../../database")
 
-const database = require("../../../../../database");
-// const { FieldValidationError } = require('../../../helpers/errors')
+const kitOutDomain = new KitOutDomain()
+const technicianDomain = new TechnicianDomain()
+const carDomain = new CarDomain()
+const markDomain = new MarkDomain()
+const productDomain = new ProductDomain()
+const companyDomain = new CompanyDomain()
+const entranceDomain = new EntranceDomain()
+const osDomain = new OsDomain()
+const kitDomain = new KitDomain()
 
-const kitOutDomain = new KitOutDomain();
-const technicianDomain = new TechnicianDomain();
-const carDomain = new CarDomain();
-const markDomain = new MarkDomain();
-const productDomain = new ProductDomain();
-const companyDomain = new CompanyDomain();
-const entranceDomain = new EntranceDomain();
-const osDomain = new OsDomain();
-const kitDomain = new KitDomain();
-
-const Kit = database.model("kit");
-const KitParts = database.model("kitParts");
-const ProductBase = database.model("productBase");
-const StockBase = database.model("stockBase");
+const Kit = database.model("kit")
+const KitParts = database.model("kitParts")
+const ProductBase = database.model("productBase")
+const StockBase = database.model("stockBase")
 
 describe("kitOutDomain", () => {
-  let kitParts = null;
-  let reserveOs = null;
+  let kitParts = null
+  let reserveOs = null
 
+  // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     const carMock = {
       model: "GOL",
       year: "2007",
-      plate: "RST-4444",
-    };
+      plate: "RST-4444"
+    }
 
-    await carDomain.add(carMock);
+    await carDomain.add(carMock)
 
     const technicianMock = {
       name: "NARUTO DA SUL",
       CNH: "01/01/2000",
       plate: "RST-4444",
-      external: true,
-    };
+      external: true
+    }
 
-    const technicianCreated = await technicianDomain.add(technicianMock);
+    const technicianCreated = await technicianDomain.add(technicianMock)
 
     const mark = {
       mark: "KONOHA",
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    await markDomain.add(mark);
+    await markDomain.add(mark)
 
     const productMock = {
       category: "peca",
@@ -65,10 +63,10 @@ describe("kitOutDomain", () => {
       mark: "KONOHA",
       name: "LED",
       serial: false,
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    const productCreated = await productDomain.add(productMock);
+    const productCreated = await productDomain.add(productMock)
 
     const companyMock = {
       razaoSocial: "teste hokage",
@@ -83,49 +81,47 @@ describe("kitOutDomain", () => {
       nameContact: "joseildom",
       email: "josealdo@gmasi.com",
       responsibleUser: "modrp",
-      relation: "fornecedor",
-    };
+      relation: "fornecedor"
+    }
 
-    const companyCreated = await companyDomain.add(companyMock);
+    const companyCreated = await companyDomain.add(companyMock)
 
     const entranceMock = {
       amountAdded: "26",
       stockBase: "ESTOQUE",
       productId: productCreated.id,
       companyId: companyCreated.id,
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    await entranceDomain.add(entranceMock);
+    await entranceDomain.add(entranceMock)
 
     const productBase = await ProductBase.findOne({
-      where: {
-        productId: productCreated.id,
-      },
+      where: { productId: productCreated.id },
       include: [{ model: StockBase, where: { stockBase: "ESTOQUE" } }],
-      transacition: null,
-    });
+      transacition: null
+    })
 
     const reserveMock = {
       kitParts: [
         {
           productBaseId: productBase.id,
-          amount: "5",
-        },
-      ],
-    };
+          amount: "5"
+        }
+      ]
+    }
 
-    await kitDomain.add(reserveMock);
+    await kitDomain.add(reserveMock)
 
     kitParts = await KitParts.findOne({
       include: [
         {
           model: Kit,
-          where: { technicianId: technicianCreated.id },
-        },
+          where: { technicianId: technicianCreated.id }
+        }
       ],
-      transaction: null,
-    });
+      transaction: null
+    })
 
     const reserveMockOs = {
       razaoSocial: "test Company kitout",
@@ -136,39 +132,33 @@ describe("kitOutDomain", () => {
         {
           productBaseId: productBase.id,
           amount: "1",
-          status: "venda",
-        },
-      ],
-    };
-    reserveOs = await osDomain.add(reserveMockOs);
-  });
+          status: "venda"
+        }
+      ]
+    }
+    reserveOs = await osDomain.add(reserveMockOs)
+  })
 
-  test("reserva kitOut", async () => {
-    // const reserveMock = {
-    //   kitPartsOut: [{
-    //     amount: '2',
-    //     productId: productCreated.id,
-    //     stockBase: 'ESTOQUE',
-    //   }],
-    //   technicianId: technicianCreated.id,
-    // }
+  it("reserva kitOut", async () => {
+    expect.hasAssertions()
 
     const kitOutMock = {
       reposicao: "3",
       expedicao: "2",
       perda: "1",
       os: reserveOs.os,
-      kitPartId: kitParts.id,
-    };
+      kitPartId: kitParts.id
+    }
 
-    const kitOutCreated = await kitOutDomain.add(kitOutMock);
+    const kitOutCreated = await kitOutDomain.add(kitOutMock)
 
-    expect(kitOutCreated).toBeTruthy();
-  });
+    expect(kitOutCreated).toBeTruthy()
+  })
 
-  test("getAll", async () => {
-    const kitOutList = await kitDomain.getAll();
+  it("getAll", async () => {
+    expect.hasAssertions()
+    const kitOutList = await kitDomain.getAll()
 
-    expect(kitOutList.rows.length > 0).toBeTruthy();
-  });
-});
+    expect(kitOutList.rows.length > 0).toBeTruthy()
+  })
+})

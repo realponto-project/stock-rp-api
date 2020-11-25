@@ -1,40 +1,40 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const equipType = queryInterface.createTable('equipType', {
+    const equipType = queryInterface.createTable("equipType", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
       },
 
       type: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
+        unique: true
       },
 
       responsibleUser: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
-      },
+        type: Sequelize.DATE
+      }
     })
 
     return equipType
   },
-  down: queryInterface => queryInterface.dropTable('equipType'),
+  down: queryInterface => queryInterface.dropTable("equipType")
 }

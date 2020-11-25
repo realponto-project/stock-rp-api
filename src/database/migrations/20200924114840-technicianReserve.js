@@ -4,57 +4,57 @@ module.exports = {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
       },
 
       amount: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: false
       },
 
       amountAux: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: false
       },
 
       data: { defaultValue: Sequelize.NOW, type: Sequelize.DATE },
 
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       technicianId: {
         type: Sequelize.UUID,
         references: {
           model: "technician",
-          key: "id",
+          key: "id"
         },
-        allowNull: false,
+        allowNull: false
       },
 
       productId: {
         type: Sequelize.UUID,
         references: {
           model: "product",
-          key: "id",
+          key: "id"
         },
-        allowNull: true,
-      },
-    });
+        allowNull: true
+      }
+    })
 
-    return technicianReserve;
+    return technicianReserve
   },
 
-  down: (queryInterface) => queryInterface.dropTable("technicianReserve"),
-};
+  down: queryInterface => queryInterface.dropTable("technicianReserve")
+}

@@ -1,17 +1,18 @@
-const LoginDomain = require("./");
-const UserDomain = require("../user");
-const TypeAccount = require("../user/typeAccount");
-const SessionDomain = require("./session");
+/* eslint-disable jest/no-hooks */
+const LoginDomain = require("./")
+const UserDomain = require("../user")
+const TypeAccount = require("../user/typeAccount")
+const SessionDomain = require("./session")
 
-const { UnauthorizedError } = require("../../../helpers/errors");
+const { UnauthorizedError } = require("../../../helpers/errors")
 
-const loginDomain = new LoginDomain();
-const userDomain = new UserDomain();
-const typeAccount = new TypeAccount();
-const sessionDomain = new SessionDomain();
+const loginDomain = new LoginDomain()
+const userDomain = new UserDomain()
+const typeAccount = new TypeAccount()
+const sessionDomain = new SessionDomain()
 
 describe("loginDomain", () => {
-  let userMock = null;
+  let userMock = null
 
   beforeAll(async () => {
     const typeAccountMock = {
@@ -45,9 +46,9 @@ describe("loginDomain", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
+    }
 
-    await typeAccount.add(typeAccountMock);
+    await typeAccount.add(typeAccountMock)
 
     userMock = {
       username: "teste2",
@@ -80,50 +81,53 @@ describe("loginDomain", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
-  });
+    }
+  })
 
-  test("try login with correct account", async () => {
-    await userDomain.user_Create(userMock);
+  it("try login with correct account", async () => {
+    expect.hasAssertions()
+    await userDomain.user_Create(userMock)
 
     const userLogin = {
       username: "teste2",
       password: "teste2",
       typeAccount: { labTec: true }
-    };
+    }
 
-    const session = await loginDomain.login(userLogin);
+    const session = await loginDomain.login(userLogin)
 
-    expect(session.id).not.toBeNull();
-  });
+    expect(session.id).not.toBeNull()
+  })
 
-  test("try login with incorrect password", async () => {
+  it("try login with incorrect password", async () => {
+    expect.hasAssertions()
     const userLogin = {
       username: "teste2",
       password: "teste5",
       typeAccount: { labTec: true }
-    };
+    }
 
-    await expect(loginDomain.login(userLogin)).rejects.toThrowError(
+    await expect(loginDomain.login(userLogin)).rejects.toThrow(
       new UnauthorizedError()
-    );
-  });
+    )
+  })
 
-  test("try login with user not registered", async () => {
+  it("try login with user not registered", async () => {
+    expect.hasAssertions()
     const userLogin = {
       username: "userNaoCadastrado",
       password: "abcs",
       typeAccount: { labTec: true }
-    };
+    }
 
-    await expect(loginDomain.login(userLogin)).rejects.toThrowError(
+    await expect(loginDomain.login(userLogin)).rejects.toThrow(
       new UnauthorizedError()
-    );
-  });
-});
+    )
+  })
+})
 
 describe("logoutTest", () => {
-  let userMock = null;
+  let userMock = null
 
   beforeAll(async () => {
     const typeAccountMock = {
@@ -157,9 +161,9 @@ describe("logoutTest", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
+    }
 
-    await typeAccount.add(typeAccountMock);
+    await typeAccount.add(typeAccountMock)
 
     userMock = {
       username: "teste3",
@@ -192,32 +196,31 @@ describe("logoutTest", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
-  });
+    }
+  })
 
-  test("try logout", async () => {
-    await userDomain.user_Create(userMock);
+  it("try logout", async () => {
+    expect.hasAssertions()
+    await userDomain.user_Create(userMock)
 
     const userLogin = {
       username: "teste3",
       password: "teste3",
       typeAccount: { labTec: true }
-    };
+    }
 
-    const session = await loginDomain.login(userLogin);
+    const session = await loginDomain.login(userLogin)
 
-    const logoutSucess = await loginDomain.logout(session.token);
+    const logoutSucess = await loginDomain.logout(session.token)
 
-    const sucess = {
-      logout: true
-    };
+    const sucess = { logout: true }
 
-    expect(logoutSucess).toEqual(sucess);
-  });
-});
+    expect(logoutSucess).toStrictEqual(sucess)
+  })
+})
 
 describe("sessionDomain", () => {
-  let userMock = null;
+  let userMock = null
 
   beforeAll(async () => {
     const typeAccountMock = {
@@ -251,9 +254,9 @@ describe("sessionDomain", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
+    }
 
-    await typeAccount.add(typeAccountMock);
+    await typeAccount.add(typeAccountMock)
 
     userMock = {
       username: "teste78",
@@ -286,24 +289,25 @@ describe("sessionDomain", () => {
       delROs: false,
       updateRos: false,
       addStatus: false
-    };
-  });
+    }
+  })
 
-  test("checkSessionIsValid", async () => {
-    const user = await userDomain.user_Create(userMock);
+  it("checkSessionIsValid", async () => {
+    expect.hasAssertions()
+    const user = await userDomain.user_Create(userMock)
     const loginMock = {
       username: user.username,
       password: user.username,
       typeAccount: { labTec: true }
-    };
-    const login = await loginDomain.login(loginMock);
+    }
+    const login = await loginDomain.login(loginMock)
 
     const session = await sessionDomain.checkSessionIsValid(
       login.token,
       login.username
-    );
+    )
 
-    expect(session).toEqual(true);
-    expect(await sessionDomain.checkSessionIsValid()).toEqual(false);
-  });
-});
+    expect(session).toStrictEqual(true)
+    expect(await sessionDomain.checkSessionIsValid()).toStrictEqual(false)
+  })
+})

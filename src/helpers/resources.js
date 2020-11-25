@@ -1,4 +1,3 @@
-const resources = {
-}
+const resources = {}
 
 module.exports = resources

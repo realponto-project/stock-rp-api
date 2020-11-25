@@ -1,33 +1,35 @@
-const request = require('../../../../helpers/request')
+const request = require("../../../../helpers/request")
 
-describe('carController', () => {
+describe("carController", () => {
   let headers = null
 
+  // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     const loginBody = {
-      username: 'modrp',
-      password: 'modrp',
-      typeAccount: { labTec: true },
+      username: "modrp",
+      password: "modrp",
+      typeAccount: { labTec: true }
     }
 
-    const login = await request().post('/oapi/login', loginBody)
+    const login = await request().post("/oapi/login", loginBody)
 
     const { token, username } = login.body
 
     headers = {
       token,
-      username,
+      username
     }
   })
 
-  test('create', async () => {
+  it("create", async () => {
+    expect.hasAssertions()
     const carMock = {
-      model: 'GOL',
-      year: '2007',
-      plate: 'ABC-9876',
+      model: "GOL",
+      year: "2007",
+      plate: "ABC-9876"
     }
 
-    const response = await request().post('/api/car', carMock, { headers })
+    const response = await request().post("/api/car", carMock, { headers })
 
     const { body, statusCode } = response
 
@@ -37,8 +39,9 @@ describe('carController', () => {
     expect(body.plate).toBe(carMock.plate)
   })
 
-  test('getAll', async () => {
-    const resposta = await request().get('/api/car', { headers })
+  it("getAll", async () => {
+    expect.hasAssertions()
+    const resposta = await request().get("/api/car", { headers })
 
     const { body, statusCode } = resposta
 

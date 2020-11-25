@@ -1,4 +1,4 @@
-"use strict";
+
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -12,33 +12,25 @@ module.exports = {
       amount: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        validate: {
-          min: 0
-        }
+        validate: { min: 0 }
       },
 
       priceUnit: {
         type: Sequelize.FLOAT,
         allowNull: false,
-        validate: {
-          min: 0
-        }
+        validate: { min: 0 }
       },
 
       discount: {
         type: Sequelize.FLOAT,
         allowNull: false,
-        validate: {
-          min: 0
-        }
+        validate: { min: 0 }
       },
 
       total: {
         type: Sequelize.FLOAT,
         allowNull: false,
-        validate: {
-          min: 0
-        }
+        validate: { min: 0 }
       },
 
       responsibleUser: {
@@ -78,10 +70,10 @@ module.exports = {
         defaultValue: null,
         type: Sequelize.DATE
       }
-    });
+    })
 
-    return supEntrance;
+    return supEntrance
   },
 
   down: queryInterface => queryInterface.dropTable("supEntrance")
-};
+}

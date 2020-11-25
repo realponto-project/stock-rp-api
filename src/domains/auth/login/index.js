@@ -1,72 +1,57 @@
-const R = require("ramda");
-// const bcrypt = require('bcrypt')
+const R = require("ramda")
 
-const database = require("../../../database");
+const database = require("../../../database")
 
-const SessionDomain = require("./session");
+const SessionDomain = require("./session")
 
-const {
-  UnauthorizedError,
-  FieldValidationError,
-} = require("../../../helpers/errors");
-// const { FieldValidationError } = require('../../helpers/errors')
+const { UnauthorizedError } = require("../../../helpers/errors")
 
-const User = database.model("user");
-const Login = database.model("login");
-const Resources = database.model("resources");
-const TypeAccount = database.model("typeAccount");
+const User = database.model("user")
+const Login = database.model("login")
+const Resources = database.model("resources")
+const TypeAccount = database.model("typeAccount")
 
-const sessionDomain = new SessionDomain();
+const sessionDomain = new SessionDomain()
 
 class LoginDomain {
   async login({ username, password, typeAccount }, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
     const login = await Login.findOne({
       include: [
         {
           model: User,
           where: { username },
-          include: [
-            {
-              model: TypeAccount,
-            },
-          ],
-        },
+          include: [{ model: TypeAccount }]
+        }
       ],
-      transaction,
-    });
+      transaction
+    })
 
     if (!login) {
       throw new UnauthorizedError([
         {
-          field: {
-            username: true,
-          },
-          message: "usuario não foi encontrado",
-        },
-      ]);
+          field: { username: true },
+          message: "usuario não foi encontrado"
+        }
+      ])
     }
 
-    const checkPwd = await login.checkPassword(password);
+    const checkPwd = await login.checkPassword(password)
 
     // const checkPwd = await bcrypt.compare(password, login.password)
 
     if (!checkPwd) {
       throw new UnauthorizedError([
         {
-          field: {
-            password: true,
-          },
-          message: "senha incorreta",
-        },
-      ]);
+          field: { password: true },
+          message: "senha incorreta"
+        }
+      ])
     }
     // console.log(JSON.parse(JSON.stringify(login)));
 
-    const session = await sessionDomain.createSession(login.id, {
-      transaction,
-    });
+    const session = await sessionDomain.createSession(login.id, { transaction })
 
     // console.log(JSON.parse(JSON.stringify(session)));
 
@@ -79,21 +64,21 @@ class LoginDomain {
         tecnico: login.user.tecnico,
         modulo: login.user.modulo,
         typeAccount: null,
-        active: session.active,
-      };
+        active: session.active
+      }
     }
 
     const authorizedStock = R.filter(R.propEq("stock", true), [
       typeAccount,
-      login.user.typeAccount,
-    ]);
+      login.user.typeAccount
+    ])
     const authorizedLabTec = R.filter(R.propEq("labTec", true), [
       typeAccount,
-      login.user.typeAccount,
-    ]);
+      login.user.typeAccount
+    ])
 
     if (authorizedStock.length !== 2 && authorizedLabTec.length !== 2) {
-      throw new UnauthorizedError();
+      throw new UnauthorizedError()
     }
 
     const user = await User.findByPk(login.user.id, {
@@ -104,23 +89,17 @@ class LoginDomain {
         "customized",
         "resourceId",
         "typeAccountId",
-        "modulo",
+        "modulo"
       ],
-      include: [
-        {
-          model: TypeAccount,
-        },
-      ],
-    });
+      include: [{ model: TypeAccount }]
+    })
 
-    let resource = {};
+    let resource = {}
 
     if (user.customized) {
-      const { resourceId } = user;
+      const { resourceId } = user
 
-      const resourceReturn = await Resources.findByPk(resourceId, {
-        transaction,
-      });
+      const resourceReturn = await Resources.findByPk(resourceId, { transaction })
 
       resource = {
         addCompany: resourceReturn.addCompany,
@@ -149,19 +128,15 @@ class LoginDomain {
         delROs: resourceReturn.delROs,
         updateRos: resourceReturn.updateRos,
         addStatus: resourceReturn.addStatus,
-        suprimento: resourceReturn.suprimento,
-      };
+        suprimento: resourceReturn.suprimento
+      }
     } else {
-      const { typeAccountId } = user;
+      const { typeAccountId } = user
 
       const typeAccountReturn = await TypeAccount.findByPk(typeAccountId, {
-        include: [
-          {
-            model: Resources,
-          },
-        ],
-        transaction,
-      });
+        include: [{ model: Resources }],
+        transaction
+      })
 
       resource = {
         addCompany: typeAccountReturn.resource.addCompany,
@@ -190,8 +165,8 @@ class LoginDomain {
         delROs: typeAccountReturn.resource.delROs,
         updateRos: typeAccountReturn.resource.updateRos,
         addStatus: typeAccountReturn.resource.addStatus,
-        suprimento: typeAccountReturn.resource.suprimento,
-      };
+        suprimento: typeAccountReturn.resource.suprimento
+      }
     }
 
     const response = {
@@ -202,15 +177,15 @@ class LoginDomain {
       tecnico: login.user.tecnico,
       modulo: user.modulo,
       typeAccount: user.typeAccount.typeName,
-      active: session.active,
-    };
+      active: session.active
+    }
 
-    return response;
+    return response
   }
 
   async logout(token, options = {}) {
-    const { transaction = null } = options;
-    await sessionDomain.turnInvalidSession(token, { transaction });
+    const { transaction = null } = options
+    await sessionDomain.turnInvalidSession(token, { transaction })
 
     // const isValid = await sessionDomain.checkSessionIsValid(sessionId)
 
@@ -221,11 +196,9 @@ class LoginDomain {
     //   }])
     // }
 
-    const sucess = {
-      logout: true,
-    };
-    return sucess;
+    const sucess = { logout: true }
+    return sucess
   }
 }
 
-module.exports = LoginDomain;
+module.exports = LoginDomain

@@ -1,40 +1,39 @@
-const R = require("ramda");
+const R = require("ramda")
 const {
   UniqueConstraintError,
   Error: SequelizeError,
   ValidationError: DatabaseValidationError
-} = require("sequelize");
-const { Base, ValidationError } = require("../errors");
+} = require("sequelize")
+const { Base, ValidationError } = require("../errors")
 
 const UniqueConstraintErrorFormatter = R.applySpec({
   field: R.propOr(null, "path"),
   message: R.propOr("must be unique", "message"),
   type: () => "unique_violation"
-});
+})
 
 const validationErrorFormatter = R.applySpec({
   field: R.pipe(R.propOr("", "field")),
   message: R.propOr("required", "message"),
   type: () => "required"
-});
+})
 
-const getError = (status = 500, name = "Internal Error", formatter) =>
-  R.applySpec({
-    status: R.propOr(status, "status"),
-    name: () => name,
-    errors: R.pipe(R.propOr([], "errors"), R.map(formatter)),
-    fields: R.pipe(R.propOr([], "fields"), R.map(formatter))
-  });
+const getError = (status = 500, name = "Internal Error", formatter) => R.applySpec({
+  status: R.propOr(status, "status"),
+  name: () => name,
+  errors: R.pipe(R.propOr([], "errors"), R.map(formatter)),
+  fields: R.pipe(R.propOr([], "fields"), R.map(formatter))
+})
 
-const baseErrorFormatter = R.applySpec({
-  field: R.propOr([], "field"),
-  message: R.propOr("required", "message"),
-  type: R.propOr("required")
-});
+// const baseErrorFormatter = R.applySpec({
+//   field: R.propOr([], "field"),
+//   message: R.propOr("required", "message"),
+//   type: R.propOr("required")
+// })
 
-const formatErrorResponse = err => {
+const formatErrorResponse = (err) => {
   if (err instanceof UniqueConstraintError) {
-    return getError(409, "unique_constraint", validationErrorFormatter)(err);
+    return getError(409, "unique_constraint", validationErrorFormatter)(err)
   }
 
   if (err instanceof DatabaseValidationError) {
@@ -42,7 +41,7 @@ const formatErrorResponse = err => {
       409,
       "validation_error",
       UniqueConstraintErrorFormatter
-    )(err);
+    )(err)
   }
 
   if (err instanceof SequelizeError) {
@@ -50,15 +49,15 @@ const formatErrorResponse = err => {
       409,
       "general_database",
       UniqueConstraintErrorFormatter
-    )(err);
+    )(err)
   }
 
   if (err instanceof ValidationError) {
-    return getError(422, "validation_error", validationErrorFormatter)(err);
+    return getError(422, "validation_error", validationErrorFormatter)(err)
   }
 
   if (err instanceof Base) {
-    return getError(err.statusCode, err.message, validationErrorFormatter)(err);
+    return getError(err.statusCode, err.message, validationErrorFormatter)(err)
     // return getError(err.statusCode, err.message, baseErrorFormatter)(err);
   }
 
@@ -67,10 +66,10 @@ const formatErrorResponse = err => {
       status: 500,
       name: "unknown",
       message: err.message
-    };
+    }
   }
 
-  return getError()(err);
-};
+  return getError()(err)
+}
 
-module.exports = formatErrorResponse;
+module.exports = formatErrorResponse

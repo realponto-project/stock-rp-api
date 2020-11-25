@@ -1,26 +1,26 @@
-const R = require("ramda");
-const Cnpj = require("@fnando/cnpj/es");
-const Cpf = require("@fnando/cpf/es");
+const R = require("ramda")
+const Cnpj = require("@fnando/cnpj/es")
+const Cpf = require("@fnando/cpf/es")
 
-const { FieldValidationError } = require("../../../helpers/errors");
-const formatQuery = require("../../../helpers/lazyLoad");
-const database = require("../../../database");
-const SupContactDomain = require("../contact");
+const { FieldValidationError } = require("../../../helpers/errors")
+const formatQuery = require("../../../helpers/lazyLoad")
+const database = require("../../../database")
+const SupContactDomain = require("../contact")
 
-const SupProvider = database.model("supProvider");
-const SupContact = database.model("supContact");
+const SupProvider = database.model("supProvider")
+const SupContact = database.model("supContact")
 
-const supContactDomain = new SupContactDomain();
+const supContactDomain = new SupContactDomain()
 
 module.exports = class SupProviderDomain {
   async create(body, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
-    const supProvider = body;
+    const supProvider = body
 
-    const notHasProp = (prop) => R.not(R.has(prop, supProvider));
+    const notHasProp = prop => R.not(R.has(prop, supProvider))
 
-    let errors = false;
+    let errors = false
 
     const field = {
       razaoSocial: false,
@@ -32,8 +32,8 @@ module.exports = class SupProviderDomain {
       state: false,
       neighborhood: false,
       complement: false,
-      contacts: false,
-    };
+      contacts: false
+    }
 
     const message = {
       razaoSocial: "",
@@ -45,180 +45,183 @@ module.exports = class SupProviderDomain {
       state: "",
       neighborhood: "",
       complement: "",
-      contacts: "",
-    };
+      contacts: ""
+    }
 
     if (notHasProp("razaoSocial") || !supProvider.razaoSocial) {
-      errors = true;
-      field.razaoSocial = true;
-      message.razaoSocial = "razaoSocial cannot null";
+      errors = true
+      field.razaoSocial = true
+      message.razaoSocial = "razaoSocial cannot null"
     } else if (
       await SupProvider.findOne({
         where: { razaoSocial: supProvider.razaoSocial },
-        transaction,
+        transaction
       })
     ) {
-      errors = true;
-      field.razaoSocial = true;
-      message.razaoSocial = "razaoSocial already registered";
+      errors = true
+      field.razaoSocial = true
+      message.razaoSocial = "razaoSocial already registered"
     }
 
     if (notHasProp("cnpj") || !supProvider.cnpj) {
-      errors = true;
-      field.cnpj = true;
-      message.cnpj = "cnpj cannot null";
+      errors = true
+      field.cnpj = true
+      message.cnpj = "cnpj cannot null"
     } else {
-      const cnpjOrCpf = supProvider.cnpj.replace(/\D/g, "");
+      const cnpjOrCpf = supProvider.cnpj.replace(/\D/g, "")
 
       if (!Cnpj.isValid(cnpjOrCpf) && !Cpf.isValid(cnpjOrCpf)) {
-        errors = true;
-        field.cnpj = true;
-        message.cnpj = "cnpj or cpf invalid";
+        errors = true
+        field.cnpj = true
+        message.cnpj = "cnpj or cpf invalid"
       } else if (
         await SupProvider.findOne({
-          where: {
-            cnpj: cnpjOrCpf,
-          },
-          transaction,
+          where: { cnpj: cnpjOrCpf },
+          transaction
         })
       ) {
-        errors = true;
-        field.cnpj = true;
-        message.cnpj = "cnpj already registered";
+        errors = true
+        field.cnpj = true
+        message.cnpj = "cnpj already registered"
       }
     }
 
     if (notHasProp("number") || !supProvider.number) {
-      errors = true;
-      field.number = true;
-      message.number = "number cannot null";
+      errors = true
+      field.number = true
+      message.number = "number cannot null"
     }
 
     if (notHasProp("zipCode") || !supProvider.zipCode) {
-      errors = true;
-      field.zipCode = true;
-      message.zipCode = "zipCode cannot null";
+      errors = true
+      field.zipCode = true
+      message.zipCode = "zipCode cannot null"
     } else if (!/^\d{8}$/.test(supProvider.zipCode.replace(/\D/gi, ""))) {
-      errors = true;
-      field.zipCode = true;
-      message.zipCode = "zipCode invalid";
+      errors = true
+      field.zipCode = true
+      message.zipCode = "zipCode invalid"
     }
     if (notHasProp("street") || !supProvider.street) {
-      errors = true;
-      field.street = true;
-      message.street = "street cannot null";
+      errors = true
+      field.street = true
+      message.street = "street cannot null"
     }
     if (notHasProp("city") || !supProvider.city) {
-      errors = true;
-      field.city = true;
-      message.city = "city cannot null";
+      errors = true
+      field.city = true
+      message.city = "city cannot null"
     }
     if (notHasProp("state") || !supProvider.state) {
-      errors = true;
-      field.state = true;
-      message.state = "state cannot null";
+      errors = true
+      field.state = true
+      message.state = "state cannot null"
     }
     if (notHasProp("neighborhood") || !supProvider.neighborhood) {
-      errors = true;
-      field.neighborhood = true;
-      message.neighborhood = "neighborhood cannot null";
+      errors = true
+      field.neighborhood = true
+      message.neighborhood = "neighborhood cannot null"
     }
 
     if (
-      notHasProp("contacts") ||
-      !supProvider.contacts ||
-      supProvider.contacts.length === 0
+      notHasProp("contacts")
+      || !supProvider.contacts
+      || supProvider.contacts.length === 0
     ) {
-      errors = true;
-      field.contacts = true;
-      message.contacts = "contacts cannot null";
+      errors = true
+      field.contacts = true
+      message.contacts = "contacts cannot null"
     }
     if (notHasProp("complement")) {
-      errors = true;
-      field.complement = true;
-      message.complement = "complement cannot undefined";
+      errors = true
+      field.complement = true
+      message.complement = "complement cannot undefined"
     }
 
     if (errors) {
-      throw new FieldValidationError([{ field, message }]);
+      throw new FieldValidationError([{ field, message }])
     }
 
-    const supProviderCreated = await SupProvider.create(supProvider, {
-      transaction,
-    });
+    const supProviderCreated = await SupProvider.create(supProvider, { transaction })
 
-    const { contacts } = supProvider;
+    const { contacts } = supProvider
 
     await Promise.all(
       contacts.map(
-        async (contact) =>
-          await supContactDomain.create(
-            { ...contact, supProviderId: supProviderCreated.id },
-            { transaction }
-          )
+        // eslint-disable-next-line no-return-await
+        async contact => await supContactDomain.create(
+          { ...contact, supProviderId: supProviderCreated.id },
+          { transaction }
+        )
       )
-    );
+    )
 
-    return await SupProvider.findByPk(supProviderCreated.id, {
+    const response = await SupProvider.findByPk(supProviderCreated.id, {
       include: [{ model: SupContact }],
-      transaction,
-    });
+      transaction
+    })
+
+    return response
   }
 
   async getAll(options = {}) {
-    const { query = null, transaction = null } = options;
+    const { query = null, transaction = null } = options
 
-    const newQuery = Object.assign({}, query);
+    const newQuery = Object.assign({}, query)
 
-    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
+    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery)
 
     const supProviders = await SupProvider.findAndCountAll({
       where: getWhere("supProvider"),
       include: [{ model: SupContact }],
-      order: [["createdAt", "ASC"]],
+      order: [
+        [
+          "createdAt",
+          "ASC"
+        ]
+      ],
       limit,
       offset,
-      transaction,
-    });
+      transaction
+    })
 
-    const { rows, count } = supProviders;
+    const { rows, count } = supProviders
 
     if (rows.length === 0) {
       return {
         page: null,
         show: 0,
         count,
-        rows: [],
-      };
+        rows: []
+      }
     }
 
     return {
       page: pageResponse,
       show: R.min(count, limit),
       count,
-      rows,
-    };
+      rows
+    }
   }
 
   async update(body, options = {}) {
-    const { transaction = null } = options;
-    const supProvider = R.omit(["id"], body);
+    const { transaction = null } = options
+    const supProvider = R.omit(["id"], body)
 
     const oldSupProvider = await SupProvider.findByPk(body.id, {
       include: [{ model: SupContact }],
-      transaction,
-    });
+      transaction
+    })
 
     if (!oldSupProvider) {
       throw new FieldValidationError({
         field: { id: true },
-        message: { id: "invalid id" },
-      });
+        message: { id: "invalid id" }
+      })
     }
 
-    const notHasProp = (prop) => R.not(R.has(prop, supProvider));
+    const notHasProp = prop => R.not(R.has(prop, supProvider))
 
-    let errors = false;
+    let errors = false
 
     const field = {
       razaoSocial: false,
@@ -230,8 +233,8 @@ module.exports = class SupProviderDomain {
       state: false,
       neighborhood: false,
       complement: false,
-      contacts: false,
-    };
+      contacts: false
+    }
 
     const message = {
       razaoSocial: "",
@@ -243,136 +246,134 @@ module.exports = class SupProviderDomain {
       state: "",
       neighborhood: "",
       complement: "",
-      contacts: "",
-    };
+      contacts: ""
+    }
 
     if (notHasProp("razaoSocial") || !supProvider.razaoSocial) {
-      errors = true;
-      field.razaoSocial = true;
-      message.razaoSocial = "razaoSocial cannot null";
+      errors = true
+      field.razaoSocial = true
+      message.razaoSocial = "razaoSocial cannot null"
     } else if (
       (await SupProvider.findOne({
         where: { razaoSocial: supProvider.razaoSocial },
-        transaction,
-      })) &&
-      oldSupProvider.razaoSocial !== supProvider.razaoSocial
+        transaction
+      }))
+      && oldSupProvider.razaoSocial !== supProvider.razaoSocial
     ) {
-      errors = true;
-      field.razaoSocial = true;
-      message.razaoSocial = "razaoSocial already registered";
+      errors = true
+      field.razaoSocial = true
+      message.razaoSocial = "razaoSocial already registered"
     }
 
     if (notHasProp("cnpj") || !supProvider.cnpj) {
-      errors = true;
-      field.cnpj = true;
-      message.cnpj = "cnpj cannot null";
+      errors = true
+      field.cnpj = true
+      message.cnpj = "cnpj cannot null"
     } else {
-      const cnpjOrCpf = supProvider.cnpj.replace(/\D/g, "");
+      const cnpjOrCpf = supProvider.cnpj.replace(/\D/g, "")
 
       if (!Cnpj.isValid(cnpjOrCpf) && !Cpf.isValid(cnpjOrCpf)) {
-        errors = true;
-        field.cnpj = true;
-        message.cnpj = "cnpj or cpf invalid";
+        errors = true
+        field.cnpj = true
+        message.cnpj = "cnpj or cpf invalid"
       } else if (
         (await SupProvider.findOne({
-          where: {
-            cnpj: cnpjOrCpf,
-          },
-          transaction,
-        })) &&
-        oldSupProvider.cnpj !== cnpjOrCpf
+          where: { cnpj: cnpjOrCpf },
+          transaction
+        }))
+        && oldSupProvider.cnpj !== cnpjOrCpf
       ) {
-        errors = true;
-        field.cnpj = true;
-        message.cnpj = "cnpj already registered";
+        errors = true
+        field.cnpj = true
+        message.cnpj = "cnpj already registered"
       }
     }
 
     if (notHasProp("number") || !supProvider.number) {
-      errors = true;
-      field.number = true;
-      message.number = "number cannot null";
+      errors = true
+      field.number = true
+      message.number = "number cannot null"
     }
 
     if (notHasProp("zipCode") || !supProvider.zipCode) {
-      errors = true;
-      field.zipCode = true;
-      message.zipCode = "zipCode cannot null";
+      errors = true
+      field.zipCode = true
+      message.zipCode = "zipCode cannot null"
     } else if (!/^\d{8}$/.test(supProvider.zipCode.replace(/\D/gi, ""))) {
-      errors = true;
-      field.zipCode = true;
-      message.zipCode = "zipCode invalid";
+      errors = true
+      field.zipCode = true
+      message.zipCode = "zipCode invalid"
     }
     if (notHasProp("street") || !supProvider.street) {
-      errors = true;
-      field.street = true;
-      message.street = "street cannot null";
+      errors = true
+      field.street = true
+      message.street = "street cannot null"
     }
     if (notHasProp("city") || !supProvider.city) {
-      errors = true;
-      field.city = true;
-      message.city = "city cannot null";
+      errors = true
+      field.city = true
+      message.city = "city cannot null"
     }
     if (notHasProp("state") || !supProvider.state) {
-      errors = true;
-      field.state = true;
-      message.state = "state cannot null";
+      errors = true
+      field.state = true
+      message.state = "state cannot null"
     }
     if (notHasProp("neighborhood") || !supProvider.neighborhood) {
-      errors = true;
-      field.neighborhood = true;
-      message.neighborhood = "neighborhood cannot null";
+      errors = true
+      field.neighborhood = true
+      message.neighborhood = "neighborhood cannot null"
     }
 
     if (
-      notHasProp("contacts") ||
-      !supProvider.contacts ||
-      supProvider.contacts.length === 0
+      notHasProp("contacts")
+      || !supProvider.contacts
+      || supProvider.contacts.length === 0
     ) {
-      errors = true;
-      field.contacts = true;
-      message.contacts = "contacts cannot null";
+      errors = true
+      field.contacts = true
+      message.contacts = "contacts cannot null"
     }
 
     if (notHasProp("complement")) {
-      errors = true;
-      field.complement = true;
-      message.complement = "complement cannot undefined";
+      errors = true
+      field.complement = true
+      message.complement = "complement cannot undefined"
     }
 
     if (errors) {
-      throw new FieldValidationError([{ field, message }]);
+      throw new FieldValidationError([{ field, message }])
     }
 
-    let supContacts = oldSupProvider.supContacts;
-    const { contacts } = supProvider;
+    let { supContacts } = oldSupProvider
+    const { contacts } = supProvider
 
     await Promise.all(
       contacts.map(async (contact) => {
         if (R.has("id", contact)) {
           supContacts = supContacts.filter(
-            (supContact) => supContact.id !== contact.id
-          );
+            supContact => supContact.id !== contact.id
+          )
 
-          await supContactDomain.update(contact, { transaction });
+          await supContactDomain.update(contact, { transaction })
         } else {
           await supContactDomain.create(
             { ...contact, supProviderId: oldSupProvider.id },
             { transaction }
-          );
+          )
         }
       })
-    );
+    )
 
     await Promise.all(
       supContacts.map(
-        async (supContact) => await supContact.destroy({ transaction })
+        // eslint-disable-next-line no-return-await
+        async supContact => await supContact.destroy({ transaction })
       )
-    );
+    )
 
-    return await oldSupProvider.update(supProvider, {
-      // include: [{ model: SupContact }],
-      transaction,
-    });
+    const response = await oldSupProvider.update(supProvider, { transaction })
+
+    return response
   }
-};
+}

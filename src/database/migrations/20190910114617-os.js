@@ -1,69 +1,65 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const os = queryInterface.createTable('os', {
+    const os = queryInterface.createTable("os", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
       },
 
       os: {
         type: Sequelize.STRING,
         allowNull: true,
-        unique: true,
+        unique: true
       },
 
       razaoSocial: {
         type: Sequelize.STRING,
-        allowNull: true,
+        allowNull: true
       },
 
       cnpj: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
 
       date: {
         type: Sequelize.DATE,
         defaultValue: new Date(),
         timestamps: false,
-        allowNull: false,
+        allowNull: false
       },
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
       technicianId: {
         type: Sequelize.UUID,
         references: {
-          model: 'technician',
-          key: 'id',
+          model: "technician",
+          key: "id"
         },
-        allowNull: false,
-      },
+        allowNull: false
+      }
     })
 
     os.associate = (models) => {
-      os.belongsToMany(models.productBase, { through: 'osParts' })
-      os.belongsTo(models.technician, {
-        foreignKey: {
-          allowNull: true,
-        },
-      })
+      os.belongsToMany(models.productBase, { through: "osParts" })
+      os.belongsTo(models.technician, { foreignKey: { allowNull: true } })
     }
 
     return os
   },
-  down: queryInterface => queryInterface.dropTable('os'),
+  down: queryInterface => queryInterface.dropTable("os")
 }

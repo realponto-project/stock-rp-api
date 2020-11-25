@@ -1,30 +1,26 @@
-const Sequelize = require('sequelize')
+const Sequelize = require("sequelize")
 
 module.exports = (sequelize) => {
-  const mark = sequelize.define('mark', {
+  const mark = sequelize.define("mark", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
+      primaryKey: true
     },
 
     mark: {
       type: Sequelize.STRING,
       allowNull: false,
-      unique: true,
+      unique: true
     },
     responsibleUser: {
       type: Sequelize.STRING,
-      allowNull: false,
-    },
+      allowNull: false
+    }
   })
 
   mark.associate = (models) => {
-    mark.hasMany(models.product, {
-      foreignKey: {
-        allowNull: false,
-      },
-    })
+    mark.hasMany(models.product, { foreignKey: { allowNull: false } })
   }
   return mark
 }

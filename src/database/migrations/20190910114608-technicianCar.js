@@ -1,42 +1,42 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const technicianCar = queryInterface.createTable('technicianCar', {
+    const technicianCar = queryInterface.createTable("technicianCar", {
       technicianId: {
         type: Sequelize.UUID,
         references: {
-          model: 'technician',
-          key: 'id',
+          model: "technician",
+          key: "id"
         },
-        allowNull: false,
+        allowNull: false
       },
 
       carId: {
         type: Sequelize.UUID,
         references: {
-          model: 'car',
-          key: 'id',
+          model: "car",
+          key: "id"
         },
-        allowNull: false,
+        allowNull: false
       },
 
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
-      },
+        type: Sequelize.DATE
+      }
     })
     return technicianCar
   },
 
-  down: queryInterface => queryInterface.dropTable('technicianCar'),
+  down: queryInterface => queryInterface.dropTable("technicianCar")
 }

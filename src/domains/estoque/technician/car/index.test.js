@@ -1,21 +1,23 @@
-const CarDomain = require('.')
+const CarDomain = require(".")
 
-const { FieldValidationError } = require('../../../../helpers/errors')
+const { FieldValidationError } = require("../../../../helpers/errors")
 
 const carDomain = new CarDomain()
 
-describe('carDomain', () => {
+describe("carDomain", () => {
   let carMock = null
 
+  // eslint-disable-next-line jest/no-hooks
   beforeAll(() => {
     carMock = {
-      model: 'CELTA',
-      year: '2009',
-      plate: 'ABC-1234',
+      model: "CELTA",
+      year: "2009",
+      plate: "ABC-1234"
     }
   })
 
-  test('create car', async () => {
+  it("create car", async () => {
+    expect.hasAssertions()
     const carCreated = await carDomain.add(carMock)
 
     expect(carCreated.model).toBe(carMock.model)
@@ -23,10 +25,11 @@ describe('carDomain', () => {
     expect(carCreated.plate).toBe(carMock.plate)
 
     await expect(carDomain.add(carMock))
-      .rejects.toThrowError(new FieldValidationError())
+      .rejects.toThrow(new FieldValidationError())
   })
 
-  test('getAll', async () => {
+  it("getAll", async () => {
+    expect.hasAssertions()
     const cars = await carDomain.getAll()
 
     expect(cars.length > 0).toBe(true)

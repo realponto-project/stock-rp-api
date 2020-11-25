@@ -1,4 +1,4 @@
-"use strict";
+
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -28,10 +28,10 @@ module.exports = {
         defaultValue: null,
         type: Sequelize.DATE
       }
-    });
+    })
 
-    return manufacturer;
+    return manufacturer
   },
 
   down: queryInterface => queryInterface.dropTable("manufacturer")
-};
+}

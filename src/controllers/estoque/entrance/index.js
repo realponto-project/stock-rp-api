@@ -1,7 +1,7 @@
-const R = require('ramda')
+const R = require("ramda")
 
-const EntranceDomain = require('../../../domains/estoque/entrance')
-const database = require('../../../database')
+const EntranceDomain = require("../../../domains/estoque/entrance")
+const database = require("../../../database")
 
 const entranceDomain = new EntranceDomain()
 
@@ -35,8 +35,8 @@ const getAll = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has('query', req)) {
-      if (R.has('query', req.query)) {
+    if (R.has("query", req)) {
+      if (R.has("query", req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -68,5 +68,5 @@ module.exports = {
   add,
   update,
   getAll,
-  delet,
+  delet
 }

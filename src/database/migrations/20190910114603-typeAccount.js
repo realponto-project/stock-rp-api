@@ -1,55 +1,51 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const typeAccount = queryInterface.createTable('typeAccount', {
+    const typeAccount = queryInterface.createTable("typeAccount", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
       },
       typeName: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
+        unique: true
       },
       stock: {
         type: Sequelize.BOOLEAN,
-        defaultValue: false,
+        defaultValue: false
       },
       labTec: {
         type: Sequelize.BOOLEAN,
-        defaultValue: false,
+        defaultValue: false
       },
       responsibleUser: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
-      },
+        type: Sequelize.DATE
+      }
     })
 
     typeAccount.associate = (models) => {
-      typeAccount.hasOne(models.resources, {
-        foreignKey: {
-          allowNull: true,
-        },
-      })
+      typeAccount.hasOne(models.resources, { foreignKey: { allowNull: true } })
     }
 
 
     return typeAccount
   },
-  down: queryInterface => queryInterface.dropTable('typeAccount'),
+  down: queryInterface => queryInterface.dropTable("typeAccount")
 }

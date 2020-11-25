@@ -1,46 +1,41 @@
-const FreeMarketDomain = require(".");
-// const TechnicianDomain = require('../../technician')
-// const CarDomain = require('../../technician/car')
-const MarkDomain = require("../../product/mark");
-const ProductDomain = require("../../product");
-const CompanyDomain = require("../../../general/company");
-const EntranceDomain = require("../../entrance");
-const EquipModelDomain = require("../../product/equip/equipModel");
+const FreeMarketDomain = require(".")
+const MarkDomain = require("../../product/mark")
+const ProductDomain = require("../../product")
+const CompanyDomain = require("../../../general/company")
+const EntranceDomain = require("../../entrance")
+const EquipModelDomain = require("../../product/equip/equipType")
 
-const database = require("../../../../database");
-// // const { FieldValidationError } = require('../../../helpers/errors')
+const database = require("../../../../database")
 
-// const kitDomain = new KitDomain()
-// const technicianDomain = new TechnicianDomain()
-// const carDomain = new CarDomain()
-const markDomain = new MarkDomain();
-const productDomain = new ProductDomain();
-const companyDomain = new CompanyDomain();
-const entranceDomain = new EntranceDomain();
-const freeMarketDomain = new FreeMarketDomain();
-const equipModelDomain = new EquipModelDomain();
+const markDomain = new MarkDomain()
+const productDomain = new ProductDomain()
+const companyDomain = new CompanyDomain()
+const entranceDomain = new EntranceDomain()
+const freeMarketDomain = new FreeMarketDomain()
+const equipModelDomain = new EquipModelDomain()
 
-const ProductBase = database.model("productBase");
-const StockBase = database.model("stockBase");
+const ProductBase = database.model("productBase")
+const StockBase = database.model("stockBase")
 
 describe("freeMarketDomain", () => {
-  let productCreated = null;
-  let productBase = null;
+  let productCreated = null
+  let productBase = null
 
+  // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     const mark = {
       mark: "FLIP",
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    await markDomain.add(mark);
+    await markDomain.add(mark)
 
     const type = {
       type: "TESTE TYPE 45",
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    await equipModelDomain.addType(type);
+    await equipModelDomain.addType(type)
 
     const productMock = {
       category: "equipamento",
@@ -51,10 +46,10 @@ describe("freeMarketDomain", () => {
       name: "PREMIUM",
       serial: true,
       type: "TESTE TYPE 45",
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    productCreated = await productDomain.add(productMock);
+    productCreated = await productDomain.add(productMock)
 
     const companyMock = {
       razaoSocial: "teste saida MERCADO LIVRE",
@@ -69,10 +64,10 @@ describe("freeMarketDomain", () => {
       nameContact: "joseildom",
       email: "josealdo@gmasi.com",
       responsibleUser: "modrp",
-      relation: "fornecedor",
-    };
+      relation: "fornecedor"
+    }
 
-    const companyCreated = await companyDomain.add(companyMock);
+    const companyCreated = await companyDomain.add(companyMock)
 
     const entranceMock = {
       amountAdded: "2",
@@ -80,21 +75,23 @@ describe("freeMarketDomain", () => {
       productId: productCreated.id,
       companyId: companyCreated.id,
       responsibleUser: "modrp",
-      serialNumbers: ["123456789", "987654321"],
-    };
+      serialNumbers: [
+        "123456789",
+        "987654321"
+      ]
+    }
 
-    await entranceDomain.add(entranceMock);
+    await entranceDomain.add(entranceMock)
 
     productBase = await ProductBase.findOne({
-      where: {
-        productId: productCreated.id,
-      },
+      where: { productId: productCreated.id },
       include: [{ model: StockBase, where: { stockBase: "ESTOQUE" } }],
-      transacition: null,
-    });
-  });
+      transacition: null
+    })
+  })
 
-  test("create", async () => {
+  it("create", async () => {
+    expect.hasAssertions()
     const freeMarketMock = {
       trackingCode: "AA123454889BR",
       name: "TEST",
@@ -103,25 +100,26 @@ describe("freeMarketDomain", () => {
         {
           productBaseId: productBase.id,
           amount: "1",
-          serialNumberArray: ["123456789"],
-        },
-      ],
-    };
+          serialNumberArray: ["123456789"]
+        }
+      ]
+    }
 
-    const response = await freeMarketDomain.add(freeMarketMock);
+    const response = await freeMarketDomain.add(freeMarketMock)
 
-    expect(response.trackingCode).toBe(freeMarketMock.trackingCode);
-    expect(response.name).toBe(freeMarketMock.name);
-    expect(response.zipCode).toBe(freeMarketMock.zipCode);
-    expect(response.state).toBe(freeMarketMock.state);
-    expect(response.city).toBe(freeMarketMock.city);
-    expect(response.street).toBe(freeMarketMock.street);
-    expect(response.number).toBe(freeMarketMock.number);
-    expect(response.cnpjOrCpf).toBe(freeMarketMock.cnpjOrCpf);
-  });
+    expect(response.trackingCode).toBe(freeMarketMock.trackingCode)
+    expect(response.name).toBe(freeMarketMock.name)
+    expect(response.zipCode).toBe(freeMarketMock.zipCode)
+    expect(response.state).toBe(freeMarketMock.state)
+    expect(response.city).toBe(freeMarketMock.city)
+    expect(response.street).toBe(freeMarketMock.street)
+    expect(response.number).toBe(freeMarketMock.number)
+    expect(response.cnpjOrCpf).toBe(freeMarketMock.cnpjOrCpf)
+  })
 
-  test("getAll", async () => {
-    const freeMarketList = await freeMarketDomain.getAll();
-    expect(freeMarketList.rows.length > 0).toBeTruthy();
-  });
-});
+  it("getAll", async () => {
+    expect.hasAssertions()
+    const freeMarketList = await freeMarketDomain.getAll()
+    expect(freeMarketList.rows.length > 0).toBeTruthy()
+  })
+})

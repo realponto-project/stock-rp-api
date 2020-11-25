@@ -1,7 +1,7 @@
-const router = require("express").Router({ mergeParams: true });
-const stockController = require("../../../controllers/estoque");
+const router = require("express").Router({ mergeParams: true })
+const stockController = require("../../../controllers/estoque")
 
-router.get("", stockController.getAll);
-router.put("/updateProductBase", stockController.updatteProductBase);
+router.get("", stockController.getAll)
+router.put("/updateProductBase", stockController.updatteProductBase)
 
-module.exports = router;
+module.exports = router

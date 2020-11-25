@@ -1,14 +1,31 @@
 {
-  "parser": "babel-eslint"
-  // "extends": "airbnb-base",
-  // "env": {
-  //   "es6": true,
-  //   "node": true,
-  //   "jest/globals": true
-  // },
+  "parser": "babel-eslint",
+  "extends": ["airbnb-base", "plugin:jest/all"],
+  // "extends": ["airbnb", "airbnb/hooks"],
+  // "extends": ["airbnb",
+  //   "prettier",
+  //   "prettier/react"],
+  "env": {
+    "es6": true,
+    "node": true
+    // "jest/globals": true
+  },
   // "plugins": ["jest"],
-  // "rules": {
-  //   "semi": [2, "never"],
-  //   "class-methods-use-this": "off"
-  // }
+  "rules": {
+    "semi": [2, "never"],
+    "class-methods-use-this": "off",
+    "quotes": [2, "double", { "avoidEscape": true }],
+    "comma-dangle": ["error", "never"],
+    "max-len": [2, {"code": 100, "tabWidth": 4, "ignoreUrls": true}],
+    "array-bracket-newline": ["error", { "multiline": true }],
+    "array-bracket-spacing": ["error", "never"],
+    "array-element-newline": ["error", "always"],
+    "object-curly-newline": ["error", { "multiline": true }],
+    "object-curly-spacing": ["error", "always"],
+    "object-property-newline": ["error", { "allowAllPropertiesOnSameLine": true }],
+    "eol-last": ["error", "always"],
+    "function-call-argument-newline": ["error", "consistent"],
+    "lines-between-class-members": ["error", "always"],
+    "multiline-ternary": ["error", "always-multiline"]
+  }
 }

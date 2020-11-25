@@ -1,130 +1,130 @@
-const R = require("ramda");
-const { FieldValidationError } = require("../../../helpers/errors");
-const database = require("../../../database");
-const formatQuery = require("../../../helpers/lazyLoad");
-const Manufacturer = database.model("manufacturer");
+const R = require("ramda")
+const { FieldValidationError } = require("../../../helpers/errors")
+const database = require("../../../database")
+const formatQuery = require("../../../helpers/lazyLoad")
+
+const Manufacturer = database.model("manufacturer")
 
 module.exports = class ManufacturerDomain {
   async create(body, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
-    const manufacturer = body;
+    const manufacturer = body
 
-    const notHasProp = (prop) => R.not(R.has(prop, manufacturer));
+    const notHasProp = prop => R.not(R.has(prop, manufacturer))
 
-    let errors = false;
+    let errors = false
 
-    const field = {
-      name: false,
-    };
+    const field = { name: false }
 
-    const message = {
-      name: "",
-    };
+    const message = { name: "" }
 
     if (notHasProp("name") || !manufacturer.name) {
-      errors = true;
-      field.name = true;
-      message.name = "name cannot null";
+      errors = true
+      field.name = true
+      message.name = "name cannot null"
     } else if (
       await Manufacturer.findOne({
         where: { name: manufacturer.name },
-        transaction,
+        transaction
       })
     ) {
-      errors = true;
-      field.name = true;
-      message.name = "name already registered";
+      errors = true
+      field.name = true
+      message.name = "name already registered"
     }
 
     if (errors) {
-      throw new FieldValidationError([{ field, message }]);
+      throw new FieldValidationError([{ field, message }])
     }
 
-    return await Manufacturer.create(manufacturer, { transaction });
+    const response = await Manufacturer.create(manufacturer, { transaction })
+
+    return response
   }
 
   async getAll(options = {}) {
-    const { query = null, transaction = null } = options;
+    const { query = null, transaction = null } = options
 
-    const newQuery = Object.assign({}, query);
+    const newQuery = Object.assign({}, query)
 
-    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
+    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery)
 
     const manufacturers = await Manufacturer.findAndCountAll({
       where: getWhere("manufacturer"),
-      order: [["createdAt", "ASC"]],
+      order: [
+        [
+          "createdAt",
+          "ASC"
+        ]
+      ],
       limit,
       offset,
-      transaction,
-    });
+      transaction
+    })
 
-    const { rows, count } = manufacturers;
+    const { rows, count } = manufacturers
 
     if (rows.length === 0) {
       return {
         page: null,
         show: 0,
         count,
-        rows: [],
-      };
+        rows: []
+      }
     }
 
     return {
       page: pageResponse,
       show: R.min(count, limit),
       count,
-      rows,
-    };
+      rows
+    }
   }
 
   async update(body, options = {}) {
-    const { transaction = null } = options;
-    const manufacturer = R.omit(["id"], body);
+    const { transaction = null } = options
+    const manufacturer = R.omit(["id"], body)
 
-    const oldManufacturer = await Manufacturer.findByPk(body.id, {
-      transaction,
-    });
+    const oldManufacturer = await Manufacturer.findByPk(body.id, { transaction })
 
     if (!oldManufacturer) {
       throw new FieldValidationError({
         field: { id: true },
-        message: { id: "invalid id" },
-      });
+        message: { id: "invalid id" }
+      })
     }
 
-    const notHasProp = (prop) => R.not(R.has(prop, manufacturer));
+    const notHasProp = prop => R.not(R.has(prop, manufacturer))
 
-    let errors = false;
+    let errors = false
 
-    const field = {
-      name: false,
-    };
+    const field = { name: false }
 
-    const message = {
-      name: "",
-    };
+    const message = { name: "" }
 
     if (notHasProp("name") || !manufacturer.name) {
-      errors = true;
-      field.name = true;
-      message.name = "name cannot null";
+      errors = true
+      field.name = true
+      message.name = "name cannot null"
     } else if (
       (await Manufacturer.findOne({
         where: { name: manufacturer.name },
-        transaction,
-      })) &&
-      oldManufacturer.name !== manufacturer.name
+        transaction
+      }))
+      && oldManufacturer.name !== manufacturer.name
     ) {
-      errors = true;
-      field.name = true;
-      message.name = "name already registered";
+      errors = true
+      field.name = true
+      message.name = "name already registered"
     }
 
     if (errors) {
-      throw new FieldValidationError([{ field, message }]);
+      throw new FieldValidationError([{ field, message }])
     }
 
-    return await oldManufacturer.update(manufacturer, { transaction });
+    const response = await oldManufacturer.update(manufacturer, { transaction })
+
+    return response
   }
-};
+}

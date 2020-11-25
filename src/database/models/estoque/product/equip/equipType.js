@@ -1,23 +1,23 @@
-const Sequelize = require('sequelize')
+const Sequelize = require("sequelize")
 
 module.exports = (sequelize) => {
-  const equipType = sequelize.define('equipType', {
+  const equipType = sequelize.define("equipType", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
+      primaryKey: true
     },
 
     type: {
       type: Sequelize.STRING,
       allowNull: false,
-      unique: true,
+      unique: true
     },
 
     responsibleUser: {
       type: Sequelize.STRING,
-      allowNull: false,
-    },
+      allowNull: false
+    }
   })
 
   return equipType

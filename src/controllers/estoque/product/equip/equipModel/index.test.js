@@ -1,43 +1,43 @@
-const request = require('../../../../../helpers/request')
+const request = require("../../../../../helpers/request")
 
-// const database = require('../../../database')
-
-
-describe('equipModelController', () => {
+describe("equipModelController", () => {
   let equipTypeMock = null
   let headers = null
 
+  // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     equipTypeMock = {
-      type: 'CATRACA',
-      responsibleUser: 'modrp',
+      type: "CATRACA",
+      responsibleUser: "modrp"
     }
 
     const loginBody = {
-      username: 'modrp',
-      password: 'modrp',
-      typeAccount: { labTec: true },
+      username: "modrp",
+      password: "modrp",
+      typeAccount: { labTec: true }
     }
 
-    const login = await request().post('/oapi/login', loginBody)
+    const login = await request().post("/oapi/login", loginBody)
 
     const { token, username } = login.body
 
     headers = {
       token,
-      username,
+      username
     }
   })
 
-  test('create equipType', async () => {
-    const response = await request().post('/api/equipModel/addType', equipTypeMock, { headers })
+  it("create equipType", async () => {
+    expect.hasAssertions()
+    const response = await request().post("/api/equipModel/addType", equipTypeMock, { headers })
 
     expect(response.statusCode).toBe(200)
     expect(response.body.type).toBe(equipTypeMock.type)
   })
 
-  test('getAllTypes', async () => {
-    const resposta = await request().get('/api/equipModel/getAllType', { headers })
+  it("getAllTypes", async () => {
+    expect.hasAssertions()
+    const resposta = await request().get("/api/equipModel/getAllType", { headers })
 
     const { body, statusCode } = resposta
 

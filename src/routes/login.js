@@ -1,22 +1,8 @@
-const router = require("express").Router({ mergeParams: true });
-const loginController = require("../controllers/login");
-const utilController = require("../controllers/util");
+const router = require("express").Router({ mergeParams: true })
+const loginController = require("../controllers/login")
 
-router.get("/auth", loginController.checkSessionIsValid);
-router.post("/login", loginController.loginController);
-router.delete("/logout", loginController.logoutController);
+router.get("/auth", loginController.checkSessionIsValid)
+router.post("/login", loginController.loginController)
+router.delete("/logout", loginController.logoutController)
 
-// router.get("/util/deleteEComerce", utilController.deleteEComerce);
-// router.get(
-//   "/util/associateTechnicianReverve",
-//   utilController.associateTechnicianReverve
-// );
-// router.get("/util/writeDefautsEntrances", utilController.writeDefautsEntrances);
-// router.get("/util/writeDefautsConserto", utilController.writeDefautsConserto);
-// router.get("/util/writeDefautsProducts", utilController.writeDefautsProducts);
-
-router.get("/util/findAllTable", utilController.findAllTable);
-// router.get("/util/pdfStock", utilController.pdfStock);
-router.get("/util/getBug", utilController.getBug);
-
-module.exports = router;
+module.exports = router

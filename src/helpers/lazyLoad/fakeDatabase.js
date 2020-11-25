@@ -1,34 +1,34 @@
-const Sequelize = require('sequelize')
+const Sequelize = require("sequelize")
 
-const moment = require('moment')
+const moment = require("moment")
 
-const database = require('../../database')
+const database = require("../../database")
 
-const table1 = database.define('table1', {
+const table1 = database.define("table1", {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV4,
-    primaryKey: true,
+    primaryKey: true
   },
 
   name: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: false
   },
 
   motherName: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: false
   },
 
   fatherName: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: false
   },
 
   password: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: false
   },
 
   birthday: {
@@ -36,38 +36,38 @@ const table1 = database.define('table1', {
     allowNull: false,
     set(birthday) {
       const formattedBirthday = moment(birthday)
-        .startOf('day')
+        .startOf("day")
         .toDate()
 
-      this.setDataValue('birthday', formattedBirthday)
-    },
-  },
+      this.setDataValue("birthday", formattedBirthday)
+    }
+  }
 })
 
-const FakeTableNestedHasOne = database.define('nestedOne', {
+const FakeTableNestedHasOne = database.define("nestedOne", {
   name: {
     type: Sequelize.STRING,
-    allowNull: false,
-  },
+    allowNull: false
+  }
 })
 
-const FakeTableNestedHasMany = database.define('nestedHasManyTable', {
+const FakeTableNestedHasMany = database.define("nestedHasManyTable", {
   name: {
     type: Sequelize.STRING,
-    allowNull: false,
-  },
+    allowNull: false
+  }
 })
 
-const FakeTableNestedBelongsToMany = database.define('nestedBelongs', {
+const FakeTableNestedBelongsToMany = database.define("nestedBelongs", {
   name: {
     type: Sequelize.STRING,
-    allowNull: false,
-  },
+    allowNull: false
+  }
 })
 
 table1.hasOne(FakeTableNestedHasOne)
 table1.hasMany(FakeTableNestedHasMany)
-table1.belongsToMany(FakeTableNestedBelongsToMany, { through: 'belongThrough' })
+table1.belongsToMany(FakeTableNestedBelongsToMany, { through: "belongThrough" })
 
 
 module.exports = { database }

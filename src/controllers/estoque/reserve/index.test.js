@@ -1,42 +1,42 @@
-const request = require("../../../helpers/request");
+const request = require("../../../helpers/request")
 
-const database = require("../../../database");
+const database = require("../../../database")
 
-const Kit = database.model("kit");
-const KitParts = database.model("kitParts");
-const ProductBase = database.model("productBase");
-const StockBase = database.model("stockBase");
-// const { FieldValidationError } = require('../../../helpers/errors')
+const Kit = database.model("kit")
+const KitParts = database.model("kitParts")
+const ProductBase = database.model("productBase")
+const StockBase = database.model("stockBase")
 
 describe("reserveController", () => {
-  let headers = null;
-  let product = null;
-  let technician = null;
-  let productBase = null;
-  let reserveOs = null;
+  let headers = null
+  let product = null
+  let technician = null
+  let productBase = null
+  let reserveOs = null
 
+  // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     const loginBody = {
       username: "modrp",
       password: "modrp",
-      typeAccount: { labTec: true },
-    };
+      typeAccount: { labTec: true }
+    }
 
-    const login = await request().post("/oapi/login", loginBody);
+    const login = await request().post("/oapi/login", loginBody)
 
-    const { token, username } = login.body;
+    const { token, username } = login.body
 
     headers = {
       token,
-      username,
-    };
+      username
+    }
 
     const mark = {
       mark: "MI",
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    await request().post("/api/mark", mark, { headers });
+    await request().post("/api/mark", mark, { headers })
 
     const productMock = {
       category: "peca",
@@ -46,10 +46,10 @@ describe("reserveController", () => {
       mark: "MI",
       name: "BLOCO",
       serial: false,
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    product = await request().post("/api/product", productMock, { headers });
+    product = await request().post("/api/product", productMock, { headers })
 
     const companyMock = {
       razaoSocial: "teste reserva contoller LTDA",
@@ -64,49 +64,43 @@ describe("reserveController", () => {
       nameContact: "joseildom",
       email: "clebinho@joazinho.com",
       responsibleUser: "modrp",
-      relation: "fornecedor",
-    };
+      relation: "fornecedor"
+    }
 
-    const company = await request().post("/api/company", companyMock, {
-      headers,
-    });
+    const company = await request().post("/api/company", companyMock, { headers })
 
     const entranceMock = {
       amountAdded: "50",
       stockBase: "ESTOQUE",
       productId: product.body.id,
       companyId: company.body.id,
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    await request().post("/api/entrance", entranceMock, { headers });
+    await request().post("/api/entrance", entranceMock, { headers })
 
     const carMock = {
       model: "GOL",
       year: "2007",
-      plate: "XYZ-1998",
-    };
+      plate: "XYZ-1998"
+    }
 
-    await request().post("/api/car", carMock, { headers });
+    await request().post("/api/car", carMock, { headers })
 
     const technicianMock = {
       name: "EU MESMO",
       CNH: "01/01/2000",
       plate: "XYZ-1998",
-      external: true,
-    };
+      external: true
+    }
 
-    technician = await request().post("/api/technician", technicianMock, {
-      headers,
-    });
+    technician = await request().post("/api/technician", technicianMock, { headers })
 
     productBase = await ProductBase.findOne({
-      where: {
-        productId: product.body.id,
-      },
+      where: { productId: product.body.id },
       include: [{ model: StockBase, where: { stockBase: "ESTOQUE" } }],
-      transacition: null,
-    });
+      transacition: null
+    })
 
     const reserveOsMock = {
       razaoSocial: "test Company",
@@ -117,17 +111,16 @@ describe("reserveController", () => {
         {
           productBaseId: productBase.id,
           amount: "1",
-          status: "venda",
-        },
-      ],
-    };
+          status: "venda"
+        }
+      ]
+    }
 
-    reserveOs = await request().post("/api/reserve/OS", reserveOsMock, {
-      headers,
-    });
-  });
+    reserveOs = await request().post("/api/reserve/OS", reserveOsMock, { headers })
+  })
 
-  test("create reserva Os", async () => {
+  it("create reserva Os", async () => {
+    expect.hasAssertions()
     const reserveMock = {
       razaoSocial: "test Company",
       cnpj: "47629199000185",
@@ -137,25 +130,24 @@ describe("reserveController", () => {
         {
           productBaseId: productBase.id,
           amount: "5",
-          status: "venda",
-        },
-      ],
-    };
+          status: "venda"
+        }
+      ]
+    }
 
-    const response = await request().post("/api/reserve/OS", reserveMock, {
-      headers,
-    });
+    const response = await request().post("/api/reserve/OS", reserveMock, { headers })
 
-    const { body, statusCode } = response;
+    const { body, statusCode } = response
 
-    expect(statusCode).toBe(200);
-    expect(body.razaoSocial).toBe(reserveMock.razaoSocial);
-    expect(body.cnpj).toBe(reserveMock.cnpj);
-    expect(body.technician.name).toBe(technician.body.name);
-    expect(body.technician.CNH).toBe(technician.body.CNH);
-  });
+    expect(statusCode).toBe(200)
+    expect(body.razaoSocial).toBe(reserveMock.razaoSocial)
+    expect(body.cnpj).toBe(reserveMock.cnpj)
+    expect(body.technician.name).toBe(technician.body.name)
+    expect(body.technician.CNH).toBe(technician.body.CNH)
+  })
 
-  test("output", async () => {
+  it("output", async () => {
+    expect.hasAssertions()
     const reserveMock = {
       os: "64636556",
       razaoSocial: "test Company",
@@ -166,34 +158,31 @@ describe("reserveController", () => {
         {
           productBaseId: productBase.id,
           amount: "6",
-          status: "venda",
-        },
-      ],
-    };
+          status: "venda"
+        }
+      ]
+    }
 
     const reserveCreated = await request().post(
       "/api/reserve/OS",
       reserveMock,
       { headers }
-    );
+    )
 
     const outputmock = {
       osPartsId: reserveCreated.body.productBases[0].osParts.id,
-      add: {
-        output: "2",
-      },
-    };
+      add: { output: "2" }
+    }
 
-    const response = await request().put("/api/reserve/output", outputmock, {
-      headers,
-    });
+    const response = await request().put("/api/reserve/output", outputmock, { headers })
 
-    const { statusCode } = response;
+    const { statusCode } = response
 
-    expect(statusCode).toBe(200);
-  });
+    expect(statusCode).toBe(200)
+  })
 
-  test("create delete Os", async () => {
+  it("create delete Os", async () => {
+    expect.hasAssertions()
     const reserveMock = {
       os: "366484",
       razaoSocial: "test Company",
@@ -204,51 +193,48 @@ describe("reserveController", () => {
         {
           productBaseId: productBase.id,
           amount: "9",
-          status: "venda",
-        },
-      ],
-    };
+          status: "venda"
+        }
+      ]
+    }
 
-    const Os = await request().post("/api/reserve/OS", reserveMock, {
-      headers,
-    });
+    const Os = await request().post("/api/reserve/OS", reserveMock, { headers })
 
     const response = await request().delete("/api/reserve/OS", {
       params: { osId: Os.body.id },
-      headers,
-    });
+      headers
+    })
 
-    const { body, statusCode } = response;
+    const { body, statusCode } = response
 
-    expect(statusCode).toBe(200);
-    expect(body).toBe("sucesso");
-  });
+    expect(statusCode).toBe(200)
+    expect(body).toBe("sucesso")
+  })
 
-  test("getallOs", async () => {
-    const response = await request().get("/api/reserve/Os", { headers });
+  it("getallOs", async () => {
+    expect.hasAssertions()
+    const response = await request().get("/api/reserve/Os", { headers })
 
-    const { body, statusCode } = response;
+    const { body, statusCode } = response
 
-    expect(statusCode).toBe(200);
-    expect(body.count).toBeTruthy();
-    expect(body.page).toBeTruthy();
-    expect(body.show).toBeTruthy();
-    expect(body.rows).toBeTruthy();
-  });
+    expect(statusCode).toBe(200)
+    expect(body.count).toBeTruthy()
+    expect(body.page).toBeTruthy()
+    expect(body.show).toBeTruthy()
+    expect(body.rows).toBeTruthy()
+  })
 
-  test("getAllKit", async () => {
-    const response = await request().get("/api/reserve/Kit", { headers });
+  it("getAllKit", async () => {
+    expect.hasAssertions()
+    const response = await request().get("/api/reserve/Kit", { headers })
 
-    const { statusCode } = response;
+    const { statusCode } = response
 
-    expect(statusCode).toBe(200);
-    // expect(body.count).toBeTruthy()
-    // expect(body.page).toBeTruthy()
-    // expect(body.show).toBeTruthy()
-    // expect(body.rows).toBeTruthy()
-  });
+    expect(statusCode).toBe(200)
+  })
 
-  test("getOsByOs", async () => {
+  it("getOsByOs", async () => {
+    expect.hasAssertions()
     const reserveMock = {
       razaoSocial: "test Company",
       cnpj: "47629199000185",
@@ -258,97 +244,92 @@ describe("reserveController", () => {
         {
           productBaseId: productBase.id,
           amount: "3",
-          status: "venda",
-        },
-      ],
-    };
+          status: "venda"
+        }
+      ]
+    }
 
-    await request().post("/api/reserve/OS", reserveMock, { headers });
+    await request().post("/api/reserve/OS", reserveMock, { headers })
 
     const response = await request().get("/api/reserve/getOsByOs", {
       headers,
-      params: { os: reserveMock.razaoSocial },
-    });
+      params: { os: reserveMock.razaoSocial }
+    })
 
-    const { body, statusCode } = response;
+    const { body, statusCode } = response
 
-    expect(statusCode).toBe(200);
-    expect(body.razaoSocial).toBe(reserveMock.razaoSocial);
-    expect(body.cnpj).toBe(reserveMock.cnpj);
-  });
+    expect(statusCode).toBe(200)
+    expect(body.razaoSocial).toBe(reserveMock.razaoSocial)
+    expect(body.cnpj).toBe(reserveMock.cnpj)
+  })
 
-  test("create reserva kit", async () => {
+  it("create reserva kit", async () => {
+    expect.hasAssertions()
     const reserveMock = {
       kitParts: [
         {
           productBaseId: productBase.id,
-          amount: "2",
-        },
-      ],
-    };
+          amount: "2"
+        }
+      ]
+    }
 
-    const response = await request().post("/api/reserve/kit", reserveMock, {
-      headers,
-    });
+    const response = await request().post("/api/reserve/kit", reserveMock, { headers })
 
-    const { body, statusCode } = response;
+    const { body, statusCode } = response
 
-    expect(statusCode).toBe(200);
-    expect(body.length > 0).toBe(true);
-  });
+    expect(statusCode).toBe(200)
+    expect(body.length > 0).toBe(true)
+  })
 
-  test("getKitDefaultValue", async () => {
-    const response = await request().get("/api/reserve/kitDefaultValue", {
-      headers,
-    });
+  it("getKitDefaultValue", async () => {
+    expect.hasAssertions()
+    const response = await request().get("/api/reserve/kitDefaultValue", { headers })
 
-    const { statusCode } = response;
+    const { statusCode } = response
 
-    expect(statusCode).toBe(200);
-  });
+    expect(statusCode).toBe(200)
+  })
 
-  test("create reserva kitOut", async () => {
+  it("create reserva kitOut", async () => {
+    expect.hasAssertions()
     const kitParts = await KitParts.findOne({
       include: [
         {
           model: Kit,
-          where: { technicianId: technician.body.id },
-        },
+          where: { technicianId: technician.body.id }
+        }
       ],
-      transacition: null,
-    });
+      transacition: null
+    })
 
     const reserveMock = {
       reposicao: "3",
       expedicao: "2",
       perda: "1",
       os: reserveOs.body.os,
-      kitPartId: kitParts.id,
-    };
+      kitPartId: kitParts.id
+    }
 
-    const response = await request().post("/api/reserve/kitOut", reserveMock, {
-      headers,
-    });
+    const response = await request().post("/api/reserve/kitOut", reserveMock, { headers })
 
-    const { body, statusCode } = response;
+    const { body, statusCode } = response
 
-    expect(statusCode).toBe(200);
-    expect(body).toBeTruthy();
-  });
+    expect(statusCode).toBe(200)
+    expect(body).toBeTruthy()
+  })
 
-  test("getAllKitOut", async () => {
-    const response = await request().get("/api/reserve/kitOut", { headers });
+  it("getAllKitOut", async () => {
+    expect.hasAssertions()
+    const response = await request().get("/api/reserve/kitOut", { headers })
 
-    const { statusCode } = response;
+    const { statusCode } = response
 
-    expect(statusCode).toBe(200);
-    // expect(body.count).toBeTruthy()
-    // expect(body.page).toBeTruthy()
-    // expect(body.show).toBeTruthy()
-    // expect(body.rows).toBeTruthy()
-  });
+    expect(statusCode).toBe(200)
+  })
 
-  test("create reserva mercado livre", async () => {
+  it("create reserva mercado livre", async () => {
+    expect.hasAssertions()
     const reserveMock = {
       trackingCode: "AA123456789BR",
       name: "TEST",
@@ -356,35 +337,21 @@ describe("reserveController", () => {
       freeMarketParts: [
         {
           productBaseId: productBase.id,
-          amount: "1",
-        },
-      ],
-    };
+          amount: "1"
+        }
+      ]
+    }
 
     const response = await request().post(
       "/api/reserve/freeMarket",
       reserveMock,
       { headers }
-    );
+    )
 
-    const { body, statusCode } = response;
+    const { body, statusCode } = response
 
-    expect(statusCode).toBe(200);
-    expect(body.trackingCode).toBe(reserveMock.trackingCode);
-    expect(body.zipCode).toBe(reserveMock.zipCode);
-  });
-
-  test("getAllKit", async () => {
-    const response = await request().get("/api/reserve/freeMarket", {
-      headers,
-    });
-
-    const { statusCode } = response;
-
-    expect(statusCode).toBe(200);
-    // expect(body.count).toBeTruthy()
-    // expect(body.page).toBeTruthy()
-    // expect(body.show).toBeTruthy()
-    // expect(body.rows).toBeTruthy()
-  });
-});
+    expect(statusCode).toBe(200)
+    expect(body.trackingCode).toBe(reserveMock.trackingCode)
+    expect(body.zipCode).toBe(reserveMock.zipCode)
+  })
+})

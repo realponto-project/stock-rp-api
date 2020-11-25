@@ -1,4 +1,4 @@
-"use strict";
+
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -8,50 +8,50 @@ module.exports = {
         id: {
           type: Sequelize.UUID,
           defaultValue: Sequelize.UUIDV4,
-          primaryKey: true,
+          primaryKey: true
         },
 
         amount: {
           type: Sequelize.STRING,
-          allowNull: false,
+          allowNull: false
         },
 
         createdAt: {
           defaultValue: Sequelize.NOW,
-          type: Sequelize.DATE,
+          type: Sequelize.DATE
         },
 
         updatedAt: {
           defaultValue: Sequelize.NOW,
-          type: Sequelize.DATE,
+          type: Sequelize.DATE
         },
 
         deletedAt: {
           defaultValue: null,
-          type: Sequelize.DATE,
+          type: Sequelize.DATE
         },
 
         reservaInternoId: {
           type: Sequelize.UUID,
           references: {
             model: "reservaInterno",
-            key: "id",
+            key: "id"
           },
-          allowNull: true,
+          allowNull: true
         },
         productId: {
           type: Sequelize.UUID,
           references: {
             model: "product",
-            key: "id",
+            key: "id"
           },
-          allowNull: true,
-        },
+          allowNull: true
+        }
       }
-    );
+    )
 
-    return reservaInternoParts;
+    return reservaInternoParts
   },
 
-  down: (queryInterface) => queryInterface.dropTable("reservaInternoParts"),
-};
+  down: queryInterface => queryInterface.dropTable("reservaInternoParts")
+}
