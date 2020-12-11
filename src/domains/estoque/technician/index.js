@@ -1,27 +1,29 @@
-const R = require("ramda")
-const moment = require("moment")
+const R = require('ramda')
+const moment = require('moment')
 
-const formatQuery = require("../../../helpers/lazyLoad")
-const database = require("../../../database")
+const formatQuery = require('../../../helpers/lazyLoad')
+const database = require('../../../database')
 
-const { FieldValidationError } = require("../../../helpers/errors")
+const { FieldValidationError } = require('../../../helpers/errors')
 
-const Car = database.model("car")
-const Technician = database.model("technician")
-const Kit = database.model("kit")
-const KitParts = database.model("kitParts")
-const ProductBase = database.model("productBase")
-const User = database.model("user")
-const Login = database.model("login")
+const Car = database.model('car')
+const Technician = database.model('technician')
+const Kit = database.model('kit')
+const KitParts = database.model('kitParts')
+const ProductBase = database.model('productBase')
+const User = database.model('user')
+const Login = database.model('login')
 
 module.exports = class TechnicianDomain {
-  async add(bodyData, options = {}) {
+  async add (bodyData, options = {}) {
     const { transaction = null } = options
 
+    console.log(bodyData)
+
     const technician = R.omit([
-      "id",
-      "plate",
-      "responsibleUser"
+      'id',
+      'plate',
+      'responsibleUser'
     ], bodyData)
 
     const technicianNotHasProp = prop => R.not(R.has(prop, technician))
@@ -40,14 +42,14 @@ module.exports = class TechnicianDomain {
 
     let errors = false
 
-    if (technicianNotHasProp("name") || !technician.name) {
+    if (technicianNotHasProp('name') || !technician.name) {
       errors = true
       field.nome = true
-      message.nome = "Por favor informar nome do técinico."
+      message.nome = 'Por favor informar nome do técinico.'
     } else if (!/^[A-Za-zà-ù]/gi.test(technician.name)) {
       errors = true
       field.nome = true
-      message.nome = "Nome inválido."
+      message.nome = 'Nome inválido.'
     } else {
       const nameHasExist = await Technician.findOne({
         where: { name: technician.name },
@@ -57,31 +59,31 @@ module.exports = class TechnicianDomain {
       if (nameHasExist) {
         errors = true
         field.nome = true
-        message.nome = "Há um técnico cadastrado com esse nome"
+        message.nome = 'Há um técnico cadastrado com esse nome'
       }
     }
 
-    if (technicianNotHasProp("CNH") || !technician.CNH) {
+    if (technicianNotHasProp('CNH') || !technician.CNH) {
       errors = true
       field.cnh = true
-      message.cnh = "Por favor a CNH."
+      message.cnh = 'Por favor a CNH.'
     } else if (
-      /\D\/-./gi.test(technician.CNH)
-      || technician.CNH.replace(/\D/gi, "").length !== 8
+      /\D\/-./gi.test(technician.CNH) ||
+      technician.CNH.replace(/\D/gi, '').length !== 8
     ) {
       errors = true
       field.cnh = true
-      message.cnh = "Por favor 8 números."
+      message.cnh = 'Por favor 8 números.'
     }
 
-    if (bodyDataNotHasProp("plate") || !bodyData.plate) {
+    if (bodyDataNotHasProp('plate') || !bodyData.plate) {
       errors = true
       field.car = true
-      message.car = "Por favor informar a placa do carro."
+      message.car = 'Por favor informar a placa do carro.'
     } else if (!/^[A-Z]{3}-\d{4}/.test(bodyData.plate)) {
       errors = true
       field.car = true
-      message.car = "Placa inválida."
+      message.car = 'Placa inválida.'
     } else {
       const car = await Car.findOne({
         where: { plate: bodyData.plate },
@@ -91,20 +93,21 @@ module.exports = class TechnicianDomain {
       if (!car) {
         errors = true
         field.plate = true
-        message.plate = "Não há nenhum carro cadastrado com essa placa."
+        message.plate = 'Não há nenhum carro cadastrado com essa placa.'
       }
     }
 
     if (
-      technicianNotHasProp("external")
-      || typeof technician.external !== "boolean"
+      technicianNotHasProp('external') ||
+      typeof technician.external !== 'boolean'
     ) {
       errors = true
       field.external = true
-      message.external = "Informar se é externo"
+      message.external = 'Informar se é externo'
     }
 
     if (errors) {
+      console.log({ field, message })
       throw new FieldValidationError([{ field, message }])
     }
     const car = await Car.findOne({
@@ -112,16 +115,16 @@ module.exports = class TechnicianDomain {
       transaction
     })
 
-    technician.CNH = technician.CNH.replace(/\D/gi, "")
+    technician.CNH = technician.CNH.replace(/\D/gi, '')
 
     const technicianCreated = await Technician.create(technician, { transaction })
 
     if (technicianCreated.external) {
       const formatBody = R.evolve({ username: R.pipe(R.toLower(), R.trim()) })
 
-      const user = formatBody({ username: technicianCreated.name.replace(/\W/gi, ".") })
+      const user = formatBody({ username: technicianCreated.name.replace(/\W/gi, '.') })
 
-      const password = R.prop("username", user)
+      const password = R.prop('username', user)
 
       const userFormatted = {
         ...user,
@@ -161,7 +164,7 @@ module.exports = class TechnicianDomain {
           const kitPart = {
             kitId: kitCreated.id,
             productBaseId: item.productBaseId,
-            amount: "0"
+            amount: '0'
           }
 
           await KitParts.create(kitPart, { transaction })
@@ -179,12 +182,12 @@ module.exports = class TechnicianDomain {
     return response
   }
 
-  async update(bodyData, options = {}) {
+  async update (bodyData, options = {}) {
     const { transaction = null } = options
 
     const technician = R.omit([
-      "id",
-      "plate"
+      'id',
+      'plate'
     ], bodyData)
 
     const technicianNotHasProp = prop => R.not(R.has(prop, technician))
@@ -211,17 +214,17 @@ module.exports = class TechnicianDomain {
     if (!oldTechnician) {
       errors = true
       field.id = true
-      message.id = "Não foi encontrado o Tecnico"
+      message.id = 'Não foi encontrado o Tecnico'
     }
 
-    if (technicianNotHasProp("name") || !technician.name) {
+    if (technicianNotHasProp('name') || !technician.name) {
       errors = true
       field.nome = true
-      message.nome = "Por favor informar nome do técinico."
+      message.nome = 'Por favor informar nome do técinico.'
     } else if (!/^[A-Za-zà-ù]/gi.test(technician.name)) {
       errors = true
       field.nome = true
-      message.nome = "Nome inválido."
+      message.nome = 'Nome inválido.'
     } else {
       const nameHasExist = await Technician.findOne({
         where: { name: technician.name },
@@ -231,31 +234,31 @@ module.exports = class TechnicianDomain {
       if (nameHasExist && nameHasExist.id !== bodyData.id) {
         errors = true
         field.nome = true
-        message.nome = "Há um técnico cadastrado com esse nome"
+        message.nome = 'Há um técnico cadastrado com esse nome'
       }
     }
 
-    if (technicianNotHasProp("CNH") || !technician.CNH) {
+    if (technicianNotHasProp('CNH') || !technician.CNH) {
       errors = true
       field.cnh = true
-      message.cnh = "Por favor a CNH."
+      message.cnh = 'Por favor a CNH.'
     } else if (
-      /\D\/-./gi.test(technician.CNH)
-      || technician.CNH.replace(/\D/gi, "").length !== 8
+      /\D\/-./gi.test(technician.CNH) ||
+      technician.CNH.replace(/\D/gi, '').length !== 8
     ) {
       errors = true
       field.cnh = true
-      message.cnh = "Por favor 8 números."
+      message.cnh = 'Por favor 8 números.'
     }
 
-    if (bodyDataNotHasProp("plate") || !bodyData.plate) {
+    if (bodyDataNotHasProp('plate') || !bodyData.plate) {
       errors = true
       field.car = true
-      message.car = "Por favor informar a placa do carro."
+      message.car = 'Por favor informar a placa do carro.'
     } else if (!/^[A-Z]{3}-\d{4}/.test(bodyData.plate)) {
       errors = true
       field.car = true
-      message.car = "Placa inválida."
+      message.car = 'Placa inválida.'
     } else {
       const car = await Car.findOne({
         where: { plate: bodyData.plate },
@@ -265,17 +268,17 @@ module.exports = class TechnicianDomain {
       if (!car) {
         errors = true
         field.plate = true
-        message.plate = "Não há nenhum carro cadastrado com essa placa."
+        message.plate = 'Não há nenhum carro cadastrado com essa placa.'
       }
     }
 
     if (
-      technicianNotHasProp("external")
-      || typeof technician.external !== "boolean"
+      technicianNotHasProp('external') ||
+      typeof technician.external !== 'boolean'
     ) {
       errors = true
       field.external = true
-      message.external = "Informar se é externo"
+      message.external = 'Informar se é externo'
     }
 
     if (errors) {
@@ -290,7 +293,7 @@ module.exports = class TechnicianDomain {
 
     await oldCar.removeTechnician(oldTechnician, { transaction })
 
-    technician.CNH = technician.CNH.replace(/\D/gi, "")
+    technician.CNH = technician.CNH.replace(/\D/gi, '')
 
     await car.addTechnician(oldTechnician, { transaction })
 
@@ -315,7 +318,7 @@ module.exports = class TechnicianDomain {
           const kitPart = {
             kitId: kitCreated.id,
             productBaseId: item.productBaseId,
-            amount: "0"
+            amount: '0'
           }
 
           await KitParts.create(kitPart, { transaction })
@@ -336,9 +339,9 @@ module.exports = class TechnicianDomain {
       const oldKitParts = await KitParts.findAll({
         where: { kitId: kit.id },
         attributes: [
-          "id",
-          "amount",
-          "productBaseId"
+          'id',
+          'amount',
+          'productBaseId'
         ],
         transaction
       })
@@ -366,11 +369,11 @@ module.exports = class TechnicianDomain {
         }
 
         if (
-          parseInt(productBaseUpdate.amount, 10) < 0
-          || parseInt(productBaseUpdate.available, 10) < 0
+          parseInt(productBaseUpdate.amount, 10) < 0 ||
+          parseInt(productBaseUpdate.available, 10) < 0
         ) {
           field.productBaseUpdate = true
-          message.productBaseUpdate = "Número negativo não é valido"
+          message.productBaseUpdate = 'Número negativo não é valido'
           throw new FieldValidationError([{ field, message }])
         }
 
@@ -392,14 +395,14 @@ module.exports = class TechnicianDomain {
     const formatUsername = R.evolve({ username: R.pipe(R.toLower(), R.trim()) })
 
     const userTechnician = await User.findOne({
-      where: formatUsername({ username: oldTechnician.name.replace(/\W/gi, "") }),
+      where: formatUsername({ username: oldTechnician.name.replace(/\W/gi, '') }),
       transaction
     })
 
     await oldTechnician.update(newTechnician, { transaction })
 
     await userTechnician.update(
-      formatUsername({ username: newTechnician.name.replace(/\W/gi, "") }),
+      formatUsername({ username: newTechnician.name.replace(/\W/gi, '') }),
       { transaction }
     )
 
@@ -411,11 +414,11 @@ module.exports = class TechnicianDomain {
     return response
   }
 
-  async getAllTechnician(options = {}) {
+  async getAllTechnician (options = {}) {
     const inicialOrder = {
-      field: "createdAt",
+      field: 'createdAt',
       acendent: true,
-      direction: "DESC"
+      direction: 'DESC'
     }
 
     const { query = null, transaction = null } = options
@@ -424,19 +427,19 @@ module.exports = class TechnicianDomain {
     const newOrder = query && query.order ? query.order : inicialOrder
 
     if (newOrder.acendent) {
-      newOrder.direction = "DESC"
+      newOrder.direction = 'DESC'
     } else {
-      newOrder.direction = "ASC"
+      newOrder.direction = 'ASC'
     }
 
     const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery)
 
     const technical = await Technician.findAndCountAll({
-      where: getWhere("technician"),
+      where: getWhere('technician'),
       include: [
         {
           model: Car,
-          where: getWhere("car")
+          where: getWhere('car')
         }
       ],
       order: [
@@ -462,9 +465,9 @@ module.exports = class TechnicianDomain {
     }
 
     const formatDateFunct = (date) => {
-      moment.locale("pt-br")
-      const formatDate = moment(date).format("L")
-      const formatHours = moment(date).format("LT")
+      moment.locale('pt-br')
+      const formatDate = moment(date).format('L')
+      const formatHours = moment(date).format('LT')
       const dateformated = `${formatDate} ${formatHours}`
       return dateformated
     }
@@ -498,7 +501,7 @@ module.exports = class TechnicianDomain {
     return response
   }
 
-  async getAll(options = {}) {
+  async getAll (options = {}) {
     const { query = null, transaction = null } = options
 
     const newQuery = Object.assign({}, query)
@@ -507,21 +510,21 @@ module.exports = class TechnicianDomain {
 
     const technician = await Technician.findAll({
       limit: 30,
-      where: getWhere("technician"),
+      where: getWhere('technician'),
       include: [
         {
           model: Car,
-          attributes: ["plate"]
+          attributes: ['plate']
         }
       ],
       attributes: [
-        "id",
-        "name"
+        'id',
+        'name'
       ],
       order: [
         [
-          "name",
-          "ASC"
+          'name',
+          'ASC'
         ]
       ],
       transaction

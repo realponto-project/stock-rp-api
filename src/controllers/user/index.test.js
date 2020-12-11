@@ -41,7 +41,8 @@ describe("userController", () => {
       gerROs: false,
       delROs: false,
       updateRos: false,
-      addStatus: false
+      addStatus: false,
+      suprimento: false
     }
 
     await typeAccount.add(typeAccountMock)

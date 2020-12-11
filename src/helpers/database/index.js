@@ -1,22 +1,23 @@
-const db = require("../../database")
+const db = require("../../database");
 
-const TypeAccount = require("../../domains/auth/user/typeAccount")
-const UserDomain = require("../../domains/auth/user")
-const StatusExpeditionDomain = require("../../domains/estoque/reserve/os/statusExpedition")
+const TypeAccount = require("../../domains/auth/user/typeAccount");
+const UserDomain = require("../../domains/auth/user");
+const StatusExpeditionDomain = require("../../domains/estoque/reserve/os/statusExpedition");
 
-const typeAccount = new TypeAccount()
-const userDomain = new UserDomain()
-const statusExpeditionDomain = new StatusExpeditionDomain()
+const typeAccount = new TypeAccount();
+const userDomain = new UserDomain();
+const statusExpeditionDomain = new StatusExpeditionDomain();
 
-const StockBase = db.model("stockBase")
+const StockBase = db.model("stockBase");
 
-const dropAllTable = () => db.dropAllSchemas()
+const dropAllTable = () => db.dropAllSchemas();
 
-const isDatabaseConnected = () => db.authenticate()
+const isDatabaseConnected = () => db.authenticate();
 
-const forceCreateTables = () => isDatabaseConnected().then(() => db.sync({ force: true }))
+const forceCreateTables = () =>
+  isDatabaseConnected().then(() => db.sync({ force: true }));
 
-const dropAndDisconnectDatabase = () => db.close()
+const dropAndDisconnectDatabase = () => db.close();
 
 const createUserAdmin = async () => {
   // const User = db.model('user')
@@ -52,10 +53,11 @@ const createUserAdmin = async () => {
     gerROs: true,
     delROs: true,
     updateRos: true,
-    addStatus: true
-  }
+    addStatus: true,
+    suprimento: true,
+  };
 
-  await typeAccount.add(typeAccountMock)
+  await typeAccount.add(typeAccountMock);
 
   const userAdmin = {
     username: "modrp",
@@ -87,20 +89,22 @@ const createUserAdmin = async () => {
     gerROs: true,
     delROs: true,
     updateRos: true,
-    addStatus: true
-  }
-  await userDomain.user_Create(userAdmin)
+    addStatus: true,
+    suprimento: true,
+  };
+  console.log(userAdmin);
+  await userDomain.user_Create(userAdmin);
 
-  await StockBase.create({ stockBase: "EMPRESTIMO" })
-  await StockBase.create({ stockBase: "ESTOQUE" })
+  await StockBase.create({ stockBase: "EMPRESTIMO" });
+  await StockBase.create({ stockBase: "ESTOQUE" });
 
-  await statusExpeditionDomain.add({ status: "venda" })
-}
+  await statusExpeditionDomain.add({ status: "venda" });
+};
 
 module.exports = {
   isDatabaseConnected,
   forceCreateTables,
   dropAndDisconnectDatabase,
   dropAllTable,
-  createUserAdmin
-}
+  createUserAdmin,
+};

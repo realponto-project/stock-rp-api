@@ -1,7 +1,7 @@
-const LoginDomain = require("../../domains/auth/login")
-const SessionDomain = require("../../domains/auth/login/session")
-const database = require("../../database")
-const { UnauthorizedError } = require("../../helpers/errors")
+const LoginDomain = require('../../domains/auth/login')
+const SessionDomain = require('../../domains/auth/login/session')
+const database = require('../../database')
+const { UnauthorizedError } = require('../../helpers/errors')
 
 const loginDomain = new LoginDomain()
 const sessionDomain = new SessionDomain()

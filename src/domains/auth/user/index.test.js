@@ -1,16 +1,16 @@
-const UserDomain = require(".")
-const TypeAccount = require("./typeAccount")
+const UserDomain = require('.')
+const TypeAccount = require('./typeAccount')
 
 const userDomain = new UserDomain()
 const typeAccount = new TypeAccount()
 
-describe("create user", () => {
+describe('create user', () => {
   let typeAccountMock = null
 
   // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     typeAccountMock = {
-      typeName: "TECNICO",
+      typeName: 'TECNICO',
       addCompany: true,
       addPart: true,
       addAnalyze: true,
@@ -21,7 +21,7 @@ describe("create user", () => {
       addAccessories: false,
       addUser: false,
       addTypeAccount: false,
-      responsibleUser: "modrp",
+      responsibleUser: 'modrp',
       stock: false,
       labTec: true,
       addTec: false,
@@ -39,13 +39,14 @@ describe("create user", () => {
       gerROs: false,
       delROs: false,
       updateRos: false,
-      addStatus: false
+      addStatus: false,
+      suprimento: false
     }
     await typeAccount.add(typeAccountMock)
 
     const userMock = {
-      username: "teste01",
-      typeName: "TECNICO",
+      username: 'teste01',
+      typeName: 'TECNICO',
       customized: false,
       addCompany: true,
       addPart: true,
@@ -57,7 +58,7 @@ describe("create user", () => {
       addAccessories: false,
       addUser: false,
       addTypeAccount: false,
-      responsibleUser: "modrp",
+      responsibleUser: 'modrp',
       addTec: false,
       addCar: false,
       addMark: false,
@@ -73,16 +74,17 @@ describe("create user", () => {
       gerROs: false,
       delROs: false,
       updateRos: false,
-      addStatus: false
+      addStatus: false,
+      suprimento: false
     }
     await userDomain.user_Create(userMock)
   })
 
-  it("create", async () => {
-    expect.hasAssertions()
+  it('create', async () => {
+    expect.assertions(4)
     const userMock = {
-      username: "teste1",
-      typeName: "TECNICO",
+      username: 'teste1',
+      typeName: 'TECNICO',
       customized: false,
       addCompany: true,
       addPart: true,
@@ -94,7 +96,7 @@ describe("create user", () => {
       addAccessories: false,
       addUser: false,
       addTypeAccount: false,
-      responsibleUser: "modrp",
+      responsibleUser: 'modrp',
       addTec: false,
       addCar: false,
       addMark: false,
@@ -117,15 +119,15 @@ describe("create user", () => {
     expect(userCreated.username).toStrictEqual(userMock.username)
     expect(userCreated.typeAccount.typeName).toStrictEqual(userMock.typeName)
 
-    expect(userCreated).not.toHaveProperty("login")
-    expect(userCreated).not.toHaveProperty("password")
+    expect(userCreated).not.toHaveProperty('login')
+    expect(userCreated).not.toHaveProperty('password')
   })
 
-  it("getResourceByUsername", async () => {
-    expect.hasAssertions()
+  it('getResourceByUsername', async () => {
+    expect.assertions(5)
     const userMock = {
-      username: "teste98",
-      typeName: "TECNICO",
+      username: 'teste98',
+      typeName: 'TECNICO',
       customized: true,
       addCompany: false,
       addPart: false,
@@ -137,7 +139,7 @@ describe("create user", () => {
       addAccessories: false,
       addUser: false,
       addTypeAccount: false,
-      responsibleUser: "modrp",
+      responsibleUser: 'modrp',
       addTec: false,
       addCar: false,
       addMark: false,
@@ -157,7 +159,7 @@ describe("create user", () => {
     }
     await userDomain.user_Create(userMock)
 
-    const username = "teste98"
+    const username = 'teste98'
 
     const userReturn = await userDomain.getResourceByUsername(username)
 
@@ -167,11 +169,11 @@ describe("create user", () => {
     expect(userReturn.addEquip).toStrictEqual(false)
     expect(userReturn.addEntry).toStrictEqual(false)
   })
-  it("getResourceByUsername customized", async () => {
-    expect.hasAssertions()
+  it('getResourceByUsername customized', async () => {
+    expect.assertions(5)
     const userMock = {
-      username: "teste99",
-      typeName: "TECNICO",
+      username: 'teste99',
+      typeName: 'TECNICO',
       customized: true,
       addCompany: true,
       addPart: true,
@@ -183,7 +185,7 @@ describe("create user", () => {
       addAccessories: false,
       addUser: false,
       addTypeAccount: false,
-      responsibleUser: "modrp",
+      responsibleUser: 'modrp',
       addTec: false,
       addCar: false,
       addMark: false,
@@ -203,7 +205,7 @@ describe("create user", () => {
     }
     await userDomain.user_Create(userMock)
 
-    const username = "teste99"
+    const username = 'teste99'
 
     const userReturn = await userDomain.getResourceByUsername(username)
 
@@ -214,10 +216,10 @@ describe("create user", () => {
     expect(userReturn.addEntry).toStrictEqual(userMock.addEntry)
   })
 
-  it("criar usuario sem premissões", async () => {
-    expect.hasAssertions()
+  it('criar usuario sem premissões', async () => {
+    expect.assertions(1)
     const typeAccountTeste = {
-      typeName: "NADINHA",
+      typeName: 'NADINHA',
       addCompany: false,
       addPart: false,
       addAnalyze: false,
@@ -228,7 +230,7 @@ describe("create user", () => {
       addAccessories: false,
       addUser: false,
       addTypeAccount: false,
-      responsibleUser: "modrp",
+      responsibleUser: 'modrp',
       stock: false,
       labTec: true,
       addTec: false,
@@ -251,8 +253,8 @@ describe("create user", () => {
     await typeAccount.add(typeAccountTeste)
 
     const userMock = {
-      username: "nadinha",
-      typeName: "NADINHA",
+      username: 'nadinha',
+      typeName: 'NADINHA',
       customized: false,
       addCompany: false,
       addPart: false,
@@ -264,7 +266,7 @@ describe("create user", () => {
       addAccessories: false,
       addUser: false,
       addTypeAccount: false,
-      responsibleUser: "modrp",
+      responsibleUser: 'modrp',
       addTec: false,
       addCar: false,
       addMark: false,
@@ -287,8 +289,8 @@ describe("create user", () => {
     expect(userReturn.username).toStrictEqual(userMock.username)
   })
 
-  it("getAll", async () => {
-    expect.hasAssertions()
+  it('getAll', async () => {
+    expect.assertions(1)
     const users = await userDomain.getAll()
     expect(users.rows.length > 0).toBeTruthy()
   })

@@ -1,13 +1,13 @@
-const R = require("ramda")
+const R = require('ramda')
 
-const ReservaTecnicoDomain = require("../../../domains/estoque/reserve/ReservaTecnico")
-const OsDomain = require("../../../domains/estoque/reserve/os")
-const KitDomain = require("../../../domains/estoque/reserve/kit")
-const KitOutDomain = require("../../../domains/estoque/reserve/kit/kitOut")
-const FreeMarketDomain = require("../../../domains/estoque/reserve/freeMarket")
-const StatusExpeditionDomain = require("../../../domains/estoque/reserve/os/statusExpedition")
-const ReservaInternoDomain = require("../../../domains/estoque/reserve/interno")
-const database = require("../../../database")
+const ReservaTecnicoDomain = require('../../../domains/estoque/reserve/ReservaTecnico')
+const OsDomain = require('../../../domains/estoque/reserve/os')
+const KitDomain = require('../../../domains/estoque/reserve/kit')
+const KitOutDomain = require('../../../domains/estoque/reserve/kit/kitOut')
+const FreeMarketDomain = require('../../../domains/estoque/reserve/freeMarket')
+const StatusExpeditionDomain = require('../../../domains/estoque/reserve/os/statusExpedition')
+const ReservaInternoDomain = require('../../../domains/estoque/reserve/interno')
+const database = require('../../../database')
 
 const osDomain = new OsDomain()
 const kitDomain = new KitDomain()
@@ -62,20 +62,13 @@ const associarEquipsParaOsPart = async (req, res, next) => {
 
 const finalizarCheckout = async (req, res, next) => {
   const transaction = await database.transaction()
-
   try {
-    // eslint-disable-next-line no-plusplus
-    // for (let index = 0; index < req.body.length; index++) {
-    //   // eslint-disable-next-line no-await-in-loop
-    //   await osDomain.finalizarCheckout(req.body[index], { transaction })
-    // }
-
-    req.body.forEach(async (item) => {
+    await Promise.all(req.body.map(async (item) => {
       await osDomain.finalizarCheckout(item, { transaction })
-    })
+    }))
 
     await transaction.commit()
-    res.json({ message: "sucess" })
+    res.json({ message: 'sucess' })
   } catch (error) {
     await transaction.rollback()
     next(error)
@@ -99,8 +92,8 @@ const getAllReservaTecnico = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -122,8 +115,8 @@ const getAllReservaInterno = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -145,8 +138,8 @@ const getAllReservaTecnicoForReturn = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -259,8 +252,8 @@ const getAllKit = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -279,8 +272,8 @@ const getKitDefaultValue = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -315,8 +308,8 @@ const getAllKitOut = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -348,8 +341,8 @@ const getAllFreeMarket = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -368,8 +361,8 @@ const getAllOs = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -388,8 +381,8 @@ const getAllOsPartsByParams = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -410,8 +403,8 @@ const getAllOsParts = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -432,8 +425,8 @@ const getAllOsPartsByParamsForReturn = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -508,8 +501,8 @@ const getAllStatusExpedition = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }

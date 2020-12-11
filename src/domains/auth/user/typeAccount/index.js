@@ -1,14 +1,14 @@
-const R = require("ramda")
-const Sequelize = require("sequelize")
+const R = require('ramda')
+const Sequelize = require('sequelize')
 
-const database = require("../../../../database")
+const database = require('../../../../database')
 
-const formatQuery = require("../../../../helpers/lazyLoad")
-const { FieldValidationError } = require("../../../../helpers/errors")
+const formatQuery = require('../../../../helpers/lazyLoad')
+const { FieldValidationError } = require('../../../../helpers/errors')
 
-const TypeAccount = database.model("typeAccount")
-const Resources = database.model("resources")
-const User = database.model("user")
+const TypeAccount = database.model('typeAccount')
+const Resources = database.model('resources')
+const User = database.model('user')
 
 const { Op: operators } = Sequelize
 
@@ -18,36 +18,31 @@ module.exports = class TypeAccountDomain {
 
     const typeAccount = R.omit(
       [
-        "id",
-        "addCompany",
-        "addPart",
-        "addAnalyze",
-        "addEquip",
-        "addEntry",
-        "addEquipType",
-        "tecnico",
-        "addAccessories",
-        "addEntr",
-        "addKit",
-        "addKitOut",
-        "addOutPut",
-        "addROs",
-        "addRML",
-        "gerROs",
-        "delROs",
-        "updateRos",
-        "addStatus",
-        "suprimento"
+        'id',
+        'addCompany',
+        'addPart',
+        'addAnalyze',
+        'addEquip',
+        'addEntry',
+        'addEquipType',
+        'tecnico',
+        'addAccessories',
+        'addEntr',
+        'addKit',
+        'addKitOut',
+        'addOutPut',
+        'addROs',
+        'addRML',
+        'gerROs',
+        'delROs',
+        'updateRos',
+        'addStatus',
+        'suprimento'
       ],
       bodyData
     )
 
-    const resources = R.omit([
-      "id",
-      "typeName",
-      "stock",
-      "labTec"
-    ], bodyData)
+    const resources = R.omit(['id', 'typeName', 'stock', 'labTec'], bodyData)
 
     const typeAccountNotHasProp = prop => R.not(R.has(prop, typeAccount))
     const resourcesNotHasProp = prop => R.not(R.has(prop, resources))
@@ -81,40 +76,40 @@ module.exports = class TypeAccountDomain {
       suprimento: false
     }
     const message = {
-      typeName: "",
-      addCompany: "",
-      addPart: "",
-      addAnalyze: "",
-      addEquip: "",
-      addEntry: "",
-      responsibleUser: "",
-      stock: "",
-      labTec: "",
-      addTec: "",
-      addCar: "",
-      addMark: "",
-      addType: "",
-      addProd: "",
-      addFonr: "",
-      addEntr: "",
-      addKit: "",
-      addKitOut: "",
-      addOutPut: "",
-      addROs: "",
-      addRML: "",
-      gerROs: "",
-      delROs: "",
-      updateRos: "",
-      addStatus: "",
-      suprimento: ""
+      typeName: '',
+      addCompany: '',
+      addPart: '',
+      addAnalyze: '',
+      addEquip: '',
+      addEntry: '',
+      responsibleUser: '',
+      stock: '',
+      labTec: '',
+      addTec: '',
+      addCar: '',
+      addMark: '',
+      addType: '',
+      addProd: '',
+      addFonr: '',
+      addEntr: '',
+      addKit: '',
+      addKitOut: '',
+      addOutPut: '',
+      addROs: '',
+      addRML: '',
+      gerROs: '',
+      delROs: '',
+      updateRos: '',
+      addStatus: '',
+      suprimento: ''
     }
 
     let errors = false
 
-    if (typeAccountNotHasProp("typeName") || !typeAccount.typeName) {
+    if (typeAccountNotHasProp('typeName') || !typeAccount.typeName) {
       errors = true
       field.typeName = true
-      message.typeName = "Por favor informar o tipo de conta."
+      message.typeName = 'Por favor informar o tipo de conta.'
     } else {
       const typeAccountReturned = await TypeAccount.findOne({
         where: { typeName: typeAccount.typeName },
@@ -124,272 +119,272 @@ module.exports = class TypeAccountDomain {
       if (typeAccountReturned) {
         errors = true
         field.typeName = true
-        message.typeName = "Essa tipo de conta já existe em nosso sistema."
+        message.typeName = 'Essa tipo de conta já existe em nosso sistema.'
       }
     }
 
     if (
-      typeAccountNotHasProp("stock")
-      || typeof typeAccount.stock !== "boolean"
+      typeAccountNotHasProp('stock') ||
+      typeof typeAccount.stock !== 'boolean'
     ) {
       errors = true
       field.stock = true
-      message.stock = "stock não é um booleano"
+      message.stock = 'stock não é um booleano'
     }
 
     if (
-      typeAccountNotHasProp("labTec")
-      || typeof typeAccount.labTec !== "boolean"
+      typeAccountNotHasProp('labTec') ||
+      typeof typeAccount.labTec !== 'boolean'
     ) {
       errors = true
       field.labTec = true
-      message.labTec = "labTec não é um booleano"
+      message.labTec = 'labTec não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addCompany")
-      || typeof resources.addCompany !== "boolean"
+      resourcesNotHasProp('addCompany') ||
+      typeof resources.addCompany !== 'boolean'
     ) {
       errors = true
       field.addCompany = true
-      message.addCompany = "addCompany não é um booleano"
+      message.addCompany = 'addCompany não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addPart")
-      || typeof resources.addPart !== "boolean"
+      resourcesNotHasProp('addPart') ||
+      typeof resources.addPart !== 'boolean'
     ) {
       errors = true
       field.addPart = true
-      message.addPart = "addPart não é um booleano"
+      message.addPart = 'addPart não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addAnalyze")
-      || typeof resources.addAnalyze !== "boolean"
+      resourcesNotHasProp('addAnalyze') ||
+      typeof resources.addAnalyze !== 'boolean'
     ) {
       errors = true
       field.addAnalyze = true
-      message.addAnalyze = "addAnalyze não é um booleano"
+      message.addAnalyze = 'addAnalyze não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addEquip")
-      || typeof resources.addEquip !== "boolean"
+      resourcesNotHasProp('addEquip') ||
+      typeof resources.addEquip !== 'boolean'
     ) {
       errors = true
       field.addEquip = true
-      message.addEquip = "addEquip não é um booleano"
+      message.addEquip = 'addEquip não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addEntry")
-      || typeof resources.addEntry !== "boolean"
+      resourcesNotHasProp('addEntry') ||
+      typeof resources.addEntry !== 'boolean'
     ) {
       errors = true
       field.addEntry = true
-      message.addEntry = "addEntry não é um booleano"
+      message.addEntry = 'addEntry não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addEquipType")
-      || typeof resources.addEquipType !== "boolean"
+      resourcesNotHasProp('addEquipType') ||
+      typeof resources.addEquipType !== 'boolean'
     ) {
       errors = true
       field.addEquipType = true
-      message.addEquipType = "addEquipType não é um booleano"
+      message.addEquipType = 'addEquipType não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("tecnico")
-      || typeof resources.tecnico !== "boolean"
+      resourcesNotHasProp('tecnico') ||
+      typeof resources.tecnico !== 'boolean'
     ) {
       errors = true
       field.tecnico = true
-      message.tecnico = "tecnico não é um booleano"
+      message.tecnico = 'tecnico não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addAccessories")
-      || typeof resources.addAccessories !== "boolean"
+      resourcesNotHasProp('addAccessories') ||
+      typeof resources.addAccessories !== 'boolean'
     ) {
       errors = true
       field.addAccessories = true
-      message.addAccessories = "addAccessories não é um booleano"
+      message.addAccessories = 'addAccessories não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addUser")
-      || typeof resources.addUser !== "boolean"
+      resourcesNotHasProp('addUser') ||
+      typeof resources.addUser !== 'boolean'
     ) {
       errors = true
       field.addUser = true
-      message.addUser = "addUser não é um booleano"
+      message.addUser = 'addUser não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addTypeAccount")
-      || typeof resources.addTypeAccount !== "boolean"
+      resourcesNotHasProp('addTypeAccount') ||
+      typeof resources.addTypeAccount !== 'boolean'
     ) {
       errors = true
       field.addTypeAccount = true
-      message.addTypeAccount = "addTypeAccount não é um booleano"
+      message.addTypeAccount = 'addTypeAccount não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addTec")
-      || typeof resources.addTec !== "boolean"
+      resourcesNotHasProp('addTec') ||
+      typeof resources.addTec !== 'boolean'
     ) {
       errors = true
       field.addTec = true
-      message.addTec = "addTec não é um booleano"
+      message.addTec = 'addTec não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addCar")
-      || typeof resources.addCar !== "boolean"
+      resourcesNotHasProp('addCar') ||
+      typeof resources.addCar !== 'boolean'
     ) {
       errors = true
       field.addCar = true
-      message.addCar = "addCar não é um booleano"
+      message.addCar = 'addCar não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addMark")
-      || typeof resources.addMark !== "boolean"
+      resourcesNotHasProp('addMark') ||
+      typeof resources.addMark !== 'boolean'
     ) {
       errors = true
       field.addMark = true
-      message.addMark = "addMark não é um booleano"
+      message.addMark = 'addMark não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addType")
-      || typeof resources.addType !== "boolean"
+      resourcesNotHasProp('addType') ||
+      typeof resources.addType !== 'boolean'
     ) {
       errors = true
       field.addType = true
-      message.addType = "addType não é um booleano"
+      message.addType = 'addType não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addProd")
-      || typeof resources.addProd !== "boolean"
+      resourcesNotHasProp('addProd') ||
+      typeof resources.addProd !== 'boolean'
     ) {
       errors = true
       field.addProd = true
-      message.addProd = "addProd não é um booleano"
+      message.addProd = 'addProd não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addFonr")
-      || typeof resources.addFonr !== "boolean"
+      resourcesNotHasProp('addFonr') ||
+      typeof resources.addFonr !== 'boolean'
     ) {
       errors = true
       field.addFonr = true
-      message.addFonr = "addFonr não é um booleano"
+      message.addFonr = 'addFonr não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addEntr")
-      || typeof resources.addEntr !== "boolean"
+      resourcesNotHasProp('addEntr') ||
+      typeof resources.addEntr !== 'boolean'
     ) {
       errors = true
       field.addEntr = true
-      message.addEntr = "addEntr não é um booleano"
+      message.addEntr = 'addEntr não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addKit")
-      || typeof resources.addKit !== "boolean"
+      resourcesNotHasProp('addKit') ||
+      typeof resources.addKit !== 'boolean'
     ) {
       errors = true
       field.addKit = true
-      message.addKit = "addKit não é um booleano"
+      message.addKit = 'addKit não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addKitOut")
-      || typeof resources.addKitOut !== "boolean"
+      resourcesNotHasProp('addKitOut') ||
+      typeof resources.addKitOut !== 'boolean'
     ) {
       errors = true
       field.addKitOut = true
-      message.addKitOut = "addKitOut não é um booleano"
+      message.addKitOut = 'addKitOut não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addOutPut")
-      || typeof resources.addOutPut !== "boolean"
+      resourcesNotHasProp('addOutPut') ||
+      typeof resources.addOutPut !== 'boolean'
     ) {
       errors = true
       field.addOutPut = true
-      message.addOutPut = "addOutPut não é um booleano"
+      message.addOutPut = 'addOutPut não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addROs")
-      || typeof resources.addROs !== "boolean"
+      resourcesNotHasProp('addROs') ||
+      typeof resources.addROs !== 'boolean'
     ) {
       errors = true
       field.addROs = true
-      message.addROs = "addROs não é um booleano"
+      message.addROs = 'addROs não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addRML")
-      || typeof resources.addRML !== "boolean"
+      resourcesNotHasProp('addRML') ||
+      typeof resources.addRML !== 'boolean'
     ) {
       errors = true
       field.addRML = true
-      message.addRML = "addRML não é um booleano"
+      message.addRML = 'addRML não é um booleano'
     }
     if (
-      resourcesNotHasProp("gerROs")
-      || typeof resources.gerROs !== "boolean"
+      resourcesNotHasProp('gerROs') ||
+      typeof resources.gerROs !== 'boolean'
     ) {
       errors = true
       field.gerROs = true
-      message.gerROs = "gerROs não é um booleano"
+      message.gerROs = 'gerROs não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("delROs")
-      || typeof resources.delROs !== "boolean"
+      resourcesNotHasProp('delROs') ||
+      typeof resources.delROs !== 'boolean'
     ) {
       errors = true
       field.delROs = true
-      message.delROs = "delROs não é um booleano"
+      message.delROs = 'delROs não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("updateRos")
-      || typeof resources.updateRos !== "boolean"
+      resourcesNotHasProp('updateRos') ||
+      typeof resources.updateRos !== 'boolean'
     ) {
       errors = true
       field.updateRos = true
-      message.updateRos = "updateRos não é um booleano"
+      message.updateRos = 'updateRos não é um booleano'
     }
 
     if (
-      resourcesNotHasProp("addStatus")
-      || typeof resources.addStatus !== "boolean"
+      resourcesNotHasProp('addStatus') ||
+      typeof resources.addStatus !== 'boolean'
     ) {
       errors = true
       field.addStatus = true
-      message.addStatus = "addStatus não é um booleano"
+      message.addStatus = 'addStatus não é um booleano'
     }
     if (
-      resourcesNotHasProp("suprimento")
-      || typeof resources.suprimento !== "boolean"
+      resourcesNotHasProp('suprimento') ||
+      typeof resources.suprimento !== 'boolean'
     ) {
       errors = true
       field.suprimento = true
-      message.suprimento = "suprimento não é um booleano"
+      message.suprimento = 'suprimento não é um booleano'
     }
-    if (typeAccountNotHasProp("responsibleUser")) {
+    if (typeAccountNotHasProp('responsibleUser')) {
       errors = true
       field.responsibleUser = true
-      message.responsibleUser = "username não está sendo passado."
+      message.responsibleUser = 'username não está sendo passado.'
     } else if (bodyData.responsibleUser) {
       const { responsibleUser } = bodyData
 
@@ -398,21 +393,24 @@ module.exports = class TypeAccountDomain {
         transaction
       })
 
-      if (!user && bodyData.responsibleUser !== "modrp") {
+      if (!user && bodyData.responsibleUser !== 'modrp') {
         errors = true
         field.responsibleUser = true
-        message.responsibleUser = "username inválido."
+        message.responsibleUser = 'username inválido.'
       }
     } else {
       errors = true
       field.responsibleUser = true
-      message.responsibleUser = "username não pode ser nulo."
+      message.responsibleUser = 'username não pode ser nulo.'
     }
     if (errors) {
+      console.log({ field, message })
       throw new FieldValidationError([{ field, message }])
     }
 
-    const typeAccountCreated = await TypeAccount.create(typeAccount, { transaction })
+    const typeAccountCreated = await TypeAccount.create(typeAccount, {
+      transaction
+    })
 
     resources.typeAccountId = typeAccountCreated.id
 
@@ -428,9 +426,9 @@ module.exports = class TypeAccountDomain {
 
   async getAll(options = {}) {
     const newOrder = {
-      field: "createdAt",
+      field: 'createdAt',
       acendent: true,
-      direction: "ASC"
+      direction: 'ASC'
     }
 
     const { query = null, transaction = null } = options
@@ -441,16 +439,11 @@ module.exports = class TypeAccountDomain {
 
     const typeAccounts = await TypeAccount.findAndCountAll({
       where: {
-        ...getWhere("typeAccount"),
-        typeName: { [operators.ne]: "MOD" }
+        ...getWhere('typeAccount'),
+        typeName: { [operators.ne]: 'MOD' }
       },
       include: [{ model: Resources }],
-      order: [
-        [
-          newOrder.field,
-          newOrder.direction
-        ]
-      ],
+      order: [[newOrder.field, newOrder.direction]],
       transaction
     })
 
@@ -465,7 +458,7 @@ module.exports = class TypeAccountDomain {
       }
     }
 
-    const formatData = R.map((comp) => {
+    const formatData = R.map(comp => {
       const resp = { typeName: comp.typeName }
       return resp
     })
@@ -485,7 +478,7 @@ module.exports = class TypeAccountDomain {
     const { getWhere } = formatQuery(newQuery)
 
     const typeAccount = await TypeAccount.findOne({
-      where: getWhere("typeAccount"),
+      where: getWhere('typeAccount'),
       include: [{ model: Resources }],
       transaction
     })

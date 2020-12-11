@@ -1,13 +1,13 @@
-const request = require("../../helpers/request")
+const request = require('../../helpers/request')
 
-describe("typeAccountController", () => {
+describe('typeAccountController', () => {
   let headers = null
   let typeAccountMock = null
 
   // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     typeAccountMock = {
-      typeName: "ADM",
+      typeName: 'ADM',
       addCompany: true,
       addPart: false,
       addAnalyze: true,
@@ -18,7 +18,7 @@ describe("typeAccountController", () => {
       addAccessories: false,
       addUser: false,
       addTypeAccount: false,
-      responsibleUser: "modrp",
+      responsibleUser: 'modrp',
       stock: false,
       labTec: true,
       addTec: false,
@@ -36,16 +36,17 @@ describe("typeAccountController", () => {
       gerROs: false,
       delROs: false,
       updateRos: false,
-      addStatus: false
+      addStatus: false,
+      suprimento: false
     }
 
     const loginBody = {
-      username: "modrp",
-      password: "modrp",
+      username: 'modrp',
+      password: 'modrp',
       typeAccount: { labTec: true }
     }
 
-    const login = await request().post("/oapi/login", loginBody)
+    const login = await request().post('/oapi/login', loginBody)
 
     const { token, username } = login.body
 
@@ -55,9 +56,9 @@ describe("typeAccountController", () => {
     }
   })
 
-  it("create", async () => {
-    expect.hasAssertions()
-    const response = await request().post("/api/typeAccount", typeAccountMock, { headers })
+  it('create', async () => {
+    expect.assertions(7)
+    const response = await request().post('/api/typeAccount', typeAccountMock, { headers })
 
     const { body, statusCode } = response
 
@@ -70,9 +71,9 @@ describe("typeAccountController", () => {
     expect(body.resource.addEntry).toBe(typeAccountMock.addEntry)
   })
 
-  it("getall", async () => {
+  it('getall', async () => {
     expect.hasAssertions()
-    const response = await request().get("/api/typeAccount", { headers })
+    const response = await request().get('/api/typeAccount', { headers })
 
     const { body, statusCode } = response
 
@@ -80,10 +81,10 @@ describe("typeAccountController", () => {
     expect(body.rows).toBeTruthy()
   })
 
-  it("getResourcesByTypeAccount", async () => {
+  it('getResourcesByTypeAccount', async () => {
     expect.hasAssertions()
     const response = await request().get(
-      "/api/typeAccount/getResourcesByTypeAccount",
+      '/api/typeAccount/getResourcesByTypeAccount',
       { headers }
     )
 
