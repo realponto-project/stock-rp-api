@@ -1,32 +1,32 @@
 /* eslint-disable array-callback-return */
-const R = require("ramda")
+const R = require('ramda')
 
-const formatQuery = require("../../../../helpers/lazyLoad")
+const formatQuery = require('../../../../helpers/lazyLoad')
 
-const database = require("../../../../database")
+const database = require('../../../../database')
 
-const { FieldValidationError } = require("../../../../helpers/errors")
+const { FieldValidationError } = require('../../../../helpers/errors')
 
-const Product = database.model("product")
-const ProductBase = database.model("productBase")
-const Equip = database.model("equip")
-const OsParts = database.model("osParts")
-const Os = database.model("os")
-const FreeMarketParts = database.model("freeMarketParts")
-const FreeMarket = database.model("freeMarket")
-const StockBase = database.model("stockBase")
-const Mark = database.model("mark")
+const Product = database.model('product')
+const ProductBase = database.model('productBase')
+const Equip = database.model('equip')
+const OsParts = database.model('osParts')
+const Os = database.model('os')
+const FreeMarketParts = database.model('freeMarketParts')
+const FreeMarket = database.model('freeMarket')
+const StockBase = database.model('stockBase')
+const Mark = database.model('mark')
 
 module.exports = class EquipDomain {
-  async add(bodyData, options = {}) {
+  async add (bodyData, options = {}) {
     const { transaction = null } = options
 
     const equip = R.omit(
       [
-        "id",
-        "productId",
-        "stockBase",
-        "serialNumbers"
+        'id',
+        'productId',
+        'stockBase',
+        'serialNumbers'
       ],
       bodyData
     )
@@ -39,31 +39,31 @@ module.exports = class EquipDomain {
       serialNumbers: false
     }
     const message = {
-      productId: "",
-      stockBase: "",
-      serialNumbers: ""
+      productId: '',
+      stockBase: '',
+      serialNumbers: ''
     }
 
     let errors = false
 
-    if (NotHasProp("productId", bodyData) || !bodyData.productId) {
+    if (NotHasProp('productId', bodyData) || !bodyData.productId) {
       errors = true
       field.productId = true
-      message.productId = "Por favor informe productId."
+      message.productId = 'Por favor informe productId.'
     } else {
       const productBase = await Product.findByPk(bodyData.productId, { transaction })
 
       if (!productBase) {
         errors = true
         field.productId = true
-        message.productId = "productId inválid."
+        message.productId = 'productId inválid.'
       }
     }
 
-    if (NotHasProp("stockBase", bodyData) || !bodyData.stockBase) {
+    if (NotHasProp('stockBase', bodyData) || !bodyData.stockBase) {
       errors = true
       field.stockBase = true
-      message.stockBase = "Por favor informe stockBase."
+      message.stockBase = 'Por favor informe stockBase.'
     } else {
       const stockBase = await StockBase.findOne({
         where: { stockBase: bodyData.stockBase },
@@ -73,14 +73,14 @@ module.exports = class EquipDomain {
       if (stockBase) {
         errors = true
         field.stockBase = true
-        message.stockBase = "stockBase inválid."
+        message.stockBase = 'stockBase inválid.'
       }
     }
 
-    if (NotHasProp("serialNumber", bodyData) || !bodyData.serialNumber) {
+    if (NotHasProp('serialNumber', bodyData) || !bodyData.serialNumber) {
       errors = true
       field.serialNumber = true
-      message.serialNumber = "Por favor informe os números de série."
+      message.serialNumber = 'Por favor informe os números de série.'
     } else {
       const serialNumberReturned = await Equip.findOne({
         where: { serialNumber: equip.serialNumber },
@@ -90,7 +90,7 @@ module.exports = class EquipDomain {
       if (serialNumberReturned) {
         errors = true
         field.serialNumber = true
-        message.serialNumber = "Esse equipamento já está cadastrado."
+        message.serialNumber = 'Esse equipamento já está cadastrado.'
       }
     }
 
@@ -118,11 +118,11 @@ module.exports = class EquipDomain {
     return equipCreated
   }
 
-  async getAll(options = {}) {
+  async getAll (options = {}) {
     const inicialOrder = {
-      field: "createdAt",
+      field: 'createdAt',
       acendent: true,
-      direction: "DESC"
+      direction: 'DESC'
     }
 
     const { query = null, transaction = null } = options
@@ -131,29 +131,29 @@ module.exports = class EquipDomain {
     const newOrder = query && query.order ? query.order : inicialOrder
 
     if (newOrder.acendent) {
-      newOrder.direction = "DESC"
+      newOrder.direction = 'DESC'
     } else {
-      newOrder.direction = "ASC"
+      newOrder.direction = 'ASC'
     }
 
     const { getWhere, pageResponse, offset, limit } = formatQuery(newQuery)
 
     const equips = await Equip.findAndCountAll({
-      where: getWhere("equip"),
+      where: getWhere('equip'),
       include: [
         {
           required: true,
           model: ProductBase,
           include: [
-            { model: StockBase, where: getWhere("stockBase"), required: true },
+            { model: StockBase, where: getWhere('stockBase'), required: true },
             {
               model: Product,
-              where: getWhere("product"),
+              where: getWhere('product'),
               required: true,
               include: [
                 {
                   model: Mark,
-                  where: getWhere("mark")
+                  where: getWhere('mark')
                 }
               ]
             }
@@ -191,9 +191,9 @@ module.exports = class EquipDomain {
         razaoSocial: equip.razaoSocial,
         name: equip.productBase && equip.productBase.product.name,
         mark:
-          equip.productBase
-          && equip.productBase.product.mark
-          && equip.productBase.product.mark.mark
+          equip.productBase &&
+          equip.productBase.product.mark &&
+          equip.productBase.product.mark.mark
       }
 
       return resp
@@ -211,19 +211,19 @@ module.exports = class EquipDomain {
     return response
   }
 
-  async update(bodyData, options = {}) {
+  async update (bodyData, options = {}) {
     const { transaction = null } = options
 
-    const equip = R.omit(["id"], bodyData)
+    const equip = R.omit(['id'], bodyData)
 
     const oldEquip = await Equip.findByPk(bodyData.id)
 
     const newEquip = JSON.parse(JSON.stringify(oldEquip))
 
     Object.assign(newEquip, R.omit([
-      "mark",
-      "type",
-      "model"
+      'mark',
+      'type',
+      'model'
     ], equip))
 
     const newEquipNotHasProp = prop => R.not(R.has(prop, newEquip))
@@ -241,24 +241,24 @@ module.exports = class EquipDomain {
       cartografico: false
     }
     const message = {
-      companyId: "",
-      serialNumber: "",
-      corLeitor: "",
-      tipoCracha: "",
-      details: "",
-      responsibleUser: "",
-      proximidade: "",
-      bio: "",
-      barras: "",
-      cartografico: ""
+      companyId: '',
+      serialNumber: '',
+      corLeitor: '',
+      tipoCracha: '',
+      details: '',
+      responsibleUser: '',
+      proximidade: '',
+      bio: '',
+      barras: '',
+      cartografico: ''
     }
 
     let errors = false
 
-    if (newEquipNotHasProp("serialNumber") || !newEquip.serialNumber) {
+    if (newEquipNotHasProp('serialNumber') || !newEquip.serialNumber) {
       errors = true
       field.serialNumber = true
-      message.serialNumber = "informe o número de série."
+      message.serialNumber = 'informe o número de série.'
     } else {
       const serialNumberReturned = await Equip.findOne({
         where: { serialNumber: newEquip.serialNumber },
@@ -266,67 +266,67 @@ module.exports = class EquipDomain {
       })
 
       if (
-        serialNumberReturned
-        && newEquip.serialNumber !== oldEquip.serialNumber
+        serialNumberReturned &&
+        newEquip.serialNumber !== oldEquip.serialNumber
       ) {
         errors = true
         field.serialNumber = true
-        message.serialNumber = "já está cadastrado."
+        message.serialNumber = 'já está cadastrado.'
       }
     }
 
     if (
-      newEquipNotHasProp("proximidade")
-      || typeof newEquip.proximidade !== "boolean"
+      newEquipNotHasProp('proximidade') ||
+      typeof newEquip.proximidade !== 'boolean'
     ) {
       errors = true
       field.proximidade = true
-      message.proximidade = "proximidade não é um booleano"
+      message.proximidade = 'proximidade não é um booleano'
     }
-    if (newEquipNotHasProp("bio") || typeof newEquip.bio !== "boolean") {
+    if (newEquipNotHasProp('bio') || typeof newEquip.bio !== 'boolean') {
       errors = true
       field.bio = true
-      message.bio = "bio não é um booleano"
+      message.bio = 'bio não é um booleano'
     }
-    if (newEquipNotHasProp("barras") || typeof newEquip.barras !== "boolean") {
+    if (newEquipNotHasProp('barras') || typeof newEquip.barras !== 'boolean') {
       errors = true
       field.barras = true
-      message.barras = "barras não é um booleano"
+      message.barras = 'barras não é um booleano'
     }
     if (
-      newEquipNotHasProp("cartografico")
-      || typeof newEquip.cartografico !== "boolean"
+      newEquipNotHasProp('cartografico') ||
+      typeof newEquip.cartografico !== 'boolean'
     ) {
       errors = true
       field.cartografico = true
-      message.cartografico = "cartografico não é um booleano"
+      message.cartografico = 'cartografico não é um booleano'
     }
 
     if (
-      newEquipNotHasProp("corLeitor")
-      || (newEquip.corLeitor !== "Branco"
-        && newEquip.corLeitor !== "Vermelho"
-        && newEquip.corLeitor !== "Azul"
-        && newEquip.corLeitor !== "Verde"
-        && newEquip.corLeitor !== "NaoSeAplica")
+      newEquipNotHasProp('corLeitor') ||
+      (newEquip.corLeitor !== 'Branco' &&
+        newEquip.corLeitor !== 'Vermelho' &&
+        newEquip.corLeitor !== 'Azul' &&
+        newEquip.corLeitor !== 'Verde' &&
+        newEquip.corLeitor !== 'NaoSeAplica')
     ) {
       errors = true
       field.corLeitor = true
-      message.corLeitor = "leitor inválido."
+      message.corLeitor = 'leitor inválido.'
     }
 
     if (
-      newEquipNotHasProp("tipoCracha")
-      || (newEquip.tipoCracha !== "Hid"
-        && newEquip.tipoCracha !== "Mifare"
-        && newEquip.tipoCracha !== "Wiegand"
-        && newEquip.tipoCracha !== "Abatrack"
-        && newEquip.tipoCracha !== "Sarial"
-        && newEquip.tipoCracha !== "NaoSeAplica")
+      newEquipNotHasProp('tipoCracha') ||
+      (newEquip.tipoCracha !== 'Hid' &&
+        newEquip.tipoCracha !== 'Mifare' &&
+        newEquip.tipoCracha !== 'Wiegand' &&
+        newEquip.tipoCracha !== 'Abatrack' &&
+        newEquip.tipoCracha !== 'Sarial' &&
+        newEquip.tipoCracha !== 'NaoSeAplica')
     ) {
       errors = true
       field.tipoCracha = true
-      message.tipoCracha = "leitor inválido."
+      message.tipoCracha = 'leitor inválido.'
     }
 
     if (errors) {
@@ -338,41 +338,41 @@ module.exports = class EquipDomain {
     return response
   }
 
-  async getOneBySerialNumber(serialNumber, options = {}) {
+  async getOneBySerialNumber (serialNumber, options = {}) {
     const { transaction = null, paranoid = false } = options
     const response = await Equip.findOne({
       where: { serialNumber },
       attributes: [
-        "id",
-        "reserved",
-        "deletedAt",
-        "osPartId",
-        "freeMarketPartId",
-        "productBaseId"
+        'id',
+        'reserved',
+        'deletedAt',
+        'osPartId',
+        'freeMarketPartId',
+        'productBaseId'
       ],
       include: [
         {
           model: OsParts,
           paranoid: false,
-          attributes: ["oId"],
+          attributes: ['oId'],
           include: [
             {
               paranoid: false,
-              attributes: ["os"],
+              attributes: ['os'],
               model: Os
             }
           ]
         },
         {
           model: ProductBase,
-          attributes: ["productId"],
+          attributes: ['productId'],
           include: [
             {
               model: Product,
               attributes: [
-                "name",
-                "category",
-                "serial"
+                'name',
+                'category',
+                'serial'
               ]
             }
           ]
@@ -380,24 +380,24 @@ module.exports = class EquipDomain {
         {
           paranoid: false,
           model: FreeMarketParts,
-          attributes: ["freeMarketId"],
+          attributes: ['freeMarketId'],
           include: [
             {
               paranoid: false,
-              attributes: ["trackingCode"],
+              attributes: ['trackingCode'],
               model: FreeMarket
             }
           ]
         }
       ],
-      paranoid: paranoid === "true",
+      paranoid: paranoid === 'true',
       transaction
     })
 
     return response
   }
 
-  async delete(body, options = {}) {
+  async delete (body, options = {}) {
     const { transaction = null } = options
     const equip = await Equip.findByPk(body.id, { transaction })
     const productBase = await ProductBase.findByPk(body.productBaseId, { transaction })
@@ -406,18 +406,18 @@ module.exports = class EquipDomain {
       throw new FieldValidationError([
         {
           field: { productBaseId: true },
-          message: { productBaseId: "invalid productBaseId" }
+          message: { productBaseId: 'invalid productBaseId' }
         }
       ])
     }
 
     if (!equip) {
-      throw new FieldValidationError([{ field: { id: true }, message: { id: "invalid id" } }])
+      throw new FieldValidationError([{ field: { id: true }, message: { id: 'invalid id' } }])
     } else if (equip.reserved || equip.inClient) {
       throw new FieldValidationError([
         {
           field: { id: true },
-          message: { id: "equipamneto reservado ou em cliente" }
+          message: { id: 'equipamneto reservado ou em cliente' }
         }
       ])
     }

@@ -1,20 +1,20 @@
-const R = require("ramda")
+const R = require('ramda')
 
-const database = require("../../../database")
+const database = require('../../../database')
 
-const SessionDomain = require("./session")
+const SessionDomain = require('./session')
 
-const { UnauthorizedError } = require("../../../helpers/errors")
+const { UnauthorizedError } = require('../../../helpers/errors')
 
-const User = database.model("user")
-const Login = database.model("login")
-const Resources = database.model("resources")
-const TypeAccount = database.model("typeAccount")
+const User = database.model('user')
+const Login = database.model('login')
+const Resources = database.model('resources')
+const TypeAccount = database.model('typeAccount')
 
 const sessionDomain = new SessionDomain()
 
 class LoginDomain {
-  async login({ username, password, typeAccount }, options = {}) {
+  async login ({ username, password, typeAccount }, options = {}) {
     const { transaction = null } = options
 
     const login = await Login.findOne({
@@ -32,7 +32,7 @@ class LoginDomain {
       throw new UnauthorizedError([
         {
           field: { username: true },
-          message: "usuario não foi encontrado"
+          message: 'usuario não foi encontrado'
         }
       ])
     }
@@ -45,7 +45,7 @@ class LoginDomain {
       throw new UnauthorizedError([
         {
           field: { password: true },
-          message: "senha incorreta"
+          message: 'senha incorreta'
         }
       ])
     }
@@ -68,11 +68,11 @@ class LoginDomain {
       }
     }
 
-    const authorizedStock = R.filter(R.propEq("stock", true), [
+    const authorizedStock = R.filter(R.propEq('stock', true), [
       typeAccount,
       login.user.typeAccount
     ])
-    const authorizedLabTec = R.filter(R.propEq("labTec", true), [
+    const authorizedLabTec = R.filter(R.propEq('labTec', true), [
       typeAccount,
       login.user.typeAccount
     ])
@@ -84,12 +84,12 @@ class LoginDomain {
     const user = await User.findByPk(login.user.id, {
       transaction,
       attributes: [
-        "id",
-        "username",
-        "customized",
-        "resourceId",
-        "typeAccountId",
-        "modulo"
+        'id',
+        'username',
+        'customized',
+        'resourceId',
+        'typeAccountId',
+        'modulo'
       ],
       include: [{ model: TypeAccount }]
     })
@@ -183,7 +183,7 @@ class LoginDomain {
     return response
   }
 
-  async logout(token, options = {}) {
+  async logout (token, options = {}) {
     const { transaction = null } = options
     await sessionDomain.turnInvalidSession(token, { transaction })
 

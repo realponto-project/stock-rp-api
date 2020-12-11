@@ -145,6 +145,10 @@ class ReservaTecnicoDomain {
         await Promise.all(row.osPartisIdArray.map(async (id) => {
           const osPart = await OsParts.findByPk(id, { transaction })
 
+          if (!!osPart.technicianReserveId) {
+            throw new FieldValidationError([{ field, message }])
+          }
+  
           await osPart.update({ technicianReserveId }, { transaction })
         }))
 

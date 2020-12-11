@@ -12,7 +12,7 @@ describe("typeAccountDomain", () => {
   // eslint-disable-next-line jest/no-hooks
   beforeAll(() => {
     typeAccountMock = {
-      typeName: "Adm",
+      typeName: "Adm 1",
       addCompany: true,
       addPart: true,
       addAnalyze: true,
@@ -41,12 +41,13 @@ describe("typeAccountDomain", () => {
       gerROs: false,
       delROs: false,
       updateRos: false,
-      addStatus: false
+      addStatus: false,
+      suprimento: false
     }
   })
 
   it("create", async () => {
-    expect.hasAssertions()
+    expect.assertions(7)
     const typeAccountCreated = await typeAccountDomain.add(typeAccountMock)
 
     expect(typeAccountCreated.typeName).toBe(typeAccountMock.typeName)
@@ -66,7 +67,7 @@ describe("typeAccountDomain", () => {
   })
 
   it("try add typeAccount with typeName null", async () => {
-    expect.hasAssertions()
+    expect.assertions(1)
     const typeAccountCreated = typeAccountMock
     typeAccountCreated.typeName = ""
 
@@ -83,7 +84,7 @@ describe("typeAccountDomain", () => {
   })
 
   it("try add typeAccount without typeName", async () => {
-    expect.hasAssertions()
+    expect.assertions(1)
     const typeAccountCreated = R.omit(["typeName"], typeAccountMock)
 
     await expect(
@@ -99,13 +100,13 @@ describe("typeAccountDomain", () => {
   })
 
   it("getAll", async () => {
-    expect.hasAssertions()
+    expect.assertions(1)
     const typeAccounts = await typeAccountDomain.getAll()
     expect(typeAccounts.rows.length > 0).toBeTruthy()
   })
 
   it("getResourcesByTypeAccount", async () => {
-    expect.hasAssertions()
+    expect.assertions(1)
     const typeAccount = await typeAccountDomain.getResourcesByTypeAccount()
 
     expect(typeAccount.typeName).toBeTruthy()
