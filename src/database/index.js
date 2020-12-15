@@ -1,13 +1,13 @@
-const Sequelize = require("sequelize")
-const models = require("./models")
+const Sequelize = require('sequelize')
+const models = require('./models')
 
 const sequelize = new Sequelize({
-  host: process.env.DB_HOST || "localhost",
+  host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT,
   password: process.env.DB_PASSWORD,
   username: process.env.DB_USERNAME,
   database: process.env.DB_DATABASE,
-  dialect: "postgres",
+  dialect: 'postgres',
   // operatorsAliases: false,
   logging: false,
   pool: {
@@ -24,7 +24,8 @@ const sequelize = new Sequelize({
 
 const modelInstances = models.map(model => model(sequelize))
 modelInstances.forEach(
-  modelInstance => modelInstance.associate && modelInstance.associate(sequelize.models)
+  modelInstance =>
+    modelInstance.associate && modelInstance.associate(sequelize.models)
 )
 
 module.exports = sequelize

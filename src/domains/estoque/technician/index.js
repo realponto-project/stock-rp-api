@@ -1,3 +1,4 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 const R = require('ramda')
 const moment = require('moment')
 
@@ -15,16 +16,12 @@ const User = database.model('user')
 const Login = database.model('login')
 
 module.exports = class TechnicianDomain {
-  async add (bodyData, options = {}) {
+  async add(bodyData, options = {}) {
     const { transaction = null } = options
 
     console.log(bodyData)
 
-    const technician = R.omit([
-      'id',
-      'plate',
-      'responsibleUser'
-    ], bodyData)
+    const technician = R.omit(['id', 'plate', 'responsibleUser'], bodyData)
 
     const technicianNotHasProp = prop => R.not(R.has(prop, technician))
     const bodyDataNotHasProp = prop => R.not(R.has(prop, bodyData))
@@ -80,7 +77,7 @@ module.exports = class TechnicianDomain {
       errors = true
       field.car = true
       message.car = 'Por favor informar a placa do carro.'
-    } else if (!/^[A-Z]{3}-\d{4}/.test(bodyData.plate)) {
+    } else if (/\D{7}/.test(bodyData.plate)) {
       errors = true
       field.car = true
       message.car = 'Placa inválida.'
@@ -117,12 +114,16 @@ module.exports = class TechnicianDomain {
 
     technician.CNH = technician.CNH.replace(/\D/gi, '')
 
-    const technicianCreated = await Technician.create(technician, { transaction })
+    const technicianCreated = await Technician.create(technician, {
+      transaction
+    })
 
     if (technicianCreated.external) {
       const formatBody = R.evolve({ username: R.pipe(R.toLower(), R.trim()) })
 
-      const user = formatBody({ username: technicianCreated.name.replace(/\W/gi, '.') })
+      const user = formatBody({
+        username: technicianCreated.name.replace(/\W/gi, '.')
+      })
 
       const password = R.prop('username', user)
 
@@ -160,7 +161,7 @@ module.exports = class TechnicianDomain {
           { transaction }
         )
 
-        const kitPartsPromise = kitParts.map(async (item) => {
+        const kitPartsPromise = kitParts.map(async item => {
           const kitPart = {
             kitId: kitCreated.id,
             productBaseId: item.productBaseId,
@@ -182,13 +183,10 @@ module.exports = class TechnicianDomain {
     return response
   }
 
-  async update (bodyData, options = {}) {
+  async update(bodyData, options = {}) {
     const { transaction = null } = options
 
-    const technician = R.omit([
-      'id',
-      'plate'
-    ], bodyData)
+    const technician = R.omit(['id', 'plate'], bodyData)
 
     const technicianNotHasProp = prop => R.not(R.has(prop, technician))
     const bodyDataNotHasProp = prop => R.not(R.has(prop, bodyData))
@@ -255,7 +253,7 @@ module.exports = class TechnicianDomain {
       errors = true
       field.car = true
       message.car = 'Por favor informar a placa do carro.'
-    } else if (!/^[A-Z]{3}-\d{4}/.test(bodyData.plate)) {
+    } else if (/\D{7}/.test(bodyData.plate)) {
       errors = true
       field.car = true
       message.car = 'Placa inválida.'
@@ -314,7 +312,7 @@ module.exports = class TechnicianDomain {
           { transaction }
         )
 
-        const kitPartsPromise = kitParts.map(async (item) => {
+        const kitPartsPromise = kitParts.map(async item => {
           const kitPart = {
             kitId: kitCreated.id,
             productBaseId: item.productBaseId,
@@ -336,55 +334,55 @@ module.exports = class TechnicianDomain {
         transaction
       })
 
-      const oldKitParts = await KitParts.findAll({
-        where: { kitId: kit.id },
-        attributes: [
-          'id',
-          'amount',
-          'productBaseId'
-        ],
-        transaction
-      })
+      if (kit) {
+        const oldKitParts = await KitParts.findAll({
+          where: { kitId: kit.id },
+          attributes: ['id', 'amount', 'productBaseId'],
+          transaction
+        })
 
-      const kitPartsDeletePromises = oldKitParts.map(async (item) => {
-        const productBase = await ProductBase.findByPk(item.productBaseId, { transaction })
+        const kitPartsDeletePromises = oldKitParts.map(async item => {
+          const productBase = await ProductBase.findByPk(item.productBaseId, {
+            transaction
+          })
 
-        count = {
-          ...count,
-          [item.productBaseId]: count[item.productBaseId]
-            ? count[item.productBaseId]
-            : 0
-        }
+          count = {
+            ...count,
+            [item.productBaseId]: count[item.productBaseId]
+              ? count[item.productBaseId]
+              : 0
+          }
 
-        count[item.productBaseId] += parseInt(item.amount, 10)
+          count[item.productBaseId] += parseInt(item.amount, 10)
 
-        const productBaseUpdate = {
-          ...productBase,
-          available: (
-            parseInt(productBase.available, 10) + count[item.productBaseId]
-          ).toString(),
-          reserved: (
-            parseInt(productBase.reserved, 10) - count[item.productBaseId]
-          ).toString()
-        }
+          const productBaseUpdate = {
+            ...productBase,
+            available: (
+              parseInt(productBase.available, 10) + count[item.productBaseId]
+            ).toString(),
+            reserved: (
+              parseInt(productBase.reserved, 10) - count[item.productBaseId]
+            ).toString()
+          }
 
-        if (
-          parseInt(productBaseUpdate.amount, 10) < 0 ||
-          parseInt(productBaseUpdate.available, 10) < 0
-        ) {
-          field.productBaseUpdate = true
-          message.productBaseUpdate = 'Número negativo não é valido'
-          throw new FieldValidationError([{ field, message }])
-        }
+          if (
+            parseInt(productBaseUpdate.amount, 10) < 0 ||
+            parseInt(productBaseUpdate.available, 10) < 0
+          ) {
+            field.productBaseUpdate = true
+            message.productBaseUpdate = 'Número negativo não é valido'
+            throw new FieldValidationError([{ field, message }])
+          }
 
-        await productBase.update(productBaseUpdate, { transaction })
+          await productBase.update(productBaseUpdate, { transaction })
 
-        await item.destroy({ transaction })
-      })
+          await item.destroy({ transaction })
+        })
 
-      await Promise.all(kitPartsDeletePromises)
+        await Promise.all(kitPartsDeletePromises)
 
-      await kit.destroy({ transaction })
+        await kit.destroy({ transaction })
+      }
     }
 
     const newTechnician = {
@@ -395,12 +393,13 @@ module.exports = class TechnicianDomain {
     const formatUsername = R.evolve({ username: R.pipe(R.toLower(), R.trim()) })
 
     const userTechnician = await User.findOne({
-      where: formatUsername({ username: oldTechnician.name.replace(/\W/gi, '') }),
+      where: formatUsername({
+        username: oldTechnician.name.replace(/\W/gi, '')
+      }),
       transaction
     })
 
     await oldTechnician.update(newTechnician, { transaction })
-
     await userTechnician.update(
       formatUsername({ username: newTechnician.name.replace(/\W/gi, '') }),
       { transaction }
@@ -414,7 +413,7 @@ module.exports = class TechnicianDomain {
     return response
   }
 
-  async getAllTechnician (options = {}) {
+  async getAllTechnician(options = {}) {
     const inicialOrder = {
       field: 'createdAt',
       acendent: true,
@@ -442,12 +441,7 @@ module.exports = class TechnicianDomain {
           where: getWhere('car')
         }
       ],
-      order: [
-        [
-          newOrder.field,
-          newOrder.direction
-        ]
-      ],
+      order: [[newOrder.field, newOrder.direction]],
       limit,
       offset,
       transaction
@@ -464,7 +458,7 @@ module.exports = class TechnicianDomain {
       }
     }
 
-    const formatDateFunct = (date) => {
+    const formatDateFunct = date => {
       moment.locale('pt-br')
       const formatDate = moment(date).format('L')
       const formatHours = moment(date).format('LT')
@@ -472,7 +466,7 @@ module.exports = class TechnicianDomain {
       return dateformated
     }
 
-    const formatData = R.map((technician) => {
+    const formatData = R.map(technician => {
       const resp = {
         id: technician.id,
         name: technician.name,
@@ -501,7 +495,7 @@ module.exports = class TechnicianDomain {
     return response
   }
 
-  async getAll (options = {}) {
+  async getAll(options = {}) {
     const { query = null, transaction = null } = options
 
     const newQuery = Object.assign({}, query)
@@ -517,16 +511,8 @@ module.exports = class TechnicianDomain {
           attributes: ['plate']
         }
       ],
-      attributes: [
-        'id',
-        'name'
-      ],
-      order: [
-        [
-          'name',
-          'ASC'
-        ]
-      ],
+      attributes: ['id', 'name'],
+      order: [['name', 'ASC']],
       transaction
     })
 
