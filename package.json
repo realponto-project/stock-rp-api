@@ -52,7 +52,7 @@
     "validator": "^10.11.0",
     "web-push": "^3.4.1",
     "xlsx": "^0.16.6",
-    "yarn": "^1.12.3"
+    "yarn": "^1.22.0"
   },
   "devDependencies": {
     "babel-eslint": "^9.0.0",
