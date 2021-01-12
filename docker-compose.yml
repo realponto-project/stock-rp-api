@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: stockRp_2.0
       POSTGRES_DB: stock_2.0
     ports:
-      - 5402:5432
+      - 5412:5432
     volumes:
       - db_estoque:/var/lib/postgresql/data
   # pgbackups:
