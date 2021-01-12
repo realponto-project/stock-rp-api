@@ -1,6 +1,6 @@
-const Sequelize = require("sequelize");
+const Sequelize = require("sequelize")
 
-module.exports = sequelize => {
+module.exports = (sequelize) => {
   const supProvider = sequelize.define("supProvider", {
     id: {
       type: Sequelize.UUID,
@@ -8,16 +8,14 @@ module.exports = sequelize => {
       primaryKey: true
     },
 
-    razaoSocial: {
-      type: Sequelize.STRING
-    },
+    razaoSocial: { type: Sequelize.STRING },
 
     cnpj: {
       type: Sequelize.STRING,
       set(oldValue) {
         // eslint-disable-next-line no-useless-escape
-        const newValue = oldValue.replace(/\D/gi, "");
-        this.setDataValue("cnpj", newValue);
+        const newValue = oldValue.replace(/\D/gi, "")
+        this.setDataValue("cnpj", newValue)
       }
     },
 
@@ -31,9 +29,7 @@ module.exports = sequelize => {
       allowNull: false
     },
 
-    complement: {
-      type: Sequelize.STRING
-    },
+    complement: { type: Sequelize.STRING },
 
     city: {
       type: Sequelize.STRING,
@@ -55,19 +51,15 @@ module.exports = sequelize => {
       allowNull: false,
       set(oldValue) {
         // eslint-disable-next-line no-useless-escape
-        const newValue = oldValue.replace(/\D/gi, "");
-        this.setDataValue("zipCode", newValue);
+        const newValue = oldValue.replace(/\D/gi, "")
+        this.setDataValue("zipCode", newValue)
       }
     }
-  });
+  })
 
-  supProvider.associate = models => {
-    supProvider.hasMany(models.supContact, {
-      foreignKey: {
-        allowNull: false
-      }
-    });
-  };
+  supProvider.associate = (models) => {
+    supProvider.hasMany(models.supContact, { foreignKey: { allowNull: false } })
+  }
 
-  return supProvider;
-};
+  return supProvider
+}

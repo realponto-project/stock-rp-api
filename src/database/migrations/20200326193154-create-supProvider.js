@@ -16,8 +16,8 @@ module.exports = {
         type: Sequelize.STRING,
         set(oldValue) {
           // eslint-disable-next-line no-useless-escape
-          const newValue = oldValue.replace(/\.|-|\//gi, "");
-          this.setDataValue("cnpj", newValue);
+          const newValue = oldValue.replace(/\.|-|\//gi, "")
+          this.setDataValue("cnpj", newValue)
         }
       },
 
@@ -31,9 +31,7 @@ module.exports = {
         allowNull: false
       },
 
-      complement: {
-        type: Sequelize.STRING
-      },
+      complement: { type: Sequelize.STRING },
 
       city: {
         type: Sequelize.STRING,
@@ -55,8 +53,8 @@ module.exports = {
         allowNull: false,
         set(oldValue) {
           // eslint-disable-next-line no-useless-escape
-          const newValue = oldValue.replace(/\.|-/gi, "");
-          this.setDataValue("zipCode", newValue);
+          const newValue = oldValue.replace(/\.|-/gi, "")
+          this.setDataValue("zipCode", newValue)
         }
       },
 
@@ -74,10 +72,10 @@ module.exports = {
         defaultValue: null,
         type: Sequelize.DATE
       }
-    });
+    })
 
-    return supProvider;
+    return supProvider
   },
 
   down: queryInterface => queryInterface.dropTable("supProvider")
-};
+}

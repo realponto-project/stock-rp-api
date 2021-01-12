@@ -16,17 +16,15 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
         set(oldValue) {
-          const newValue = oldValue.replace(/\.|-/gi, "");
-          this.setDataValue("telphone", newValue);
+          const newValue = oldValue.replace(/\.|-/gi, "")
+          this.setDataValue("telphone", newValue)
         }
       },
 
       email: {
         type: Sequelize.STRING,
         allowNull: false,
-        validate: {
-          isEmail: true
-        }
+        validate: { isEmail: true }
       },
 
       supProviderId: {
@@ -52,10 +50,10 @@ module.exports = {
         defaultValue: null,
         type: Sequelize.DATE
       }
-    });
+    })
 
-    return supContact;
+    return supContact
   },
 
   down: queryInterface => queryInterface.dropTable("supContact")
-};
+}

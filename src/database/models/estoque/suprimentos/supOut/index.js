@@ -1,6 +1,6 @@
-const Sequelize = require("sequelize");
+const Sequelize = require("sequelize")
 
-module.exports = sequelize => {
+module.exports = (sequelize) => {
   const supOut = sequelize.define("supOut", {
     id: {
       type: Sequelize.UUID,
@@ -11,9 +11,7 @@ module.exports = sequelize => {
     amount: {
       type: Sequelize.INTEGER,
       allowNull: false,
-      validate: {
-        min: 0
-      }
+      validate: { min: 0 }
     },
 
     solicitante: {
@@ -24,9 +22,7 @@ module.exports = sequelize => {
     emailSolic: {
       type: Sequelize.STRING,
       allowNull: false,
-      validate: {
-        isEmail: true
-      }
+      validate: { isEmail: true }
     },
 
     emailResp: {
@@ -38,15 +34,11 @@ module.exports = sequelize => {
       type: Sequelize.STRING,
       allowNull: false
     }
-  });
+  })
 
-  supOut.associate = models => {
-    supOut.belongsTo(models.supProduct, {
-      foreignKey: {
-        allowNull: false
-      }
-    });
-  };
+  supOut.associate = (models) => {
+    supOut.belongsTo(models.supProduct, { foreignKey: { allowNull: false } })
+  }
 
-  return supOut;
-};
+  return supOut
+}

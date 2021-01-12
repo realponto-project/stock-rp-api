@@ -58,9 +58,8 @@ const getResourcesByTypeAccount = async (req, res, next) => {
   }
 }
 
-
 module.exports = {
   add,
   getAll,
-  getResourcesByTypeAccount,
+  getResourcesByTypeAccount
 }

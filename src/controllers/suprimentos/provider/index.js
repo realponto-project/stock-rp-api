@@ -1,63 +1,61 @@
-const R = require("ramda");
+const R = require("ramda")
 
-const SupProviderDomain = require("../../../domains/suprimentos/provider");
-const database = require("../../../database");
+const SupProviderDomain = require("../../../domains/suprimentos/provider")
+const database = require("../../../database")
 
-const supProviderDomain = new SupProviderDomain();
+const supProviderDomain = new SupProviderDomain()
 
 const create = async (req, res, next) => {
-  const transaction = await database.transaction();
+  const transaction = await database.transaction()
   try {
-    const provider = await supProviderDomain.create(req.body, { transaction });
+    const provider = await supProviderDomain.create(req.body, { transaction })
 
-    await transaction.commit();
-    res.json(provider);
+    await transaction.commit()
+    res.json(provider)
   } catch (error) {
-    await transaction.rollback();
-    next(error);
+    await transaction.rollback()
+    next(error)
   }
-};
+}
 
 const getAll = async (req, res, next) => {
-  const transaction = await database.transaction();
+  const transaction = await database.transaction()
   try {
-    let query;
+    let query
     if (R.has("query", req)) {
       if (R.has("query", req.query)) {
-        query = JSON.parse(req.query.query);
+        query = JSON.parse(req.query.query)
       }
     }
 
     const providers = await supProviderDomain.getAll({
       query,
       transaction
-    });
+    })
 
-    await transaction.commit();
-    res.json(providers);
+    await transaction.commit()
+    res.json(providers)
   } catch (error) {
-    await transaction.rollback();
-    next();
+    await transaction.rollback()
+    next()
   }
-};
+}
 
 const update = async (req, res, next) => {
-  const transaction = await database.transaction();
+  const transaction = await database.transaction()
   try {
-    const provider = await supProviderDomain.update(req.body, {
-      transaction
-    });
+    const provider = await supProviderDomain.update(req.body, { transaction })
 
-    await transaction.commit();
-    res.json(provider);
+    await transaction.commit()
+    res.json(provider)
   } catch (error) {
-    await transaction.rollback();
-    next(error);
+    await transaction.rollback()
+    next(error)
   }
-};
+}
 
 module.exports = {
   create,
   getAll,
   update
-};
+}

@@ -4,88 +4,73 @@ module.exports = {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
       },
       username: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
+        unique: true
       },
       customized: {
         type: Sequelize.BOOLEAN,
-        allowNull: false,
+        allowNull: false
         // defaultValue: false,
       },
       responsibleUser: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
 
       modulo: {
         type: Sequelize.BOOLEAN,
-        defaultValue: false,
+        defaultValue: false
       },
 
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       loginId: {
         type: Sequelize.UUID,
         references: {
           model: "login",
-          key: "id",
+          key: "id"
         },
-        allowNull: true,
+        allowNull: true
       },
 
       resourceId: {
         type: Sequelize.UUID,
         references: {
           model: "resources",
-          key: "id",
+          key: "id"
         },
-        allowNull: true,
+        allowNull: true
       },
 
       typeAccountId: {
         type: Sequelize.UUID,
         references: {
           model: "typeAccount",
-          key: "id",
+          key: "id"
         },
-        allowNull: true,
-      },
-    });
+        allowNull: true
+      }
+    })
 
-    user.associate = (models) => {
-      user.belongsTo(models.login);
-      user.belongsTo(models.resources);
-      user.belongsTo(models.typeAccount, {
-        // foreignKey: {
-        //   allowNull: false,
-        // },
-      });
-      // user.belongsTo(models.user, {
-      //   foreignKey: {
-      //     allowNull: false,
-      //   },
-      // })
-    };
-
-    return user;
+    return user
   },
 
-  down: (queryInterface) => queryInterface.dropTable("user"),
-};
+  down: queryInterface => queryInterface.dropTable("user")
+}

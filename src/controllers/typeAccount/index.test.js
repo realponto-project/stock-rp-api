@@ -1,12 +1,13 @@
-const request = require("../../helpers/request");
+const request = require('../../helpers/request')
 
-describe("typeAccountController", () => {
-  let headers = null;
-  let typeAccountMock = null;
+describe('typeAccountController', () => {
+  let headers = null
+  let typeAccountMock = null
 
+  // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     typeAccountMock = {
-      typeName: "ADM",
+      typeName: 'ADM',
       addCompany: true,
       addPart: false,
       addAnalyze: true,
@@ -17,7 +18,7 @@ describe("typeAccountController", () => {
       addAccessories: false,
       addUser: false,
       addTypeAccount: false,
-      responsibleUser: "modrp",
+      responsibleUser: 'modrp',
       stock: false,
       labTec: true,
       addTec: false,
@@ -35,58 +36,60 @@ describe("typeAccountController", () => {
       gerROs: false,
       delROs: false,
       updateRos: false,
-      addStatus: false
-    };
+      addStatus: false,
+      suprimento: false
+    }
 
     const loginBody = {
-      username: "modrp",
-      password: "modrp",
+      username: 'modrp',
+      password: 'modrp',
       typeAccount: { labTec: true }
-    };
+    }
 
-    const login = await request().post("/oapi/login", loginBody);
+    const login = await request().post('/oapi/login', loginBody)
 
-    const { token, username } = login.body;
+    const { token, username } = login.body
 
     headers = {
       token,
       username
-    };
-  });
+    }
+  })
 
-  test("create", async () => {
-    const response = await request().post("/api/typeAccount", typeAccountMock, {
-      headers
-    });
+  it('create', async () => {
+    expect.assertions(7)
+    const response = await request().post('/api/typeAccount', typeAccountMock, { headers })
 
-    const { body, statusCode } = response;
+    const { body, statusCode } = response
 
-    expect(statusCode).toBe(200);
-    expect(body.typeName).toBe(typeAccountMock.typeName);
-    expect(body.resource.addCompany).toBe(typeAccountMock.addCompany);
-    expect(body.resource.addPart).toBe(typeAccountMock.addPart);
-    expect(body.resource.addAnalyze).toBe(typeAccountMock.addAnalyze);
-    expect(body.resource.addEquip).toBe(typeAccountMock.addEquip);
-    expect(body.resource.addEntry).toBe(typeAccountMock.addEntry);
-  });
+    expect(statusCode).toBe(200)
+    expect(body.typeName).toBe(typeAccountMock.typeName)
+    expect(body.resource.addCompany).toBe(typeAccountMock.addCompany)
+    expect(body.resource.addPart).toBe(typeAccountMock.addPart)
+    expect(body.resource.addAnalyze).toBe(typeAccountMock.addAnalyze)
+    expect(body.resource.addEquip).toBe(typeAccountMock.addEquip)
+    expect(body.resource.addEntry).toBe(typeAccountMock.addEntry)
+  })
 
-  test("getall", async () => {
-    const response = await request().get("/api/typeAccount", { headers });
+  it('getall', async () => {
+    expect.hasAssertions()
+    const response = await request().get('/api/typeAccount', { headers })
 
-    const { body, statusCode } = response;
+    const { body, statusCode } = response
 
-    expect(statusCode).toBe(200);
-    expect(body.rows).toBeTruthy();
-  });
+    expect(statusCode).toBe(200)
+    expect(body.rows).toBeTruthy()
+  })
 
-  test("getResourcesByTypeAccount", async () => {
+  it('getResourcesByTypeAccount', async () => {
+    expect.hasAssertions()
     const response = await request().get(
-      "/api/typeAccount/getResourcesByTypeAccount",
+      '/api/typeAccount/getResourcesByTypeAccount',
       { headers }
-    );
+    )
 
-    const { statusCode } = response;
+    const { statusCode } = response
 
-    expect(statusCode).toBe(200);
-  });
-});
+    expect(statusCode).toBe(200)
+  })
+})

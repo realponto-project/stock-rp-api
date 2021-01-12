@@ -1,5 +1,5 @@
-const EquipTypeDomain = require('../../../domains/estoque/product/equip/equipModel')
-const database = require('../../../database')
+const EquipTypeDomain = require("../../../domains/estoque/product/equip/equipType")
+const database = require("../../../database")
 
 const equipTypeDomain = new EquipTypeDomain()
 
@@ -64,7 +64,7 @@ const getAllModelByMark = async (req, res, next) => {
 
     const obj = {
       mark,
-      type,
+      type
     }
 
     const modelArray = await equipTypeDomain.getAllModelByMark(obj)
@@ -82,5 +82,5 @@ module.exports = {
   addMark,
   getAll,
   getAllMarkByType,
-  getAllModelByMark,
+  getAllModelByMark
 }

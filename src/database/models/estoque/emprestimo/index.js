@@ -1,48 +1,38 @@
-const Sequelize = require("sequelize");
+const Sequelize = require("sequelize")
 
 module.exports = (sequelize) => {
   const emprestimo = sequelize.define("emprestimo", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
+      primaryKey: true
     },
 
     dateExpedition: {
       type: Sequelize.DATE,
-      allowNull: false,
+      allowNull: false
     },
 
-    razaoSocial: {
-      type: Sequelize.STRING,
-    },
+    razaoSocial: { type: Sequelize.STRING },
 
     cnpj: {
       type: Sequelize.STRING,
       set(oldValue) {
-        const newValue = oldValue.replace(/\.|-|\//gi, "");
-        this.setDataValue("cnpj", newValue);
-      },
+        const newValue = oldValue.replace(/\.|-|\//gi, "")
+        this.setDataValue("cnpj", newValue)
+      }
     },
 
     observation: {
       type: Sequelize.TEXT,
-      allowNull: true,
-    },
-  });
+      allowNull: true
+    }
+  })
 
   emprestimo.associate = (models) => {
-    emprestimo.belongsTo(models.equip, {
-      foreignKey: {
-        allowNull: false,
-      },
-    });
-    emprestimo.belongsTo(models.technician, {
-      foreignKey: {
-        allowNull: false,
-      },
-    });
-  };
+    emprestimo.belongsTo(models.equip, { foreignKey: { allowNull: false } })
+    emprestimo.belongsTo(models.technician, { foreignKey: { allowNull: false } })
+  }
 
-  return emprestimo;
-};
+  return emprestimo
+}

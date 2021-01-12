@@ -1,95 +1,88 @@
-const moment = require("moment");
-const Sequelize = require("sequelize");
+const moment = require("moment")
+const Sequelize = require("sequelize")
 
-const database = require("../../../database");
+const database = require("../../../database")
 
-const { UnauthorizedError } = require("../../../helpers/errors");
+const { UnauthorizedError } = require("../../../helpers/errors")
 
-const Session = database.model("session");
-const User = database.model("user");
-const Login = database.model("login");
+const Session = database.model("session")
+const User = database.model("user")
+const Login = database.model("login")
 
-const { Op } = Sequelize;
+const { Op } = Sequelize
 
 class SessionDomain {
   async createSession(loginId, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
     const session = await Session.create(
       { loginId },
-      {
-        transaction,
-      }
-    );
+      { transaction }
+    )
 
-    return session;
+    return session
   }
 
   async updateLastActivity(id, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
-    const sessionInstance = await Session.findByPk(id, { transaction });
+    const sessionInstance = await Session.findByPk(id, { transaction })
 
     if (!sessionInstance) {
-      throw new UnauthorizedError();
+      throw new UnauthorizedError()
     }
 
-    const lastActivity = moment();
+    const lastActivity = moment()
 
-    await sessionInstance.update({ lastActivity });
+    await sessionInstance.update({ lastActivity })
 
-    const sessionUpdated = await Session.findByPk(sessionInstance.id, {
-      transaction,
-    });
+    const sessionUpdated = await Session.findByPk(sessionInstance.id, { transaction })
 
-    return sessionUpdated;
+    return sessionUpdated
   }
 
   async turnInvalidSession(id, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
-    const sessionInstance = await Session.findByPk(id, { transaction });
+    const sessionInstance = await Session.findByPk(id, { transaction })
 
     if (!sessionInstance) {
-      throw new Error("session not found");
+      throw new Error("session not found")
     }
 
-    await sessionInstance.update({ active: false });
+    await sessionInstance.update({ active: false })
 
-    await sessionInstance.destroy({ force: true });
+    await sessionInstance.destroy({ force: true })
 
-    const sessionUpdated = await Session.findByPk(sessionInstance.id, {
-      transaction,
-    });
+    const sessionUpdated = await Session.findByPk(sessionInstance.id, { transaction })
 
-    return sessionUpdated;
+    return sessionUpdated
   }
 
   async checkSessionIsValid(id, username, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
     if (!username) {
-      return false;
+      return false
     }
 
     const login = await Login.findOne({
       include: [
         {
           model: User,
-          where: { username },
-        },
+          where: { username }
+        }
       ],
-      transaction,
-    });
+      transaction
+    })
 
     if (!login) {
-      return false;
+      return false
     }
 
     if (!login.id) {
-      return false;
+      return false
     }
-    console.log(JSON.parse(JSON.stringify(login)));
 
     const session = await Session.findOne({
       where: {
@@ -98,31 +91,31 @@ class SessionDomain {
         createdAt: {
           [Op.and]: [
             { [Op.gte]: moment().startOf("day") },
-            { [Op.lte]: moment().endOf("day") },
-          ],
-        },
+            { [Op.lte]: moment().endOf("day") }
+          ]
+        }
       },
-      transaction,
-    });
-    console.log(JSON.parse(JSON.stringify(session)));
+      transaction
+    })
 
     if (!session) {
       const sessions = await Session.findAll({
         where: {
           id,
-          loginId: login.id,
+          loginId: login.id
         },
-        transaction,
-      });
+        transaction
+      })
 
       await Promise.all(
-        sessions.map((session) => session.destroy({ force: true, transaction }))
-      );
-      return false;
+        // eslint-disable-next-line no-return-await
+        sessions.map(async item => await item.destroy({ force: true, transaction }))
+      )
+      return false
     }
 
-    return session.active;
+    return session.active
   }
 }
 
-module.exports = SessionDomain;
+module.exports = SessionDomain

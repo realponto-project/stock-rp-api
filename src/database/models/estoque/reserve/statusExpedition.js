@@ -1,18 +1,18 @@
-const Sequelize = require('sequelize')
+const Sequelize = require("sequelize")
 
 module.exports = (sequelize) => {
-  const statusExpedition = sequelize.define('statusExpedition', {
+  const statusExpedition = sequelize.define("statusExpedition", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
+      primaryKey: true
     },
 
     status: {
       type: Sequelize.STRING,
       allowNull: false,
-      unique: true,
-    },
+      unique: true
+    }
   })
 
   return statusExpedition

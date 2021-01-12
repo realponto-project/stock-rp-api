@@ -4,46 +4,46 @@ module.exports = {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
       },
 
       razaoSocial: {
         type: Sequelize.STRING,
-        allowNull: true,
+        allowNull: true
       },
 
       date: {
         type: Sequelize.DATE,
         defaultValue: new Date(),
         timestamps: false,
-        allowNull: false,
+        allowNull: false
       },
 
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
       technicianId: {
         type: Sequelize.UUID,
         references: {
           model: "technician",
-          key: "id",
+          key: "id"
         },
-        allowNull: false,
-      },
-    });
+        allowNull: false
+      }
+    })
 
-    return reservaInterno;
+    return reservaInterno
   },
-  down: (queryInterface) => queryInterface.dropTable("reservaInterno"),
-};
+  down: queryInterface => queryInterface.dropTable("reservaInterno")
+}

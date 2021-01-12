@@ -4,103 +4,103 @@ module.exports = {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
       },
 
       name: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
 
       category: {
-        type: Sequelize.ENUM(["peca", "equipamento", "acessorios"]),
-        allowNull: false,
+        type: Sequelize.ENUM([
+          "peca",
+          "equipamento",
+          "acessorios"
+        ]),
+        allowNull: false
       },
 
       description: {
         type: Sequelize.STRING,
-        allowNull: true,
+        allowNull: true
       },
 
       SKU: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
-        allowNull: false,
+        allowNull: false
       },
 
       serial: {
         type: Sequelize.BOOLEAN,
-        defaultValue: false,
+        defaultValue: false
       },
 
       minimumStock: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
 
       corredor: {
         type: Sequelize.STRING,
-        defauktValues: "",
+        defauktValues: ""
       },
 
       coluna: {
         type: Sequelize.STRING,
-        defauktValues: "",
+        defauktValues: ""
       },
 
       prateleira: {
         type: Sequelize.STRING,
-        defauktValues: "",
+        defauktValues: ""
       },
 
       gaveta: {
         type: Sequelize.STRING,
-        defauktValues: "",
+        defauktValues: ""
       },
 
       modulo: {
         type: Sequelize.BOOLEAN,
-        defaultValue: false,
+        defaultValue: false
       },
 
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
       markId: {
         type: Sequelize.UUID,
         references: {
           model: "mark",
-          key: "id",
+          key: "id"
         },
-        allowNull: false,
+        allowNull: false
       },
       equipTypeId: {
         type: Sequelize.UUID,
         references: {
           model: "equipType",
-          key: "id",
+          key: "id"
         },
-        allowNull: true,
-      },
-    });
+        allowNull: true
+      }
+    })
 
     product.associate = (models) => {
-      product.belongsTo(models.mark, {
-        foreignKey: {
-          allowNull: false,
-        },
-      });
+      product.belongsTo(models.mark, { foreignKey: { allowNull: false } })
 
       // product.belongsTo(models.part, {
       //   foreignKey: {
@@ -114,18 +114,18 @@ module.exports = {
       //   },
       // })
 
-      product.belongsTo(models.equipType);
+      product.belongsTo(models.equipType)
 
       product.belongsToMany(models.product, {
         as: "productToMany",
-        through: "productProduct",
-      });
+        through: "productProduct"
+      })
 
-      product.belongsToMany(models.stockBase, { through: "productBase" });
-    };
+      product.belongsToMany(models.stockBase, { through: "productBase" })
+    }
 
-    return product;
+    return product
   },
 
-  down: (queryInterface) => queryInterface.dropTable("product"),
-};
+  down: queryInterface => queryInterface.dropTable("product")
+}

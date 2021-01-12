@@ -1,55 +1,53 @@
-// const R = require('ramda')
+const KitDomain = require(".")
+const TechnicianDomain = require("../../technician")
+const CarDomain = require("../../technician/car")
+const MarkDomain = require("../../product/mark")
+const ProductDomain = require("../../product")
+const CompanyDomain = require("../../../general/company")
+const EntranceDomain = require("../../entrance")
 
-const KitDomain = require(".");
-const TechnicianDomain = require("../../technician");
-const CarDomain = require("../../technician/car");
-const MarkDomain = require("../../product/mark");
-const ProductDomain = require("../../product");
-const CompanyDomain = require("../../../general/company");
-const EntranceDomain = require("../../entrance");
+const database = require("../../../../database")
 
-const database = require("../../../../database");
-// const { FieldValidationError } = require('../../../helpers/errors')
+const kitDomain = new KitDomain()
+const technicianDomain = new TechnicianDomain()
+const carDomain = new CarDomain()
+const markDomain = new MarkDomain()
+const productDomain = new ProductDomain()
+const companyDomain = new CompanyDomain()
+const entranceDomain = new EntranceDomain()
 
-const kitDomain = new KitDomain();
-const technicianDomain = new TechnicianDomain();
-const carDomain = new CarDomain();
-const markDomain = new MarkDomain();
-const productDomain = new ProductDomain();
-const companyDomain = new CompanyDomain();
-const entranceDomain = new EntranceDomain();
-
-const ProductBase = database.model("productBase");
-const StockBase = database.model("stockBase");
+const ProductBase = database.model("productBase")
+const StockBase = database.model("stockBase")
 
 describe("kitDomain", () => {
-  let productCreated = null;
-  let productBase = null;
+  let productCreated = null
+  let productBase = null
 
+  // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     const carMock = {
       model: "GOL",
       year: "2007",
-      plate: "RST-8888",
-    };
+      plate: "RST-8888"
+    }
 
-    await carDomain.add(carMock);
+    await carDomain.add(carMock)
 
     const technicianMock = {
       name: "KLEITINHO DA MEIOTA",
       CNH: "01/01/2020",
       plate: "RST-8888",
-      external: true,
-    };
+      external: true
+    }
 
-    await technicianDomain.add(technicianMock);
+    await technicianDomain.add(technicianMock)
 
     const mark = {
       mark: "HONDA",
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    await markDomain.add(mark);
+    await markDomain.add(mark)
 
     const productMock = {
       name: "PLACA",
@@ -59,10 +57,10 @@ describe("kitDomain", () => {
       minimumStock: "10",
       mark: "HONDA",
       serial: false,
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    productCreated = await productDomain.add(productMock);
+    productCreated = await productDomain.add(productMock)
 
     const companyMock = {
       razaoSocial: "teste saida kit",
@@ -77,52 +75,53 @@ describe("kitDomain", () => {
       nameContact: "joseildom",
       email: "josealdo@gmasi.com",
       responsibleUser: "modrp",
-      relation: "fornecedor",
-    };
+      relation: "fornecedor"
+    }
 
-    const companyCreated = await companyDomain.add(companyMock);
+    const companyCreated = await companyDomain.add(companyMock)
 
     const entranceMock = {
       amountAdded: "26",
       stockBase: "ESTOQUE",
       productId: productCreated.id,
       companyId: companyCreated.id,
-      responsibleUser: "modrp",
-    };
+      responsibleUser: "modrp"
+    }
 
-    await entranceDomain.add(entranceMock);
+    await entranceDomain.add(entranceMock)
 
     productBase = await ProductBase.findOne({
-      where: {
-        productId: productCreated.id,
-      },
+      where: { productId: productCreated.id },
       include: [{ model: StockBase, where: { stockBase: "ESTOQUE" } }],
-      transacition: null,
-    });
-  });
+      transacition: null
+    })
+  })
 
-  test("reserva kit", async () => {
+  it("reserva kit", async () => {
+    expect.hasAssertions()
     const reserveMock = {
       kitParts: [
         {
           productBaseId: productBase.id,
-          amount: "5",
-        },
-      ],
-    };
+          amount: "5"
+        }
+      ]
+    }
 
-    await kitDomain.add(reserveMock);
-  });
+    await kitDomain.add(reserveMock)
+  })
 
-  test("getAll", async () => {
-    const kitList = await kitDomain.getAll();
+  it("getAll", async () => {
+    expect.hasAssertions()
+    const kitList = await kitDomain.getAll()
 
-    expect(kitList.rows.length > 0).toBeTruthy();
-  });
+    expect(kitList.rows.length > 0).toBeTruthy()
+  })
 
-  test("getKitDefaultValue", async () => {
-    const kitList = await kitDomain.getKitDefaultValue();
+  it("getKitDefaultValue", async () => {
+    expect.hasAssertions()
+    const kitList = await kitDomain.getKitDefaultValue()
 
-    expect(kitList.rows.length > 0).toBeTruthy();
-  });
-});
+    expect(kitList.rows.length > 0).toBeTruthy()
+  })
+})

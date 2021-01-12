@@ -1,28 +1,30 @@
-const R = require("ramda");
-const moment = require("moment");
+const R = require("ramda")
+const moment = require("moment")
 
-const Cnpj = require("@fnando/cnpj/es");
-const Cpf = require("@fnando/cpf/es");
+const Cnpj = require("@fnando/cnpj/es")
+const Cpf = require("@fnando/cpf/es")
 
-const database = require("../../../database");
-const { FieldValidationError } = require("../../../helpers/errors");
-const formatQuery = require("../../../helpers/lazyLoad");
+const database = require("../../../database")
+const { FieldValidationError } = require("../../../helpers/errors")
+const formatQuery = require("../../../helpers/lazyLoad")
 
-const Emprestimo = database.model("emprestimo");
-const Product = database.model("product");
-const Equip = database.model("equip");
-const Technician = database.model("technician");
-const ProductBase = database.model("productBase");
+const Emprestimo = database.model("emprestimo")
+const Product = database.model("product")
+const Equip = database.model("equip")
+const Technician = database.model("technician")
+const ProductBase = database.model("productBase")
 
 module.exports = class EmprestimoDomain {
   async add(bodyData, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
-    const emprestimo = R.omit(["id", "serialNumber"], bodyData);
-    const hasProps = (prop, obj) => R.has(prop, obj);
-    const notHasProps = (prop, obj) => R.not(R.has(prop, obj));
+    const emprestimo = R.omit([
+      "id",
+      "serialNumber"
+    ], bodyData)
+    const notHasProps = (prop, obj) => R.not(R.has(prop, obj))
 
-    let errors = false;
+    let errors = false
 
     const field = {
       cnpj: false,
@@ -30,8 +32,8 @@ module.exports = class EmprestimoDomain {
       dateExpedition: false,
       productId: false,
       equipId: false,
-      observation: false,
-    };
+      observation: false
+    }
 
     const message = {
       razaoSocial: "",
@@ -39,227 +41,229 @@ module.exports = class EmprestimoDomain {
       dateExpedition: "",
       productId: "",
       equipId: "",
-      observation: "",
-    };
+      observation: ""
+    }
 
     if (notHasProps("cnpj", emprestimo) || !emprestimo.cnpj) {
-      errors = true;
-      field.cnpj = true;
-      message.cnpj = "cnpj cannot null";
+      errors = true
+      field.cnpj = true
+      message.cnpj = "cnpj cannot null"
     } else if (
-      !Cnpj.isValid(emprestimo.cnpj.replace(/\D/g, "")) &&
-      !Cpf.isValid(emprestimo.cnpj.replace(/\D/g, ""))
+      !Cnpj.isValid(emprestimo.cnpj.replace(/\D/g, ""))
+      && !Cpf.isValid(emprestimo.cnpj.replace(/\D/g, ""))
     ) {
-      errors = true;
-      field.cnpj = true;
-      message.cnpj = "cnpj inválid";
+      errors = true
+      field.cnpj = true
+      message.cnpj = "cnpj inválid"
     }
 
     if (notHasProps("razaoSocial", emprestimo) || !emprestimo.razaoSocial) {
-      errors = true;
-      field.razaoSocial = true;
-      message.razaoSocial = "razaoSocial cannot null";
+      errors = true
+      field.razaoSocial = true
+      message.razaoSocial = "razaoSocial cannot null"
     }
 
     if (
-      notHasProps("dateExpedition", emprestimo) ||
-      !emprestimo.dateExpedition
+      notHasProps("dateExpedition", emprestimo)
+      || !emprestimo.dateExpedition
     ) {
-      errors = true;
-      field.dateExpedition = true;
-      message.dateExpedition = "dateExpedition cannot null";
+      errors = true
+      field.dateExpedition = true
+      message.dateExpedition = "dateExpedition cannot null"
     }
 
     if (notHasProps("serialNumber", bodyData) || !bodyData.serialNumber) {
-      errors = true;
-      field.serialNumber = true;
-      message.serialNumber = "serialNumber cannot null";
+      errors = true
+      field.serialNumber = true
+      message.serialNumber = "serialNumber cannot null"
     } else {
-      const { serialNumber } = bodyData;
+      const { serialNumber } = bodyData
       const equip = await Equip.findOne({
         where: { serialNumber },
-        transaction,
-      });
+        transaction
+      })
 
       if (equip) {
-        emprestimo.equipId = equip.id;
+        emprestimo.equipId = equip.id
       } else {
-        errors = true;
-        field.equipId = true;
-        message.equipId = "equipId inválid";
+        errors = true
+        field.equipId = true
+        message.equipId = "equipId inválid"
       }
     }
 
     if (notHasProps("technicianId", emprestimo) || !emprestimo.technicianId) {
-      errors = true;
-      field.technicianId = true;
-      message.technicianId = "technicianId cannot null";
+      errors = true
+      field.technicianId = true
+      message.technicianId = "technicianId cannot null"
     } else {
-      const technician = await Technician.findByPk(emprestimo.technicianId, {
-        transaction,
-      });
+      const technician = await Technician.findByPk(emprestimo.technicianId,
+        { transaction })
 
       if (!technician) {
-        errors = true;
-        field.technicianId = true;
-        message.technicianId = "technicianId inválid";
+        errors = true
+        field.technicianId = true
+        message.technicianId = "technicianId inválid"
       }
     }
 
     if (notHasProps("observation", emprestimo)) {
-      errors = true;
-      field.observation = true;
-      message.observation = "observation cannot undefined";
+      errors = true
+      field.observation = true
+      message.observation = "observation cannot undefined"
     }
 
     if (errors) {
-      throw new FieldValidationError([{ field, message }]);
+      throw new FieldValidationError([{ field, message }])
     }
 
-    const emprestimoCreted = await Emprestimo.create(emprestimo, {
-      transaction,
-    });
+    const emprestimoCreted = await Emprestimo.create(emprestimo,
+      { transaction })
 
-    const equip = await Equip.findByPk(emprestimo.equipId, {
-      transaction,
-    });
+    const equip = await Equip.findByPk(emprestimo.equipId, { transaction })
 
     await equip.update(
       {
         ...JSON.parse(JSON.stringify(equip)),
-        inClient: true,
+        inClient: true
       },
-      {
-        transaction,
-      }
-    );
+      { transaction }
+    )
 
-    return emprestimoCreted;
+    const productBase = await ProductBase.findByPk(equip.productBaseId, { transaction })
+    await productBase.update({
+      available: (parseInt(productBase.available, 10) - 1).toString(),
+      reserved: (parseInt(productBase.reserved, 10) + 1).toString()
+    }, { transaction })
+
+    return emprestimoCreted
   }
 
   async update(bodyData, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
-    const oldEmprestimo = await Emprestimo.findByPk(bodyData.id, {
-      transaction,
-    });
+    const oldEmprestimo = await Emprestimo.findByPk(
+      bodyData.id, { transaction }
+    )
 
     if (!oldEmprestimo) {
       throw new FieldValidationError([
-        { field: { id: true }, message: { id: "inválid id" } },
-      ]);
+        {
+          field: { id: true },
+          message: { id: "inválid id" }
+        }
+      ])
     }
 
-    const emprestimo = R.omit(["id", "serialNumber"], bodyData);
-    const notHasProps = (prop, obj) => R.not(R.has(prop, obj));
+    const emprestimo = R.omit([
+      "id",
+      "serialNumber"
+    ], bodyData)
+    const notHasProps = (prop, obj) => R.not(R.has(prop, obj))
 
-    let errors = false;
+    let errors = false
 
     const field = {
       cnpj: false,
       razaoSocial: false,
       dateExpedition: false,
       productId: false,
-      observation: false,
-    };
+      observation: false
+    }
 
     const message = {
       razaoSocial: "",
       cnpj: "",
       dateExpedition: "",
       productId: "",
-      observation: "",
-    };
+      observation: ""
+    }
 
     if (notHasProps("cnpj", emprestimo) || !emprestimo.cnpj) {
-      errors = true;
-      field.cnpj = true;
-      message.cnpj = "cnpj cannot null";
+      errors = true
+      field.cnpj = true
+      message.cnpj = "cnpj cannot null"
     } else if (
-      !Cnpj.isValid(emprestimo.cnpj.replace(/\D/g, "")) &&
-      !Cpf.isValid(emprestimo.cnpj.replace(/\D/g, ""))
+      !Cnpj.isValid(emprestimo.cnpj.replace(/\D/g, ""))
+      && !Cpf.isValid(emprestimo.cnpj.replace(/\D/g, ""))
     ) {
-      errors = true;
-      field.cnpj = true;
-      message.cnpj = "cnpj inválid";
+      errors = true
+      field.cnpj = true
+      message.cnpj = "cnpj inválid"
     }
 
     if (notHasProps("razaoSocial", emprestimo) || !emprestimo.razaoSocial) {
-      errors = true;
-      field.razaoSocial = true;
-      message.razaoSocial = "razaoSocial cannot null";
+      errors = true
+      field.razaoSocial = true
+      message.razaoSocial = "razaoSocial cannot null"
     }
 
     if (
-      notHasProps("dateExpedition", emprestimo) ||
-      !emprestimo.dateExpedition
+      notHasProps("dateExpedition", emprestimo)
+      || !emprestimo.dateExpedition
     ) {
-      errors = true;
-      field.dateExpedition = true;
-      message.dateExpedition = "dateExpedition cannot null";
+      errors = true
+      field.dateExpedition = true
+      message.dateExpedition = "dateExpedition cannot null"
     }
 
     if (notHasProps("technicianId", emprestimo) || !emprestimo.technicianId) {
-      errors = true;
-      field.technicianId = true;
-      message.technicianId = "technicianId cannot null";
+      errors = true
+      field.technicianId = true
+      message.technicianId = "technicianId cannot null"
     } else {
-      const technician = await Technician.findByPk(emprestimo.technicianId, {
-        transaction,
-      });
+      const technician = await Technician.findByPk(emprestimo.technicianId, { transaction })
 
       if (!technician) {
-        errors = true;
-        field.technicianId = true;
-        message.technicianId = "technicianId inválid";
+        errors = true
+        field.technicianId = true
+        message.technicianId = "technicianId inválid"
       }
     }
 
     if (notHasProps("observation", emprestimo)) {
-      errors = true;
-      field.observation = true;
-      message.observation = "observation cannot undefined";
+      errors = true
+      field.observation = true
+      message.observation = "observation cannot undefined"
     }
 
     if (errors) {
-      throw new FieldValidationError([{ field, message }]);
+      throw new FieldValidationError([{ field, message }])
     }
 
     const emperestimoUpdated = {
       ...JSON.parse(JSON.stringify(oldEmprestimo)),
-      ...emprestimo,
-    };
+      ...emprestimo
+    }
 
-    await oldEmprestimo.update(emperestimoUpdated, { transaction });
+    await oldEmprestimo.update(emperestimoUpdated, { transaction })
 
-    const response = await Emprestimo.findByPk(bodyData.id, {
-      transaction,
-    });
+    const response = await Emprestimo.findByPk(bodyData.id, { transaction })
 
-    return response;
+    return response
   }
 
   async getAll(options = {}) {
     const inicialOrder = {
       field: "createdAt",
       acendent: true,
-      direction: "DESC",
-    };
-
-    const { query = null, transaction = null } = options;
-
-    const newQuery = Object.assign({}, query);
-    const newOrder = query && query.order ? query.order : inicialOrder;
-
-    const paranoid = R.has("paranoid", newQuery) ? newQuery.paranoid : true;
-
-    if (newOrder.acendent) {
-      newOrder.direction = "DESC";
-    } else {
-      newOrder.direction = "ASC";
+      direction: "DESC"
     }
 
-    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery);
+    const { query = null, transaction = null } = options
+
+    const newQuery = Object.assign({}, query)
+    const newOrder = query && query.order ? query.order : inicialOrder
+
+    const paranoid = R.has("paranoid", newQuery) ? newQuery.paranoid : true
+
+    if (newOrder.acendent) {
+      newOrder.direction = "DESC"
+    } else {
+      newOrder.direction = "ASC"
+    }
+
+    const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery)
 
     const emprestimos = await Emprestimo.findAndCountAll({
       where: getWhere("emprestimo"),
@@ -273,46 +277,51 @@ module.exports = class EmprestimoDomain {
               include: [
                 {
                   model: Product,
-                  where: getWhere("product"),
-                },
+                  where: getWhere("product")
+                }
               ],
-              required: true,
-            },
+              required: true
+            }
           ],
-          paranoid: false,
+          paranoid: false
         },
 
         {
           model: Technician,
-          where: getWhere("technician"),
-        },
+          where: getWhere("technician")
+        }
       ],
       paranoid,
-      order: [[newOrder.field, newOrder.direction]],
+      order: [
+        [
+          newOrder.field,
+          newOrder.direction
+        ]
+      ],
       limit: query.total === null ? undefined : limit,
       offset,
-      transaction,
-    });
+      transaction
+    })
 
-    const { rows } = emprestimos;
+    const { rows } = emprestimos
 
     if (rows.length === 0) {
       return {
         page: null,
         show: 0,
         count: emprestimos.count,
-        rows: [],
-      };
+        rows: []
+      }
     }
 
     const formatDateFunct = (date) => {
-      moment.locale("pt-br");
-      const formatDate = moment(date).format("L");
+      moment.locale("pt-br")
+      const formatDate = moment(date).format("L")
       // const formatHours = moment(date).format("LT");
-      const dateformated = `${formatDate}`;
+      const dateformated = `${formatDate}`
       // const dateformated = `${formatDate} ${formatHours}`;
-      return dateformated;
-    };
+      return dateformated
+    }
 
     const formatData = R.map((emprestimo) => {
       const resp = {
@@ -329,64 +338,62 @@ module.exports = class EmprestimoDomain {
         createdAtNotFormatted: emprestimo.createdAt,
         createdAt: formatDateFunct(emprestimo.createdAt),
         deletedAt:
-          emprestimo.deletedAt && formatDateFunct(emprestimo.deletedAt),
-      };
-      return resp;
-    });
+          emprestimo.deletedAt && formatDateFunct(emprestimo.deletedAt)
+      }
+      return resp
+    })
 
-    const emprestimoList = formatData(rows);
+    const emprestimoList = formatData(rows)
 
-    let show = limit;
+    let show = limit
     if (emprestimos.count < show) {
-      show = emprestimos.count;
+      show = emprestimos.count
     }
 
     const response = {
       page: pageResponse,
       show,
       count: emprestimos.count,
-      rows: emprestimoList,
-    };
+      rows: emprestimoList
+    }
 
-    return response;
+    return response
   }
 
   async delete(bodyData, options = {}) {
-    const { transaction = null } = options;
+    const { transaction = null } = options
 
-    const optionsQuery = R.omit(["id"], bodyData);
+    const optionsQuery = R.omit(["id"], bodyData)
 
     const deletEmprestimo = await Emprestimo.findByPk(bodyData.id, {
-      include: [
-        {
-          model: Equip,
-        },
-      ],
-      transaction,
-    });
+      include: [{ model: Equip }],
+      transaction
+    })
 
-    const field = {
-      id: false,
-    };
-    const message = {
-      id: "",
-    };
+    const field = { id: false }
+    const message = { id: "" }
 
     if (!deletEmprestimo) {
-      field.id = true;
-      message.id = "entrada não econtrada";
-      throw new FieldValidationError([{ field, message }]);
+      field.id = true
+      message.id = "entrada não econtrada"
+      throw new FieldValidationError([{ field, message }])
     }
 
-    const { equip } = deletEmprestimo;
+    const { equip } = deletEmprestimo
 
     await equip.update({
       ...JSON.parse(JSON.stringify(equip)),
-      inClient: false,
-    });
+      inClient: false
+    })
 
-    await deletEmprestimo.destroy({ ...optionsQuery, transaction });
+    const productBase = await ProductBase.findByPk(equip.productBaseId, { transaction })
+    await productBase.update({
+      available: (parseInt(productBase.available, 10) + 1).toString(),
+      reserved: (parseInt(productBase.reserved, 10) - 1).toString()
+    }, { transaction })
 
-    return "sucesso";
+    await deletEmprestimo.destroy({ ...optionsQuery, transaction })
+
+    return "sucesso"
   }
-};
+}

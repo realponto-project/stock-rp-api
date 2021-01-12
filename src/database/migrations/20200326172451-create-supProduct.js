@@ -1,4 +1,4 @@
-"use strict";
+
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -7,64 +7,67 @@ module.exports = {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
-        allowNull: false,
+        allowNull: false
       },
 
       code: {
         type: Sequelize.STRING,
-        unique: true,
+        unique: true
       },
 
       name: {
         type: Sequelize.STRING,
         unique: true,
-        allowNull: false,
+        allowNull: false
       },
 
       unit: {
-        type: Sequelize.ENUM(["UNID", "PÇ", "CX", "LT"]),
-        allowNull: false,
+        type: Sequelize.ENUM([
+          "UNID",
+          "PÇ",
+          "CX",
+          "LT"
+        ]),
+        allowNull: false
       },
 
       amount: {
         type: Sequelize.INTEGER,
         defaultValue: 0,
-        validate: {
-          min: 0,
-        },
+        validate: { min: 0 }
       },
 
       minimumQuantity: {
         type: Sequelize.INTEGER,
-        defaultValue: 5,
+        defaultValue: 5
       },
 
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
       manufacturerId: {
         type: Sequelize.UUID,
         references: {
           model: "manufacturer",
-          key: "id",
+          key: "id"
         },
-        allowNull: false,
-      },
-    });
+        allowNull: false
+      }
+    })
 
-    return supProduct;
+    return supProduct
   },
 
-  down: (queryInterface) => queryInterface.dropTable("supProduct"),
-};
+  down: queryInterface => queryInterface.dropTable("supProduct")
+}

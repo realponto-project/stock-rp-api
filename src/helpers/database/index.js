@@ -54,6 +54,7 @@ const createUserAdmin = async () => {
     delROs: true,
     updateRos: true,
     addStatus: true,
+    suprimento: true,
   };
 
   await typeAccount.add(typeAccountMock);
@@ -89,7 +90,9 @@ const createUserAdmin = async () => {
     delROs: true,
     updateRos: true,
     addStatus: true,
+    suprimento: true,
   };
+  console.log(userAdmin);
   await userDomain.user_Create(userAdmin);
 
   await StockBase.create({ stockBase: "EMPRESTIMO" });

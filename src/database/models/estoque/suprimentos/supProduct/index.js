@@ -1,4 +1,4 @@
-const Sequelize = require("sequelize");
+const Sequelize = require("sequelize")
 
 module.exports = (sequelize) => {
   const supProduct = sequelize.define("supProduct", {
@@ -6,55 +6,52 @@ module.exports = (sequelize) => {
       type: Sequelize.INTEGER,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
+      allowNull: false
     },
 
     code: {
       type: Sequelize.STRING,
-      unique: true,
+      unique: true
     },
 
     name: {
       type: Sequelize.STRING,
       unique: true,
-      allowNull: false,
+      allowNull: false
     },
 
     unit: {
-      type: Sequelize.ENUM(["UNID", "PÇ", "CX", "LT"]),
-      allowNull: false,
+      type: Sequelize.ENUM([
+        "UNID",
+        "PÇ",
+        "CX",
+        "LT"
+      ]),
+      allowNull: false
     },
 
     amount: {
       type: Sequelize.INTEGER,
       defaultValue: 0,
-      validate: {
-        min: 0,
-      },
+      validate: { min: 0 }
     },
 
     minimumQuantity: {
       type: Sequelize.INTEGER,
       defaultValue: 5,
-      validate: {
-        min: 1,
-      },
+      validate: { min: 1 }
     },
 
     esporadico: {
       type: Sequelize.BOOLEAN,
-      defaultValue: false,
-    },
-  });
+      defaultValue: false
+    }
+  })
 
   supProduct.associate = (models) => {
-    supProduct.belongsTo(models.manufacturer, {
-      foreignKey: {
-        allowNull: false,
-      },
-    });
-    supProduct.hasMany(models.supEntrance);
-  };
+    supProduct.belongsTo(models.manufacturer, { foreignKey: { allowNull: false } })
+    supProduct.hasMany(models.supEntrance)
+  }
 
-  return supProduct;
-};
+  return supProduct
+}

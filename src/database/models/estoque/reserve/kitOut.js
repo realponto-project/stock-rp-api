@@ -1,35 +1,35 @@
-const Sequelize = require('sequelize')
+const Sequelize = require("sequelize")
 
 module.exports = (sequelize) => {
-  const kitOut = sequelize.define('kitOut', {
+  const kitOut = sequelize.define("kitOut", {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
+      primaryKey: true
     },
 
     action: {
-      type: Sequelize.ENUM(['reposicao', 'expedicao', 'perda']),
-      allowNull: false,
+      type: Sequelize.ENUM([
+        "reposicao",
+        "expedicao",
+        "perda"
+      ]),
+      allowNull: false
     },
 
     amount: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: false
     },
 
     os: {
       type: Sequelize.STRING,
-      allowNull: true,
-    },
+      allowNull: true
+    }
   })
 
   kitOut.associate = (models) => {
-    kitOut.belongsTo(models.kitParts, {
-      foreignKey: {
-        allowNull: false,
-      },
-    })
+    kitOut.belongsTo(models.kitParts, { foreignKey: { allowNull: false } })
   }
 
   return kitOut

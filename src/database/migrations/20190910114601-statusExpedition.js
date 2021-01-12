@@ -1,38 +1,38 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const statusExpedition = queryInterface.createTable('statusExpedition', {
+    const statusExpedition = queryInterface.createTable("statusExpedition", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
       },
 
       status: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
+        unique: true
       },
 
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
-      },
+        type: Sequelize.DATE
+      }
     })
 
 
     return statusExpedition
   },
 
-  down: queryInterface => queryInterface.dropTable('statusExpedition'),
+  down: queryInterface => queryInterface.dropTable("statusExpedition")
 }

@@ -1,48 +1,44 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const mark = queryInterface.createTable('mark', {
+    const mark = queryInterface.createTable("mark", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
+        primaryKey: true
       },
 
       mark: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
+        unique: true
       },
       responsibleUser: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
       createdAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       updatedAt: {
         defaultValue: Sequelize.NOW,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
 
       deletedAt: {
         defaultValue: null,
-        type: Sequelize.DATE,
-      },
+        type: Sequelize.DATE
+      }
 
     })
 
     mark.associate = (models) => {
-      mark.hasMany(models.product, {
-        foreignKey: {
-          allowNull: false,
-        },
-      })
+      mark.hasMany(models.product, { foreignKey: { allowNull: false } })
     }
     return mark
   },
 
-  down: queryInterface => queryInterface.dropTable('mark'),
+  down: queryInterface => queryInterface.dropTable("mark")
 }
