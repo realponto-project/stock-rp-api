@@ -26,13 +26,13 @@ const TechnicianReserve = database.model('technicianReserve')
 const { Op: operators } = Sequelize
 
 module.exports = class OsDomain {
-  async add (bodyData, options = {}) {
+  async add(bodyData, options = {}) {
     const { transaction = null } = options
 
     const reserve = R.omit(['id', 'osParts'], bodyData)
 
-    const reserveNotHasProp = (prop) => R.not(R.has(prop, reserve))
-    const bodyHasProp = (prop) => R.has(prop, bodyData)
+    const reserveNotHasProp = prop => R.not(R.has(prop, reserve))
+    const bodyHasProp = prop => R.has(prop, bodyData)
     const HasProp = (prop, obj) => R.has(prop, obj)
 
     const field = {
@@ -139,7 +139,7 @@ module.exports = class OsDomain {
     if (bodyHasProp('osParts')) {
       const { osParts } = bodyData
 
-      const osPartsCreattedPromises = osParts.map(async (item) => {
+      const osPartsCreattedPromises = osParts.map(async item => {
         if (!HasProp('status', item) || !item.status) {
           field.status = true
           message.status = 'status cannot null'
@@ -194,7 +194,7 @@ module.exports = class OsDomain {
             })
 
             await Promise.all(
-              item.serialNumbers.map(async (serialNumber) => {
+              item.serialNumbers.map(async serialNumber => {
                 await Equip.create(
                   {
                     serialNumber: serialNumber.replace(/\D/gi, ''),
@@ -224,7 +224,7 @@ module.exports = class OsDomain {
             }
 
             if (serialNumberArray.length > 0) {
-              await serialNumberArray.map(async (serialNumber) => {
+              await serialNumberArray.map(async serialNumber => {
                 const equip = await Equip.findOne({
                   where: {
                     serialNumber,
@@ -241,7 +241,7 @@ module.exports = class OsDomain {
                   throw new FieldValidationError([{ field, message }])
                 }
               })
-              await serialNumberArray.map(async (serialNumber) => {
+              await serialNumberArray.map(async serialNumber => {
                 const equip = await Equip.findOne({
                   where: {
                     serialNumber,
@@ -301,7 +301,7 @@ module.exports = class OsDomain {
     return response
   }
 
-  async delete (osId, options = {}) {
+  async delete(osId, options = {}) {
     const { transaction = null } = options
 
     const field = { os: false }
@@ -315,7 +315,7 @@ module.exports = class OsDomain {
         transaction
       })
 
-      const osPartsPromise = osParts.map(async (item) => {
+      const osPartsPromise = osParts.map(async item => {
         if (item.productBaseId) {
           const productBase = await ProductBase.findByPk(item.productBaseId, {
             include: [Product],
@@ -327,7 +327,7 @@ module.exports = class OsDomain {
             transaction
           })
 
-          const equipUpdatePromise = equips.map(async (equip) => {
+          const equipUpdatePromise = equips.map(async equip => {
             await equip.update(
               {
                 ...equip,
@@ -381,7 +381,7 @@ module.exports = class OsDomain {
     return 'erro'
   }
 
-  async update (bodyData, options = {}) {
+  async update(bodyData, options = {}) {
     const { transaction = null } = options
 
     const reserve = R.omit(['id'], bodyData)
@@ -390,7 +390,7 @@ module.exports = class OsDomain {
     const reserveOs = { ...oldReserve }
 
     const HasProp = (prop, obj) => R.has(prop, obj)
-    const reserveHasProp = (prop) => R.has(prop, reserve)
+    const reserveHasProp = prop => R.has(prop, reserve)
 
     const technicianUpdated = oldReserve.technicianId !== reserve.technicianId
 
@@ -434,7 +434,7 @@ module.exports = class OsDomain {
         transaction
       })
 
-      const osPartsUpdatePromises = osParts.map(async (item) => {
+      const osPartsUpdatePromises = osParts.map(async item => {
         if (R.prop('id', item)) {
           const osPartsReturn = await OsParts.findByPk(item.id, {
             include: [{ model: Os }, { model: ProductBase }],
@@ -474,9 +474,7 @@ module.exports = class OsDomain {
                           .toString()
                       }
                     : {
-                        [Op.gte]: moment('01/01/2019')
-                          .startOf('day')
-                          .toString()
+                        [Op.gte]: moment('01/01/2019').startOf('day').toString()
                       }
               },
               transaction
@@ -489,7 +487,7 @@ module.exports = class OsDomain {
               })
 
               await Promise.all(
-                equips.map(async (equip) => {
+                equips.map(async equip => {
                   await equip.update(
                     { reserved: false, technicianReserveId: null },
                     { transaction }
@@ -513,7 +511,7 @@ module.exports = class OsDomain {
             }
           }
 
-          osPartsAll = await osPartsAll.filter((itemOld) => {
+          osPartsAll = await osPartsAll.filter(itemOld => {
             if (itemOld.id !== item.id) {
               return itemOld.id
             }
@@ -615,7 +613,7 @@ module.exports = class OsDomain {
             }
 
             if (serialNumberArray.length > 0) {
-              await serialNumberArray.map(async (serialNumber) => {
+              await serialNumberArray.map(async serialNumber => {
                 const equip = await Equip.findOne({
                   where: {
                     serialNumber,
@@ -633,7 +631,7 @@ module.exports = class OsDomain {
                 }
               })
 
-              await serialNumberArray.map(async (serialNumber) => {
+              await serialNumberArray.map(async serialNumber => {
                 const equip = await Equip.findOne({
                   where: {
                     serialNumber,
@@ -681,7 +679,7 @@ module.exports = class OsDomain {
       await Promise.all(osPartsUpdatePromises)
 
       if (osPartsAll.length > 0) {
-        const osPartsdeletePromises = osPartsAll.map(async (item) => {
+        const osPartsdeletePromises = osPartsAll.map(async item => {
           const osPartDelete = await OsParts.findByPk(item.id, {
             include: [{ model: Os }, { model: ProductBase }],
             transaction
@@ -723,7 +721,7 @@ module.exports = class OsDomain {
             transaction
           })
 
-          const equipUpdatePromise = equips.map(async (equip) => {
+          const equipUpdatePromise = equips.map(async equip => {
             await equip.update(
               {
                 ...equip,
@@ -784,7 +782,7 @@ module.exports = class OsDomain {
     return response
   }
 
-  async getAll (options = {}) {
+  async getAll(options = {}) {
     const inicialOrder = {
       field: 'createdAt',
       acendent: true,
@@ -865,7 +863,7 @@ module.exports = class OsDomain {
       }
     }
 
-    const formatDateFunct = (date) => {
+    const formatDateFunct = date => {
       moment.locale('pt-br')
       const formatDate = moment(date).format('L')
       const formatHours = moment(date).format('LT')
@@ -873,7 +871,7 @@ module.exports = class OsDomain {
       return dateformated
     }
 
-    const formatKitOut = R.map((item) => {
+    const formatKitOut = R.map(item => {
       const resp = {
         name: `#${item.kitPart.productBase.product.name}`,
         amount: '-',
@@ -884,7 +882,7 @@ module.exports = class OsDomain {
       return resp
     })
 
-    const findKitOuts = async (osProps) => {
+    const findKitOuts = async osProps => {
       const kitOuts = await KitOut.findAll({
         where: { os: osProps },
         include: [
@@ -907,7 +905,7 @@ module.exports = class OsDomain {
     const notDelet = []
 
     const formatProduct = (productBases, index) =>
-      R.map(async (item) => {
+      R.map(async item => {
         const { osParts } = item
         const { amount, output, missOut } = osParts
         const status = await StatusExpedition.findByPk(
@@ -991,7 +989,7 @@ module.exports = class OsDomain {
         notDelet:
           (item.productBases &&
             item.productBases.filter(
-              (productBase) => productBase.osParts.deletedAt !== null
+              productBase => productBase.osParts.deletedAt !== null
             ).length !== 0) ||
           notDelet[index]
       }
@@ -1016,10 +1014,10 @@ module.exports = class OsDomain {
     return response
   }
 
-  async getOsByOs (os, options = {}) {
+  async getOsByOs(os, options = {}) {
     const { transaction = null } = options
 
-    const formatDateFunct = (date) => {
+    const formatDateFunct = date => {
       moment.locale('pt-br')
       const formatDate = moment(date)
       return formatDate
@@ -1046,7 +1044,7 @@ module.exports = class OsDomain {
       }
     }
 
-    const formatedReserve = R.map((item) => {
+    const formatedReserve = R.map(item => {
       const resp = {
         stockBase: item.stockBase.stockBase,
         amount: item.osParts.amount,
@@ -1067,9 +1065,9 @@ module.exports = class OsDomain {
     return response
   }
 
-  async output (bodyData, options = {}) {
+  async output(bodyData, options = {}) {
     const { transaction = null } = options
-    const bodyDataNotHasProp = (prop) => R.not(R.has(prop, bodyData))
+    const bodyDataNotHasProp = prop => R.not(R.has(prop, bodyData))
 
     const field = {
       osPartId: false,
@@ -1174,7 +1172,7 @@ module.exports = class OsDomain {
     return response
   }
 
-  async returnOutput (body, options) {
+  async returnOutput(body, options) {
     const { transaction = null } = options
 
     let error = false
@@ -1244,7 +1242,7 @@ module.exports = class OsDomain {
     )
   }
 
-  async getAllOsPartsByParams (options = {}) {
+  async getAllOsPartsByParams(options = {}) {
     const { query = null, transaction = null } = options
 
     const newQuery = Object.assign({}, query)
@@ -1270,13 +1268,15 @@ module.exports = class OsDomain {
 
     const equipamentos = []
 
-    const formatedProducts = R.map(async (item) => {
+    const formatedProducts = R.map(async item => {
       if (item.product.serial) {
         if (item.product.category === 'peca') {
           let amount = 0
           let osPartisIdArray = []
-          item.os.forEach((os) => {
-            osPartisIdArray = [...osPartisIdArray, os.osParts.id]
+          item.os.forEach(os => {
+            osPartisIdArray = !os.osParts.technicianReserveId
+              ? [...osPartisIdArray, os.osParts.id]
+              : osPartisIdArray
             amount =
               amount +
               parseInt(os.osParts.amount, 10) -
@@ -1314,13 +1314,13 @@ module.exports = class OsDomain {
         }
 
         await Promise.all(
-          item.os.map(async (os) => {
+          item.os.map(async os => {
             const equips = await Equip.findAll({
               where: { osPartId: os.osParts.id },
               transaction
             })
 
-            equips.forEach((equip) => {
+            equips.forEach(equip => {
               if (!equip.technicianReserveId) {
                 equipamentos.push({
                   id: item.product.id,
@@ -1342,8 +1342,10 @@ module.exports = class OsDomain {
       let amount = 0
       let osPartisIdArray = []
 
-      item.os.forEach((os) => {
-        osPartisIdArray = [...osPartisIdArray, os.osParts.id]
+      item.os.forEach(os => {
+        osPartisIdArray = !os.osParts.technicianReserveId
+          ? [...osPartisIdArray, os.osParts.id]
+          : osPartisIdArray
         amount =
           amount +
           parseInt(os.osParts.amount, 10) -
@@ -1386,14 +1388,14 @@ module.exports = class OsDomain {
     const rows = await Promise.all(formatedProducts(products.rows))
 
     return {
-      rows: [...rows.filter((item) => item.id), ...equipamentos],
+      rows: [...rows.filter(item => item.id), ...equipamentos],
       count: products.count,
       page: pageResponse,
       show: R.min(limit, products.count)
     }
   }
 
-  async getAllOsPartsByParamsForReturn (options = {}) {
+  async getAllOsPartsByParamsForReturn(options = {}) {
     const { query = null, transaction = null } = options
 
     const newQuery = Object.assign({}, query)
@@ -1418,10 +1420,10 @@ module.exports = class OsDomain {
       transaction
     })
 
-    const formatedProducts = R.map(async (item) => {
+    const formatedProducts = R.map(async item => {
       let quant = 0
       await Promise.all(
-        item.productBases.map(async (productBase) => {
+        item.productBases.map(async productBase => {
           const {
             osParts: { amount, missOut, output, return: retorno }
           } = productBase
@@ -1450,10 +1452,10 @@ module.exports = class OsDomain {
 
     const rows = await Promise.all(formatedProducts(os))
 
-    return { rows: rows.filter((item) => item.oId) }
+    return { rows: rows.filter(item => item.oId) }
   }
 
-  async getAllOsParts (options = {}) {
+  async getAllOsParts(options = {}) {
     const { query = null, transaction = null } = options
 
     const newQuery = Object.assign({}, query)
@@ -1493,7 +1495,7 @@ module.exports = class OsDomain {
       transaction
     })
 
-    const formatedProducts = R.map(async (item) => ({
+    const formatedProducts = R.map(async item => ({
       amount: parseInt(item.amount, 10),
       return: parseInt(item.return, 10),
       output: parseInt(item.output, 10),
@@ -1510,20 +1512,18 @@ module.exports = class OsDomain {
     const rows = await Promise.all(formatedProducts(osParts))
 
     return {
-      rows: [...rows.filter((item) => item.id)],
+      rows: [...rows.filter(item => item.id)],
       count: osParts.length,
       page: pageResponse,
       show: R.min(limit, osParts.length)
     }
   }
 
-  async finalizarCheckout (bodyData, options = {}) {
+  async finalizarCheckout(bodyData, options = {}) {
     const { transaction = null } = options
 
-    console.log(bodyData)
-
-    const bodyDataNotHasProp = (prop) => R.not(R.has(prop, bodyData))
-    const convertForInt = (prop) => parseInt(prop, 10)
+    const bodyDataNotHasProp = prop => R.not(R.has(prop, bodyData))
+    const convertForInt = prop => parseInt(prop, 10)
 
     let errors = false
     let technicianReserve = null
@@ -1547,7 +1547,6 @@ module.exports = class OsDomain {
       message.technicianReserveId = 'technicianReserveId cannot null'
       errors = true
     } else {
-      console.log(technicianReserve)
       technicianReserve = await TechnicianReserve.findByPk(
         bodyData.technicianReserveId,
         {
@@ -1556,15 +1555,12 @@ module.exports = class OsDomain {
         }
       )
 
-      console.log(technicianReserve)
-
       if (!technicianReserve) {
         field.technicianReserveId = true
         message.technicianReserveId = 'technicianReserveId invalid'
         errors = true
       }
     }
-    console.log('bodyData')
 
     if (bodyDataNotHasProp('osPartId') || !bodyData.osPartId) {
       field.osPartId = true
@@ -1636,9 +1632,7 @@ module.exports = class OsDomain {
             await productBase.update(
               {
                 reserved: (convertForInt(productBase.reserved) - 1).toString(),
-                available: (
-                  convertForInt(productBase.available) + 1
-                ).toString()
+                available: (convertForInt(productBase.available) + 1).toString()
               },
               { transaction }
             )
@@ -1709,7 +1703,7 @@ module.exports = class OsDomain {
           {
             output: (convertForInt(osPart.output) + 1).toString(),
             serialNumbers: osPart.serialNumbers.filter(
-              (item) => item !== bodyData.serialNumber
+              item => item !== bodyData.serialNumber
             ),
             outSerialNumbers: osPart.outSerialNumbers
               ? [...osPart.outSerialNumbers, bodyData.serialNumber]
@@ -1791,7 +1785,7 @@ module.exports = class OsDomain {
     return true
   }
 
-  async deleteOsPart (query, options = {}) {
+  async deleteOsPart(query, options = {}) {
     const { transaction } = options
 
     const technicianReserve = await TechnicianReserve.findByPk(
@@ -1799,7 +1793,7 @@ module.exports = class OsDomain {
       { transaction }
     )
 
-    const convertForInt = (prop) => parseInt(prop, 10)
+    const convertForInt = prop => parseInt(prop, 10)
 
     const osPart = await OsParts.findByPk(query.osPartId, { transaction })
 
@@ -1807,7 +1801,7 @@ module.exports = class OsDomain {
       {
         return: (convertForInt(osPart.return) + 1).toString(),
         serialNumbers: osPart.serialNumbers.filter(
-          (item) => item !== query.serialNumber
+          item => item !== query.serialNumber
         ),
         outSerialNumbers: osPart.outSerialNumbers
           ? [...osPart.outSerialNumbers, query.serialNumber]

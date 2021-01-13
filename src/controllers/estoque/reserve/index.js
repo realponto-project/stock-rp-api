@@ -19,7 +19,9 @@ const reservaInternoDomain = new ReservaInternoDomain()
 const createReservaInterno = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
-    const reservaInterno = await reservaInternoDomain.add(req.body, { transaction })
+    const reservaInterno = await reservaInternoDomain.add(req.body, {
+      transaction
+    })
 
     await transaction.commit()
     res.json(reservaInterno)
@@ -63,9 +65,9 @@ const associarEquipsParaOsPart = async (req, res, next) => {
 const finalizarCheckout = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
-    await Promise.all(req.body.map(async (item) => {
-      await osDomain.finalizarCheckout(item, { transaction })
-    }))
+    for (let index = 0; index < req.body.length; index++) {
+      await osDomain.finalizarCheckout(req.body[index], { transaction })
+    }
 
     await transaction.commit()
     res.json({ message: 'sucess' })
@@ -78,7 +80,9 @@ const finalizarCheckout = async (req, res, next) => {
 const createReservaTecnico = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
-    const reservaTecnico = await ReservaTecnicoDomain.create(req.body, { transaction })
+    const reservaTecnico = await ReservaTecnicoDomain.create(req.body, {
+      transaction
+    })
 
     await transaction.commit()
     res.json(reservaTecnico)
@@ -474,7 +478,9 @@ const addStatusExpedition = async (req, res, next) => {
 const updateStatusExpedition = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
-    const status = await statusExpeditionDomain.update(req.body, { transaction })
+    const status = await statusExpeditionDomain.update(req.body, {
+      transaction
+    })
 
     await transaction.commit()
     res.json(status)
@@ -487,7 +493,9 @@ const updateStatusExpedition = async (req, res, next) => {
 const deleteStatusExpedition = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
-    const status = await statusExpeditionDomain.delete(req.query.id, { transaction })
+    const status = await statusExpeditionDomain.delete(req.query.id, {
+      transaction
+    })
 
     await transaction.commit()
     res.json(status)
