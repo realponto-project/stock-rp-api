@@ -19,8 +19,6 @@ module.exports = class TechnicianDomain {
   async add(bodyData, options = {}) {
     const { transaction = null } = options
 
-    console.log(bodyData)
-
     const technician = R.omit(['id', 'plate', 'responsibleUser'], bodyData)
 
     const technicianNotHasProp = prop => R.not(R.has(prop, technician))
@@ -104,7 +102,6 @@ module.exports = class TechnicianDomain {
     }
 
     if (errors) {
-      console.log({ field, message })
       throw new FieldValidationError([{ field, message }])
     }
     const car = await Car.findOne({

@@ -404,7 +404,6 @@ module.exports = class TypeAccountDomain {
       message.responsibleUser = 'username não pode ser nulo.'
     }
     if (errors) {
-      console.log({ field, message })
       throw new FieldValidationError([{ field, message }])
     }
 

@@ -18,10 +18,8 @@ const { Op: operators } = Sequelize
 
 class UserDomain {
   // eslint-disable-next-line camelcase
-  async user_Create (bodyData, options = {}) {
+  async user_Create(bodyData, options = {}) {
     const { transaction = null } = options
-
-    console.log(bodyData)
 
     const omitArray = [
       'id',
@@ -57,8 +55,8 @@ class UserDomain {
 
     const userNotFormatted = R.omit(omitArray, bodyData)
 
-    const notHasProps = (props) => R.not(R.has(props, userNotFormatted))
-    const bodyNotHasProps = (props) => R.not(R.has(props, bodyData))
+    const notHasProps = props => R.not(R.has(props, userNotFormatted))
+    const bodyNotHasProps = props => R.not(R.has(props, bodyData))
 
     if (notHasProps('username') || !userNotFormatted.username) {
       throw new FieldValidationError([
@@ -375,7 +373,6 @@ class UserDomain {
     }
 
     if (errors) {
-      console.log({ field, message })
       throw new FieldValidationError([{ field, message }])
     }
 
@@ -458,7 +455,7 @@ class UserDomain {
   }
 
   // eslint-disable-next-line camelcase
-  async user_PasswordUpdate (bodyData, options = {}) {
+  async user_PasswordUpdate(bodyData, options = {}) {
     const { transaction = null } = options
 
     const hasUsername = R.has('username', bodyData)
@@ -539,7 +536,7 @@ class UserDomain {
   }
 
   // eslint-disable-next-line camelcase
-  async user_UpdateById (id, bodyData, options = {}) {
+  async user_UpdateById(id, bodyData, options = {}) {
     const { transaction = null } = options
 
     let newUser = {}
@@ -606,7 +603,7 @@ class UserDomain {
   }
 
   // eslint-disable-next-line camelcase
-  async user_CheckPassword (id, password, options = {}) {
+  async user_CheckPassword(id, password, options = {}) {
     const { transaction = null } = options
 
     const login = await Login.findOne({
@@ -626,7 +623,7 @@ class UserDomain {
     return login.checkPassword(password)
   }
 
-  async getResourceByUsername (username, options = {}) {
+  async getResourceByUsername(username, options = {}) {
     const { transaction = null } = options
 
     const user = await User.findOne({
@@ -722,7 +719,7 @@ class UserDomain {
   }
 
   // eslint-disable-next-line camelcase
-  async user_Update (bodyData, options = {}) {
+  async user_Update(bodyData, options = {}) {
     const { transaction = null } = options
 
     const omitArray = [
@@ -765,8 +762,8 @@ class UserDomain {
       transaction
     })
 
-    const notHasProps = (props) => R.not(R.has(props, userNotFormatted))
-    const bodyNotHasProps = (props) => R.not(R.has(props, bodyData))
+    const notHasProps = props => R.not(R.has(props, userNotFormatted))
+    const bodyNotHasProps = props => R.not(R.has(props, bodyData))
 
     if (notHasProps('typeName')) {
       throw new FieldValidationError([
@@ -1106,7 +1103,7 @@ class UserDomain {
   //   return user.username
   // }
 
-  async getAll (options = {}) {
+  async getAll(options = {}) {
     const inicialOrder = {
       field: 'username',
       acendent: false,
@@ -1156,7 +1153,7 @@ class UserDomain {
       }
     }
 
-    const formatData = R.map((user) => {
+    const formatData = R.map(user => {
       const resp = {
         id: user.id,
         username: user.username,

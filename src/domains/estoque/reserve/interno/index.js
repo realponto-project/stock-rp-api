@@ -137,7 +137,6 @@ module.exports = class ReservaInternoDomain {
               'quantidade adicionada nãop condiz com a quantidade de números de série.'
           }
 
-          console.log(serialNumberArray)
           if (serialNumberArray.length > 0) {
             await serialNumberArray.map(async serialNumber => {
               const equip = await Equip.findOne({
