@@ -70,118 +70,124 @@ class ReservaTecnicoDomain {
 
     const { rows } = body
 
-    await Promise.all(
-      rows.map(async row => {
-        const rowNotHasProp = prop => R.not(R.has(prop, row))
+    for (let index = 0; index < rows.length; index++) {
+      const rowNotHasProp = prop => R.not(R.has(prop, rows[index]))
 
-        let productId = ''
+      let productId = ''
 
-        if (rowNotHasProp('produto') || !row.produto) {
-          throw new FieldValidationError([{ field, message }])
+      if (rowNotHasProp('produto') || !rows[index].produto) {
+        throw new FieldValidationError([{ field, message }])
+      } else {
+        const produto = await Product.findOne({
+          where: { name: rows[index].produto },
+          transaction
+        })
+
+        if (produto) {
+          productId = produto.id
         } else {
-          const produto = await Product.findOne({
-            where: { name: row.produto },
-            transaction
-          })
+          throw new FieldValidationError([{ field, message }])
+        }
+      }
 
-          if (produto) {
-            productId = produto.id
+      if (rowNotHasProp('amount') || !rows[index].amount) {
+        throw new FieldValidationError([{ field, message }])
+      }
+
+      if (rowNotHasProp('serial')) {
+        throw new FieldValidationError([{ field, message }])
+      }
+
+      const technicianReserve = await TechnicianReserve.findOne({
+        where: {
+          productId,
+          technicianId,
+          data:
+            body.technician !== 'LABORATORIO'
+              ? {
+                  [Op.gte]: moment(body.data).startOf('day').toString(),
+                  [Op.lte]: moment(body.data).endOf('day').toString()
+                }
+              : { [Op.eq]: null }
+        },
+        paranoid: false,
+        transaction
+      })
+
+      let technicianReserveId = null
+
+      if (technicianReserve) {
+        technicianReserveId = technicianReserve.id
+
+        await technicianReserve.update(
+          {
+            amount: technicianReserve.amount + rows[index].amount,
+            amountAux: technicianReserve.amountAux + rows[index].amount
+          },
+          { transaction }
+        )
+      } else {
+        const technicianReserveCreated = await TechnicianReserve.create(
+          {
+            productId,
+            technicianId,
+            data: body.technician !== 'LABORATORIO' ? body.data : null,
+            amount: rows[index].amount,
+            amountAux: rows[index].amount
+          },
+          { transaction }
+        )
+
+        technicianReserveId = technicianReserveCreated.id
+      }
+
+      await Promise.all(
+        rows[index].osPartisIdArray.map(async id => {
+          const osPart = await OsParts.findByPk(id, { transaction })
+
+          if (
+            osPart.technicianReserveId &&
+            osPart.technicianReserveId !== technicianReserveId
+          ) {
+            throw new FieldValidationError([{ field, message }])
+          }
+
+          await osPart.update({ technicianReserveId }, { transaction })
+        })
+      )
+
+      if (rows[index].serial) {
+        if (!rowNotHasProp('serialNumbers')) {
+          if (rows[index].serialNumbers) {
+            await Promise.all(
+              rows[index].serialNumbers.map(async item => {
+                const { serialNumber } = item
+
+                const equip = await Equip.findOne({
+                  where: { serialNumber },
+                  transaction
+                })
+
+                if (!equip) {
+                  throw new FieldValidationError([{ field, message }])
+                }
+
+                await equip.update(
+                  {
+                    prevAction: 'saida',
+                    technicianReserveId,
+                    reserved: true
+                  },
+                  { transaction }
+                )
+              })
+            )
           } else {
             throw new FieldValidationError([{ field, message }])
           }
         }
-
-        if (rowNotHasProp('amount') || !row.amount) {
-          throw new FieldValidationError([{ field, message }])
-        }
-
-        if (rowNotHasProp('serial')) {
-          throw new FieldValidationError([{ field, message }])
-        }
-
-        const technicianReserve = await TechnicianReserve.findOne({
-          where: {
-            productId,
-            technicianId,
-            data:
-              body.technician !== 'LABORATORIO'
-                ? {
-                    [Op.gte]: moment(body.data).startOf('day').toString(),
-                    [Op.lte]: moment(body.data).endOf('day').toString()
-                  }
-                : { [Op.gte]: moment('01/01/2019').startOf('day').toString() }
-          },
-          transaction
-        })
-
-        let technicianReserveId = null
-
-        if (technicianReserve) {
-          technicianReserveId = technicianReserve.id
-
-          await technicianReserve.update(
-            {
-              amount: technicianReserve.amount + row.amount,
-              amountAux: technicianReserve.amountAux + row.amount
-            },
-            { transaction }
-          )
-        } else {
-          const technicianReserveCreated = await TechnicianReserve.create(
-            {
-              productId,
-              technicianId,
-              data: body.technician !== 'LABORATORIO' ? body.data : null,
-              amount: row.amount,
-              amountAux: row.amount
-            },
-            { transaction }
-          )
-
-          technicianReserveId = technicianReserveCreated.id
-        }
-
-        await Promise.all(
-          row.osPartisIdArray.map(async id => {
-            const osPart = await OsParts.findByPk(id, { transaction })
-
-            if (osPart.technicianReserveId) {
-              throw new FieldValidationError([{ field, message }])
-            }
-
-            await osPart.update({ technicianReserveId }, { transaction })
-          })
-        )
-
-        if (row.serial) {
-          if (!rowNotHasProp('serialNumbers')) {
-            if (row.serialNumbers) {
-              await Promise.all(
-                row.serialNumbers.map(async item => {
-                  const { serialNumber } = item
-
-                  const equip = await Equip.findOne({
-                    where: { serialNumber },
-                    transaction
-                  })
-
-                  if (!equip) {
-                    throw new FieldValidationError([{ field, message }])
-                  }
-
-                  await equip.update(
-                    { technicianReserveId, reserved: true },
-                    { transaction }
-                  )
-                })
-              )
-            } else {
-              throw new FieldValidationError([{ field, message }])
-            }
-          }
-        }
-      })
-    )
+      }
+    }
   }
 
   async getAll(options = {}) {
@@ -244,6 +250,7 @@ class ReservaTecnicoDomain {
         { model: Technician, where: getWhere('technician') },
         { model: Product }
       ],
+      paranoid: false,
       transaction
     })
 
@@ -440,6 +447,7 @@ class ReservaTecnicoDomain {
       ])
     } else if (
       !(await TechnicianReserve.findByPk(body.technicianReserveId, {
+        paranoid: false,
         transaction
       }))
     ) {

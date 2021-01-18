@@ -60,19 +60,38 @@ module.exports = class OsDomain {
       message.razaoSocial = 'Por favor a razão social.'
     }
 
-    if (reserveNotHasProp('cnpj') || !reserve.cnpj) {
-      errors = true
-      field.cnpj = true
-      message.cnpj = 'Por favor informar o cnpj.'
-    } else {
-      const cnpj = reserve.cnpj.replace(/\D/g, '')
-
-      if (!Cnpj.isValid(cnpj) && !Cpf.isValid(cnpj)) {
+    if (!reserveNotHasProp('cnpj')) {
+      if (!reserve.cnpj) {
         errors = true
         field.cnpj = true
-        message.cnpj = 'O cnpj informado não é válido.'
+        message.cnpj = 'Por favor informar o cnpj.'
+      } else {
+        const cnpj = reserve.cnpj.replace(/\D/g, '')
+
+        if (!Cnpj.isValid(cnpj)) {
+          errors = true
+          field.cnpj = true
+          message.cnpj = 'O cnpj informado não é válido.'
+        }
       }
     }
+
+    if (!reserveNotHasProp('cpf')) {
+      if (!reserve.cpf) {
+        errors = true
+        field.cpf = true
+        message.cpf = 'Por favor informar o cpf.'
+      } else {
+        const cpf = reserve.cpf.replace(/\D/g, '')
+
+        if (!Cpf.isValid(cpf)) {
+          errors = true
+          field.cpf = true
+          message.cpf = 'O cpf informado não é válido.'
+        }
+      }
+    }
+
     if (reserveNotHasProp('date') || !reserve.date) {
       errors = true
       field.data = true
@@ -102,39 +121,44 @@ module.exports = class OsDomain {
       }
     }
 
-    if (errors) {
-      throw new FieldValidationError([{ field, message }])
+    console.log(
+      R.length(
+        R.filter(
+          ({ status }) => status === 'ECOMMERCE' || status === 'RECEPÇÃO',
+          bodyData.osParts
+        )
+      ),
+      R.length(bodyData.osParts)
+    )
+
+    const lengthListWithStatusEcommerce = R.length(
+      R.filter(
+        ({ status }) => status === 'ECOMMERCE' || status === 'RECEPÇÃO',
+        bodyData.osParts
+      )
+    )
+
+    if (
+      lengthListWithStatusEcommerce !== R.length(bodyData.osParts) &&
+      lengthListWithStatusEcommerce !== 0
+    ) {
+      errors = true
+      field.status = true
+      message.status =
+        'Staus de reserva não deve ser misturado com status de baixa direta'
     }
 
-    const reserveHasExist = await Os.findOne({
-      where: {
-        date: {
-          [operators.gte]: moment(reserve.date).startOf('day').toString(),
-          [operators.lte]: moment(reserve.date).endOf('day').toString()
-        },
-        razaoSocial: reserve.razaoSocial,
-        cnpj: reserve.cnpj.replace(/\D/g, '')
-      },
-      transaction
-    })
-
-    if (reserveHasExist) {
-      field.message = true
-      message.message = 'Há uma reserva nesta data para esta empresa'
+    if (errors) {
       throw new FieldValidationError([{ field, message }])
     }
 
     const reserveAll = await Os.findAll({ paranoid: false, transaction })
 
     reserve.os = (reserveAll.length + 1).toString()
-    reserve.cnpj = reserve.cnpj.replace(/\D/g, '')
+    reserve.cnpj = reserve.cnpj ? reserve.cnpj.replace(/\D/g, '') : null
+    reserve.cpf = reserve.cpf ? reserve.cpf.replace(/\D/g, '') : null
 
     const reserveCreated = await Os.create(reserve, { transaction })
-
-    // await reserveCreated.update({
-    // ...reserveCreated,
-    //  os: reserveCreated.id.toString() }, {
-    //  transaction })
 
     if (bodyHasProp('osParts')) {
       const { osParts } = bodyData
@@ -154,6 +178,7 @@ module.exports = class OsDomain {
         if (!status) {
           field.status = true
           message.status = 'status inválid'
+
           throw new FieldValidationError([{ field, message }])
         }
 
@@ -173,7 +198,6 @@ module.exports = class OsDomain {
           field.peca = true
           message.peca = 'produto não oconst a na base de dados'
         }
-
         if (errors) {
           throw new FieldValidationError([{ field, message }])
         }
@@ -197,7 +221,7 @@ module.exports = class OsDomain {
               item.serialNumbers.map(async serialNumber => {
                 await Equip.create(
                   {
-                    serialNumber: serialNumber.replace(/\D/gi, ''),
+                    serialNumber,
                     reserved: true,
                     osPartId: osPartCreated.id,
                     productBaseId: productBaseConserto.id
@@ -208,11 +232,12 @@ module.exports = class OsDomain {
             )
           }
         }
-
         if (item.status !== 'CONSERTO') {
           if (
             productBase.product.serial &&
-            productBase.product.category !== 'peca'
+            (productBase.product.category !== 'peca' ||
+              item.status === 'ECOMMERCE' ||
+              item.status === 'RECEPÇÃO')
           ) {
             const { serialNumberArray } = item
 
@@ -250,29 +275,56 @@ module.exports = class OsDomain {
                   },
                   transaction
                 })
-
-                await equip.update(
-                  {
-                    ...equip,
-                    osPartId: osPartCreated.id,
-                    reserved: true,
-                    productBaseId: productBase.id,
-                    prevAction: 'saida'
-                  },
-                  { transaction }
-                )
+                if (item.status === 'ECOMMERCE' || item.status === 'RECEPÇÃO') {
+                  await equip.update(
+                    {
+                      osPartId: osPartCreated.id,
+                      productBaseId: productBase.id
+                    },
+                    { transaction }
+                  )
+                  await equip.destroy({ transaction })
+                } else {
+                  await equip.update(
+                    {
+                      osPartId: osPartCreated.id,
+                      reserved: true,
+                      productBaseId: productBase.id,
+                      prevAction: 'saida'
+                    },
+                    { transaction }
+                  )
+                }
               })
             }
           }
 
-          const productBaseUpdate = {
-            ...productBase,
-            available: (
-              parseInt(productBase.available, 10) - parseInt(item.amount, 10)
-            ).toString(),
-            reserved: (
-              parseInt(productBase.reserved, 10) + parseInt(item.amount, 10)
-            ).toString()
+          let productBaseUpdate = {}
+
+          if (item.status === 'ECOMMERCE' || item.status === 'ECOMMERCE') {
+            productBaseUpdate = {
+              available: (
+                parseInt(productBase.available, 10) - parseInt(item.amount, 10)
+              ).toString(),
+              amount: (
+                parseInt(productBase.amount, 10) - parseInt(item.amount, 10)
+              ).toString()
+            }
+            await osPartCreated.update(
+              { output: osPartCreated.amount },
+              { transaction }
+            )
+
+            await osPartCreated.destroy({ transaction })
+          } else {
+            productBaseUpdate = {
+              available: (
+                parseInt(productBase.available, 10) - parseInt(item.amount, 10)
+              ).toString(),
+              reserved: (
+                parseInt(productBase.reserved, 10) + parseInt(item.amount, 10)
+              ).toString()
+            }
           }
 
           if (
@@ -291,6 +343,17 @@ module.exports = class OsDomain {
     }
     if (errors) {
       throw new FieldValidationError([{ field, message }])
+    }
+
+    if (
+      R.length(
+        R.filter(
+          ({ status }) => status === 'ECOMMERCE' || status === 'RECEPÇÃO',
+          bodyData.osParts
+        )
+      ) > 0
+    ) {
+      await reserveCreated.destroy({ transaction })
     }
 
     const response = await Os.findByPk(reserveCreated.id, {
@@ -810,8 +873,16 @@ module.exports = class OsDomain {
 
     const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery)
 
-    const { count } = await Os.findAndCountAll({
-      where: getWhere('os'),
+    const whereOs = R.has('cnpj', getWhere('os'))
+      ? {
+          ...getWhere('os'),
+          cnpj: { [Op.or]: [getWhere('os').cnpj, { [Op.eq]: null }] },
+          cpf: { [Op.or]: [getWhere('os').cnpj, { [Op.eq]: null }] }
+        }
+      : getWhere('os')
+
+    const count = await Os.count({
+      where: whereOs,
       include: [
         {
           model: Technician,
@@ -823,8 +894,11 @@ module.exports = class OsDomain {
       transaction
     })
 
+    console.log(count)
+    console.log(getWhere('osParts'))
+    // console.log(getWhere('osPart'))
     const os = await Os.findAndCountAll({
-      where: getWhere('os'),
+      where: whereOs,
       include: [
         {
           model: Technician,
@@ -851,6 +925,8 @@ module.exports = class OsDomain {
       paranoid,
       transaction
     })
+
+    console.log(os.count)
 
     const { rows } = os
 
@@ -973,7 +1049,7 @@ module.exports = class OsDomain {
       const resp = {
         id: item.id,
         razaoSocial: item.razaoSocial,
-        cnpj: item.cnpj,
+        cnpj: item.cnpj ? item.cnpj : item.cpf,
         date: item.date,
         formatedDate: moment(item.date).format('L'),
         technician: item.technician.name,
@@ -1099,7 +1175,6 @@ module.exports = class OsDomain {
       field.add = true
       message.add = 'Por favor a quantidade'
     }
-
     if (errors) {
       throw new FieldValidationError([{ field, message }])
     }
@@ -1151,6 +1226,7 @@ module.exports = class OsDomain {
                 }
               : null
         },
+        paranoid: false,
         transaction
       })
 
@@ -1259,7 +1335,13 @@ module.exports = class OsDomain {
           // through: {
           //   paranoid: false,
           // },
-          include: [{ model: Technician, where: getWhere('technician') }]
+          include: [
+            { model: Technician, where: getWhere('technician') },
+            {
+              model: OsParts,
+              include: [{ model: TechnicianReserve, paranoid: false }]
+            }
+          ]
         },
         { model: Product }
       ],
@@ -1283,6 +1365,10 @@ module.exports = class OsDomain {
               parseInt(os.osParts.return, 10) -
               parseInt(os.osParts.output, 10) -
               parseInt(os.osParts.missOut, 10)
+
+            if (os.osPart.technicianReserve) {
+              amount -= os.osPart.technicianReserve.amountAux
+            }
           })
 
           const equips = await Equip.findAll({
@@ -1346,12 +1432,9 @@ module.exports = class OsDomain {
         osPartisIdArray = !os.osParts.technicianReserveId
           ? [...osPartisIdArray, os.osParts.id]
           : osPartisIdArray
-        amount =
-          amount +
-          parseInt(os.osParts.amount, 10) -
-          parseInt(os.osParts.return, 10) -
-          parseInt(os.osParts.output, 10) -
-          parseInt(os.osParts.missOut, 10)
+        amount = !os.osParts.technicianReserveId
+          ? amount + parseInt(os.osParts.amount, 10)
+          : amount
       })
 
       const technicianReserve = await TechnicianReserve.findOne({
@@ -1405,7 +1488,7 @@ module.exports = class OsDomain {
     const os = await Os.findAll({
       where: getWhere('os'),
       include: [
-        { model: Technician, where: getWhere('technician') },
+        { model: Technician, where: getWhere('technician'), paranoid: false },
         {
           model: ProductBase,
           include: [
@@ -1478,6 +1561,7 @@ module.exports = class OsDomain {
       where,
       // paranoid: false,
       include: [
+        { model: TechnicianReserve, required: true, paranoid: false },
         {
           model: Os,
           required: true,
@@ -1593,6 +1677,8 @@ module.exports = class OsDomain {
     }
 
     if (bodyData.serial) {
+      console.log(JSON.parse(JSON.stringify(technicianReserve)))
+
       await technicianReserve.update(
         { amountAux: technicianReserve.amountAux - 1 },
         { transaction }
@@ -1711,6 +1797,14 @@ module.exports = class OsDomain {
           },
           { transaction }
         )
+        const { serialNumber } = bodyData
+
+        const equip = await Equip.findOne({
+          where: { serialNumber },
+          transaction
+        })
+
+        await equip.destroy({ transaction })
 
         if (
           convertForInt(osPart.amount) ===
