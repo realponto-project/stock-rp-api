@@ -1,8 +1,6 @@
-
-
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const supProduct = queryInterface.createTable("supProduct", {
+    const supProduct = queryInterface.createTable('supProduct', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -22,13 +20,13 @@ module.exports = {
       },
 
       unit: {
-        type: Sequelize.ENUM([
-          "UNID",
-          "PÇ",
-          "CX",
-          "LT"
-        ]),
+        type: Sequelize.ENUM(['UNID', 'PÇ', 'CX', 'LT']),
         allowNull: false
+      },
+
+      esporadico: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
 
       amount: {
@@ -59,8 +57,8 @@ module.exports = {
       manufacturerId: {
         type: Sequelize.UUID,
         references: {
-          model: "manufacturer",
-          key: "id"
+          model: 'manufacturer',
+          key: 'id'
         },
         allowNull: false
       }
@@ -69,5 +67,5 @@ module.exports = {
     return supProduct
   },
 
-  down: queryInterface => queryInterface.dropTable("supProduct")
+  down: queryInterface => queryInterface.dropTable('supProduct')
 }

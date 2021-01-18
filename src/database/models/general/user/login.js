@@ -1,20 +1,19 @@
-const Sequelize = require("sequelize")
-const bcrypt = require("bcrypt")
+const Sequelize = require('sequelize')
+const bcrypt = require('bcrypt')
 
 const getHash = plainPassoword => bcrypt.hash(plainPassoword, 10)
 
-const shouldMakeAHash = login => login.changed("password")
+const shouldMakeAHash = login => login.changed('password')
 
-const makeHashPasswordHook = async (login) => {
+const makeHashPasswordHook = async login => {
   if (shouldMakeAHash(login)) {
     // eslint-disable-next-line no-param-reassign
     login.password = await getHash(login.password)
   }
 }
 
-
-module.exports = (sequelize) => {
-  const login = sequelize.define("login", {
+module.exports = sequelize => {
+  const login = sequelize.define('login', {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
@@ -26,7 +25,7 @@ module.exports = (sequelize) => {
     }
   })
 
-  login.associate = (models) => {
+  login.associate = models => {
     login.hasMany(models.session, { foreignKey: { allowNull: false } })
 
     login.hasOne(models.user)
@@ -36,7 +35,7 @@ module.exports = (sequelize) => {
     return bcrypt.compare(plaintext, this.password)
   }
 
-  login.beforeCreate(makeHashPasswordHook)
-  login.beforeUpdate(makeHashPasswordHook)
+  // login.beforeCreate(makeHashPasswordHook)
+  // login.beforeUpdate(makeHashPasswordHook)
   return login
 }

@@ -1,6 +1,6 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const user = queryInterface.createTable("user", {
+    const user = queryInterface.createTable('user', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -44,8 +44,8 @@ module.exports = {
       loginId: {
         type: Sequelize.UUID,
         references: {
-          model: "login",
-          key: "id"
+          model: 'login',
+          key: 'id'
         },
         allowNull: true
       },
@@ -53,17 +53,32 @@ module.exports = {
       resourceId: {
         type: Sequelize.UUID,
         references: {
-          model: "resources",
-          key: "id"
+          model: 'resources',
+          key: 'id'
         },
         allowNull: true
+      },
+
+      tecnico: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+
+      technicianId: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'technician',
+          key: 'id'
+        },
+        allowNull: true,
+        defaultValue: null
       },
 
       typeAccountId: {
         type: Sequelize.UUID,
         references: {
-          model: "typeAccount",
-          key: "id"
+          model: 'typeAccount',
+          key: 'id'
         },
         allowNull: true
       }
@@ -72,5 +87,5 @@ module.exports = {
     return user
   },
 
-  down: queryInterface => queryInterface.dropTable("user")
+  down: queryInterface => queryInterface.dropTable('user')
 }

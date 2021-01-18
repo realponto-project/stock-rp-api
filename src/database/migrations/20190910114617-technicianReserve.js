@@ -1,6 +1,6 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const technicianReserve = queryInterface.createTable("technicianReserve", {
+    const technicianReserve = queryInterface.createTable('technicianReserve', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -17,7 +17,7 @@ module.exports = {
         allowNull: false
       },
 
-      data: { defaultValue: Sequelize.NOW, type: Sequelize.DATE },
+      data: { allowNull: true, type: Sequelize.DATE },
 
       createdAt: {
         defaultValue: Sequelize.NOW,
@@ -37,8 +37,8 @@ module.exports = {
       technicianId: {
         type: Sequelize.UUID,
         references: {
-          model: "technician",
-          key: "id"
+          model: 'technician',
+          key: 'id'
         },
         allowNull: false
       },
@@ -46,8 +46,8 @@ module.exports = {
       productId: {
         type: Sequelize.UUID,
         references: {
-          model: "product",
-          key: "id"
+          model: 'product',
+          key: 'id'
         },
         allowNull: true
       }
@@ -56,5 +56,5 @@ module.exports = {
     return technicianReserve
   },
 
-  down: queryInterface => queryInterface.dropTable("technicianReserve")
+  down: queryInterface => queryInterface.dropTable('technicianReserve')
 }

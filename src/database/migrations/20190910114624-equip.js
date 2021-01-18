@@ -1,6 +1,6 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const equip = queryInterface.createTable("equip", {
+    const equip = queryInterface.createTable('equip', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -42,38 +42,65 @@ module.exports = {
         defaultValue: null,
         type: Sequelize.DATE
       },
+
+      technicianReserveId: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'technicianReserve',
+          key: 'id'
+        },
+        allowNull: true,
+        defaultValue: null
+      },
+
+      prevAction: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        defaultValue: null
+      },
+
+      // reservaInternoPartId: {
+      //   type: Sequelize.UUID,
+      //   references: {
+      //     model: 'reservaInternoParts',
+      //     key: 'id'
+      //   },
+      //   allowNull: true,
+      //   defaultValue: null
+      // },
+
       productBaseId: {
         type: Sequelize.UUID,
         references: {
-          model: "productBase",
-          key: "id"
+          model: 'productBase',
+          key: 'id'
         },
         allowNull: false
       },
       osPartId: {
         type: Sequelize.UUID,
         references: {
-          model: "osParts",
-          key: "id"
+          model: 'osParts',
+          key: 'id'
         },
         allowNull: true
       },
       freeMarketPartId: {
         type: Sequelize.UUID,
         references: {
-          model: "freeMarketParts",
-          key: "id"
+          model: 'freeMarketParts',
+          key: 'id'
         },
         allowNull: true
       }
     })
 
-    equip.associate = (models) => {
+    equip.associate = models => {
       equip.belongsTo(models.productBase, { foreignKey: { allowNull: false } })
       equip.belongsTo(models.osParts)
     }
 
     return equip
   },
-  down: queryInterface => queryInterface.dropTable("equip")
+  down: queryInterface => queryInterface.dropTable('equip')
 }

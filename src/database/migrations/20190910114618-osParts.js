@@ -1,6 +1,6 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const osParts = queryInterface.createTable("osParts", {
+    const osParts = queryInterface.createTable('osParts', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -14,17 +14,17 @@ module.exports = {
 
       return: {
         type: Sequelize.STRING,
-        defaultValue: "0"
+        defaultValue: '0'
       },
 
       output: {
         type: Sequelize.STRING,
-        defaultValue: "0"
+        defaultValue: '0'
       },
 
       missOut: {
         type: Sequelize.STRING,
-        defaultValue: "0"
+        defaultValue: '0'
       },
 
       serialNumber: {
@@ -61,19 +61,29 @@ module.exports = {
         defaultValue: null,
         type: Sequelize.DATE
       },
+
+      technicianReserveId: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'technicianReserve',
+          key: 'id'
+        },
+        allowNull: true
+      },
+
       oId: {
         type: Sequelize.UUID,
         references: {
-          model: "os",
-          key: "id"
+          model: 'os',
+          key: 'id'
         },
         allowNull: true
       },
       productBaseId: {
         type: Sequelize.UUID,
         references: {
-          model: "productBase",
-          key: "id"
+          model: 'productBase',
+          key: 'id'
         },
         allowNull: true
       },
@@ -81,21 +91,23 @@ module.exports = {
       statusExpeditionId: {
         type: Sequelize.UUID,
         references: {
-          model: "statusExpedition",
-          key: "id"
+          model: 'statusExpedition',
+          key: 'id'
         },
         allowNull: false
       }
     })
 
-    osParts.associate = (models) => {
+    osParts.associate = models => {
       osParts.belongsTo(models.os)
       osParts.belongsTo(models.productBase)
-      osParts.belongsTo(models.statusExpedition, { foreignKey: { allowNull: false } })
+      osParts.belongsTo(models.statusExpedition, {
+        foreignKey: { allowNull: false }
+      })
     }
 
     return osParts
   },
 
-  down: queryInterface => queryInterface.dropTable("osParts")
+  down: queryInterface => queryInterface.dropTable('osParts')
 }
