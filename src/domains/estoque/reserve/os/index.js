@@ -121,16 +121,6 @@ module.exports = class OsDomain {
       }
     }
 
-    console.log(
-      R.length(
-        R.filter(
-          ({ status }) => status === 'ECOMMERCE' || status === 'RECEPÇÃO',
-          bodyData.osParts
-        )
-      ),
-      R.length(bodyData.osParts)
-    )
-
     const lengthListWithStatusEcommerce = R.length(
       R.filter(
         ({ status }) => status === 'ECOMMERCE' || status === 'RECEPÇÃO',
@@ -301,7 +291,7 @@ module.exports = class OsDomain {
 
           let productBaseUpdate = {}
 
-          if (item.status === 'ECOMMERCE' || item.status === 'ECOMMERCE') {
+          if (item.status === 'ECOMMERCE' || item.status === 'RECEPÇÃO') {
             productBaseUpdate = {
               available: (
                 parseInt(productBase.available, 10) - parseInt(item.amount, 10)
@@ -385,6 +375,8 @@ module.exports = class OsDomain {
             transaction
           })
 
+          console.log(JSON.parse(JSON.stringify(productBase)))
+
           const equips = await Equip.findAll({
             where: { osPartId: item.id },
             transaction
@@ -402,25 +394,29 @@ module.exports = class OsDomain {
           })
 
           await Promise.all(equipUpdatePromise)
-          const productBaseUpdate = {
-            ...productBase,
-            available: (
-              parseInt(productBase.available, 10) + parseInt(item.amount, 10)
-            ).toString(),
-            reserved: (
-              parseInt(productBase.reserved, 10) - parseInt(item.amount, 10)
-            ).toString()
-          }
-          if (
-            parseInt(productBaseUpdate.amount, 10) < 0 ||
-            parseInt(productBaseUpdate.available, 10) < 0
-          ) {
-            field.productBaseUpdate = true
-            message.productBaseUpdate = 'Número negativo não é valido'
-            throw new FieldValidationError([{ field, message }])
-          }
 
-          await productBase.update(productBaseUpdate, { transaction })
+          if (productBase.stockBaseId) {
+            const productBaseUpdate = {
+              ...productBase,
+              available: (
+                parseInt(productBase.available, 10) + parseInt(item.amount, 10)
+              ).toString(),
+              reserved: (
+                parseInt(productBase.reserved, 10) - parseInt(item.amount, 10)
+              ).toString()
+            }
+
+            if (
+              parseInt(productBaseUpdate.amount, 10) < 0 ||
+              parseInt(productBaseUpdate.available, 10) < 0
+            ) {
+              field.productBaseUpdate = true
+              message.productBaseUpdate = 'Número negativo não é valido'
+              throw new FieldValidationError([{ field, message }])
+            }
+
+            await productBase.update(productBaseUpdate, { transaction })
+          }
         }
 
         await item.destroy({ transaction })
@@ -1269,14 +1265,21 @@ module.exports = class OsDomain {
     ) {
       error = true
     } else {
+      console.log(body)
+
       technicianReserve = await TechnicianReserve.findByPk(
         body.technicianReserveId,
-        { transaction }
+        {
+          paranoid: false,
+          transaction
+        }
       )
+      console.log(technicianReserve)
       if (!technicianReserve) {
         error = true
       }
     }
+    console.log(error)
     if (error) {
       throw new FieldValidationError()
     }
@@ -1492,7 +1495,10 @@ module.exports = class OsDomain {
         {
           model: ProductBase,
           include: [
-            { model: StockBase, where: { stockBase: 'ESTOQUE' } },
+            {
+              model: StockBase
+              // where: { stockBase: 'ESTOQUE' }
+            },
             {
               model: Product,
               where: { name: newQuery.filters.product.specific.name }
