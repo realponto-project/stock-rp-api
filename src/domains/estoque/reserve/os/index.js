@@ -123,7 +123,10 @@ module.exports = class OsDomain {
 
     const lengthListWithStatusEcommerce = R.length(
       R.filter(
-        ({ status }) => status === 'ECOMMERCE' || status === 'RECEPÇÃO',
+        ({ status }) =>
+          status === 'ECOMMERCE' ||
+          status === 'RECEPÇÃO' ||
+          status === 'CORREIOS',
         bodyData.osParts
       )
     )
@@ -226,6 +229,7 @@ module.exports = class OsDomain {
           if (
             productBase.product.serial &&
             (productBase.product.category !== 'peca' ||
+              item.status === 'CORREIOS' ||
               item.status === 'ECOMMERCE' ||
               item.status === 'RECEPÇÃO')
           ) {
@@ -265,7 +269,11 @@ module.exports = class OsDomain {
                   },
                   transaction
                 })
-                if (item.status === 'ECOMMERCE' || item.status === 'RECEPÇÃO') {
+                if (
+                  item.status === 'ECOMMERCE' ||
+                  item.status === 'CORREIOS' ||
+                  item.status === 'RECEPÇÃO'
+                ) {
                   await equip.update(
                     {
                       osPartId: osPartCreated.id,
@@ -291,7 +299,11 @@ module.exports = class OsDomain {
 
           let productBaseUpdate = {}
 
-          if (item.status === 'ECOMMERCE' || item.status === 'RECEPÇÃO') {
+          if (
+            item.status === 'ECOMMERCE' ||
+            item.status === 'CORREIOS' ||
+            item.status === 'RECEPÇÃO'
+          ) {
             productBaseUpdate = {
               available: (
                 parseInt(productBase.available, 10) - parseInt(item.amount, 10)
@@ -338,7 +350,10 @@ module.exports = class OsDomain {
     if (
       R.length(
         R.filter(
-          ({ status }) => status === 'ECOMMERCE' || status === 'RECEPÇÃO',
+          ({ status }) =>
+            status === 'ECOMMERCE' ||
+            status === 'CORREIOS' ||
+            status === 'RECEPÇÃO',
           bodyData.osParts
         )
       ) > 0
