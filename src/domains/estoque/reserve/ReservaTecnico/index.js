@@ -521,15 +521,16 @@ class ReservaTecnicoDomain {
     }
 
     const { osParts } = body
+
     await Promise.all(
       osParts.map(async osPart => {
         const { serial, osPartId } = osPart
 
         if (serial) {
-          const { serialNumersSelects } = osPart
+          const { serialNumbers } = osPart
 
           await Promise.all(
-            serialNumersSelects.map(async serialNumber => {
+            serialNumbers.map(async serialNumber => {
               const equip = await Equip.findOne({
                 where: { serialNumber },
                 transaction
@@ -545,7 +546,7 @@ class ReservaTecnicoDomain {
           await osDomain.output(
             {
               osPartId: osPart.osPartId,
-              add: { output: osPart.quantidadeSaida },
+              add: { output: osPart.amount },
               serialNumberArray: null
             },
             { transaction }

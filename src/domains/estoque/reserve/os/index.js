@@ -1358,37 +1358,41 @@ module.exports = class OsDomain {
         if (item.product.category === 'peca') {
           let amount = 0
           let osPartisIdArray = []
-          item.os.forEach(os => {
-            osPartisIdArray = !os.osParts.technicianReserveId
-              ? [...osPartisIdArray, os.osParts.id]
-              : osPartisIdArray
-            amount =
-              amount +
-              parseInt(os.osParts.amount, 10) -
-              parseInt(os.osParts.return, 10) -
-              parseInt(os.osParts.output, 10) -
-              parseInt(os.osParts.missOut, 10)
+          const technicianReserveIds = []
 
-            if (os.osPart.technicianReserve) {
-              amount -= os.osPart.technicianReserve.amountAux
-            }
-          })
-
-          const equips = await Equip.findAll({
-            include: [
-              {
-                model: TechnicianReserve,
+          await Promise.all(
+            item.os.map(async os => {
+              const osPart = await OsParts.findOne({
                 where: {
-                  ...getWhere('technicianReserve'),
-                  productId: item.product.id,
-                  technicianId: item.os[0].technician.id
-                }
-              }
-            ],
-            transaction
-          })
+                  productBaseId: item.id,
+                  oId: os.id
+                },
+                include: [{ model: TechnicianReserve, paranoid: false }],
+                transaction
+              })
 
-          amount -= equips.length
+              osPartisIdArray = !osPart.technicianReserveId
+                ? [...osPartisIdArray, osPart.id]
+                : osPartisIdArray
+              amount =
+                amount +
+                parseInt(osPart.amount, 10) -
+                parseInt(osPart.return, 10) -
+                parseInt(osPart.output, 10) -
+                parseInt(osPart.missOut, 10)
+
+              if (
+                osPart.technicianReserve &&
+                technicianReserveIds.filter(
+                  item => item === osPart.technicianReserve.id
+                ).length === 0
+              ) {
+                amount -= osPart.technicianReserve.amountAux
+                technicianReserveIds.push(osPart.technicianReserve.id)
+              }
+            })
+          )
+
           if (amount) {
             return {
               id: item.product.id,
