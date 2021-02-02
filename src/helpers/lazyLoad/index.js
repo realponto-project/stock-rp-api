@@ -1,24 +1,20 @@
 /* eslint-disable no-useless-escape */
-const Sequelize = require("sequelize")
-const R = require("ramda")
-const moment = require("moment")
-const database = require("../../database")
+const Sequelize = require('sequelize')
+const R = require('ramda')
+const moment = require('moment')
+const database = require('../../database')
 
-const { MaliciousError } = require("../errors")
+const { MaliciousError } = require('../errors')
 
 const { Op: operators } = Sequelize
 
 // INVALIDS FIELDS, ADD HEAR FIELDS WHICH NEVER SHOULD SEARCHED
-const invalidFieldsToSearchList = [
-  "password",
-  "companyId",
-  "accountId"
-]
+const invalidFieldsToSearchList = ['password', 'companyId', 'accountId']
 
 const isKeyInvalid = key => R.contains(key, invalidFieldsToSearchList)
 
 const isEnum = type => type instanceof Sequelize.ENUM
-const assocEnum = (inputSearch) => {
+const assocEnum = inputSearch => {
   const searchformated = { [operators.eq]: inputSearch }
   return searchformated
 }
@@ -29,40 +25,46 @@ const isBoolean = type => type instanceof Sequelize.BOOLEAN
 
 // string formartter
 const isString = type => type instanceof Sequelize.STRING
-const assocString = (inputSearch) => {
-  const searchformated = { [operators.iRegexp]: `${inputSearch.replace(/([()*?+\\])/gi, "\\$1")}` }
+const assocString = inputSearch => {
+  const searchformated = {
+    [operators.iRegexp]: `${inputSearch.replace(/([()*?+\\-])/gi, '\\$1')}`
+  }
 
   return searchformated
 }
 
-const assocStringGlobal = (inputSearch) => {
+const assocStringGlobal = inputSearch => {
   const searchformated = { [operators.iRegexp]: inputSearch }
   return searchformated
 }
 
 // date formatter
-const getDateStart = R.prop("start")
-const getDateEnd = R.prop("end")
+const getDateStart = R.prop('start')
+const getDateEnd = R.prop('end')
 
-const isStartDatePresent = R.has("start")
-const isEndDatePresent = R.has("end")
+const isStartDatePresent = R.has('start')
+const isEndDatePresent = R.has('end')
 
-const createDateStart = (inputSearch) => {
+const createDateStart = inputSearch => {
   if (isStartDatePresent(inputSearch)) {
     const date = getDateStart(inputSearch)
 
-    const dateSearchFormatter = { [operators.gte]: moment(date).startOf("day").toString() }
+    const dateSearchFormatter = {
+      [operators.gte]: moment(date).startOf('day').toString()
+    }
 
     return dateSearchFormatter
   }
   return {}
 }
 
-const createDateEnd = (inputSearch) => {
+const createDateEnd = inputSearch => {
   if (isEndDatePresent(inputSearch)) {
     const date = getDateEnd(inputSearch)
 
-    const dateSearchFormatter = { [operators.lte]: moment(date).endOf("day").toString() }
+    const dateSearchFormatter = {
+      [operators.lte]: moment(date).endOf('day').toString()
+    }
 
     return dateSearchFormatter
   }
@@ -73,7 +75,7 @@ const isDate = type => type instanceof Sequelize.DATE
 
 const isNumber = type => type instanceof Sequelize.NUMBER
 
-const assocDate = (inputSearch) => {
+const assocDate = inputSearch => {
   const startDate = createDateStart(inputSearch)
   const endDate = createDateEnd(inputSearch)
 
@@ -84,7 +86,7 @@ const assocDate = (inputSearch) => {
   return searchformated
 }
 
-const createStart = (inputSearch) => {
+const createStart = inputSearch => {
   if (isStartDatePresent(inputSearch)) {
     const number = getDateStart(inputSearch)
 
@@ -95,7 +97,7 @@ const createStart = (inputSearch) => {
   return {}
 }
 
-const createEnd = (inputSearch) => {
+const createEnd = inputSearch => {
   if (isEndDatePresent(inputSearch)) {
     const number = getDateEnd(inputSearch)
 
@@ -106,7 +108,7 @@ const createEnd = (inputSearch) => {
   return {}
 }
 
-const assocNumber = (inputSearch) => {
+const assocNumber = inputSearch => {
   const startDate = createStart(inputSearch)
   const endDate = createEnd(inputSearch)
 
@@ -133,29 +135,14 @@ const getLimitAndOffset = (total, page) => {
   const isPageDown = pageRecived => pageRecived <= 0
 
   const getLimit = R.cond([
-    [
-      isTotalHigherThanMaximun,
-      R.always(100)
-    ],
-    [
-      isTotalBelowThanMinimun,
-      R.always(25)
-    ],
-    [
-      R.T,
-      R.identity
-    ]
+    [isTotalHigherThanMaximun, R.always(100)],
+    [isTotalBelowThanMinimun, R.always(25)],
+    [R.T, R.identity]
   ])
 
   const getPage = R.cond([
-    [
-      isPageDown,
-      R.always(1)
-    ],
-    [
-      R.T,
-      R.identity
-    ]
+    [isPageDown, R.always(1)],
+    [R.T, R.identity]
   ])
 
   pageResponse = getPage(page)
@@ -172,18 +159,18 @@ const getLimitAndOffset = (total, page) => {
 }
 
 const getGlobalSearchFormated = (filter, model) => {
-  const getGlobalSearch = R.propOr({}, "global")
-  const getFields = R.propOr([], "fields")
-  const getSearchValue = R.pipe(getGlobalSearch, R.prop("value"))
+  const getGlobalSearch = R.propOr({}, 'global')
+  const getFields = R.propOr([], 'fields')
+  const getSearchValue = R.pipe(getGlobalSearch, R.prop('value'))
 
   const search = getSearchValue(filter)
 
-  const getOperatorsOr = (type) => {
+  const getOperatorsOr = type => {
     if (isString(type)) return assocStringGlobal(search)
     return {}
   }
 
-  const mountSearchForGlobal = R.map((field) => {
+  const mountSearchForGlobal = R.map(field => {
     if (isKeyInvalid(field)) {
       throw new MaliciousError()
     }
@@ -192,17 +179,17 @@ const getGlobalSearchFormated = (filter, model) => {
     if (!attribute) return null
     const { type } = attribute
 
-    if (field === "createdAt") {
+    if (field === 'createdAt') {
       if (/\d{1,2}[\/.-]{1}\d{1,2}[\/.-]{1}\d{4}/.test(search)) {
-        const searchCreatedAt = search.replace(/\D/gi, "/")
+        const searchCreatedAt = search.replace(/\D/gi, '/')
 
-        const arraySearchCreatedAt = R.split("/", searchCreatedAt)
+        const arraySearchCreatedAt = R.split('/', searchCreatedAt)
 
         const diaString = arraySearchCreatedAt[0]
         const mesString = arraySearchCreatedAt[1]
         const anoString = arraySearchCreatedAt[2]
 
-        const stringToNumber = (string) => {
+        const stringToNumber = string => {
           if (!string) return 0
           const number = parseInt(string, 10)
           return number
@@ -234,7 +221,7 @@ const getGlobalSearchFormated = (filter, model) => {
     mountSearchForGlobal
   )
 
-  const mountWhereOr = (whereOrFieldsToSearch) => {
+  const mountWhereOr = whereOrFieldsToSearch => {
     if (whereOrFieldsToSearch.length >= 1) {
       return { [operators.or]: whereOrFieldsToSearch }
     }
@@ -252,7 +239,7 @@ const getGlobalSearchFormated = (filter, model) => {
 }
 
 const getspecificSearchFormated = (filter, model) => {
-  const getspecific = R.propOr({}, "specific")
+  const getspecific = R.propOr({}, 'specific')
 
   const getOperatorsAnd = (type, inputSearch) => {
     if (isString(type)) return assocString(inputSearch)
@@ -276,7 +263,7 @@ const getspecificSearchFormated = (filter, model) => {
     return { [key]: getOperatorsAnd(type, inputSearch) }
   }
 
-  const makeSearchEspecifField = (key) => {
+  const makeSearchEspecifField = key => {
     if (isKeyInvalid(key)) {
       throw new MaliciousError()
     }
@@ -309,10 +296,11 @@ const getspecificSearchFormated = (filter, model) => {
 }
 
 const formatQuery = (queryPassed = null) => {
-  const isQueryEmptyOrNull = queryPassed === null
-    || queryPassed === undefined
-    || queryPassed === {}
-    || queryPassed === []
+  const isQueryEmptyOrNull =
+    queryPassed === null ||
+    queryPassed === undefined ||
+    queryPassed === {} ||
+    queryPassed === []
 
   let query = queryPassed
   if (isQueryEmptyOrNull) query = { filters: null, total: 25, page: 1 }

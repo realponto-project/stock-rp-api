@@ -10,28 +10,28 @@ class Base extends Error {
 
 class NotFondError extends Base {
   constructor() {
-    super("NotFondError", 404)
+    super('NotFondError', 404)
     Error.captureStackTrace(this, this.constructor)
   }
 }
 
 class ForbridenError extends Base {
   constructor() {
-    super("ForbridenError", 403)
+    super('ForbridenError', 403)
     Error.captureStackTrace(this, this.constructor)
   }
 }
 
 class GoneError extends Base {
   constructor() {
-    super("GoneError", 410)
+    super('GoneError', 410)
     Error.captureStackTrace(this, this.constructor)
   }
 }
 
 class UnauthorizedError extends Base {
   constructor(fields) {
-    super("User UNAUTHORIZED", 401)
+    super('User UNAUTHORIZED', 401)
     this.fields = fields
     Error.captureStackTrace(this, this.constructor)
   }
@@ -39,14 +39,14 @@ class UnauthorizedError extends Base {
 
 class ObjectNotFoundError extends Base {
   constructor() {
-    super("ObjectNotFound", 422)
+    super('ObjectNotFound', 422)
     Error.captureStackTrace(this, this.constructor)
   }
 }
 
 class ValidationError extends Base {
   constructor() {
-    super("ValidationError", 422)
+    super('ValidationError', 422)
     Error.captureStackTrace(this, this.constructor)
   }
 }
@@ -69,7 +69,7 @@ class SearchError extends ValidationError {
 
 class MaliciousError extends Base {
   constructor() {
-    super("MaliciusError", 418)
+    super('MaliciusError', 418)
     Error.captureStackTrace(this, this.constructor)
   }
 }

@@ -7,9 +7,20 @@ services:
       POSTGRES_PASSWORD: stockRp_2.0
       POSTGRES_DB: stock_2.0
     ports:
-      - 5412:5432
+      - 5410:5432
     volumes:
       - db_estoque:/var/lib/postgresql/data
+
+  db_estoque_serve:
+    image: postgres:11.2-alpine
+    environment:
+      POSTGRES_PASSWORD: stockRp_2.0
+      POSTGRES_DB: stock_2.0
+    ports:
+      - 5422:5432
+    volumes:
+      - db_estoque_serve:/var/lib/postgresql/data
+
   # pgbackups:
   #   container_name: Backup-stock-rp
   #   image: prodrigestivill/postgres-backup-local
@@ -34,3 +45,4 @@ services:
 
 volumes:
   db_estoque:
+  db_estoque_serve:

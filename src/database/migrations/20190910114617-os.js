@@ -1,7 +1,6 @@
-
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const os = queryInterface.createTable("os", {
+    const os = queryInterface.createTable('os', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -21,7 +20,17 @@ module.exports = {
 
       cnpj: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: true
+      },
+
+      cpf: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+
+      trackId: {
+        type: Sequelize.STRING,
+        allowNull: true
       },
 
       date: {
@@ -47,19 +56,19 @@ module.exports = {
       technicianId: {
         type: Sequelize.UUID,
         references: {
-          model: "technician",
-          key: "id"
+          model: 'technician',
+          key: 'id'
         },
         allowNull: false
       }
     })
 
-    os.associate = (models) => {
-      os.belongsToMany(models.productBase, { through: "osParts" })
+    os.associate = models => {
+      os.belongsToMany(models.productBase, { through: 'osParts' })
       os.belongsTo(models.technician, { foreignKey: { allowNull: true } })
     }
 
     return os
   },
-  down: queryInterface => queryInterface.dropTable("os")
+  down: queryInterface => queryInterface.dropTable('os')
 }

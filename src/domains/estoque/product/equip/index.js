@@ -18,16 +18,11 @@ const StockBase = database.model('stockBase')
 const Mark = database.model('mark')
 
 module.exports = class EquipDomain {
-  async add (bodyData, options = {}) {
+  async add(bodyData, options = {}) {
     const { transaction = null } = options
 
     const equip = R.omit(
-      [
-        'id',
-        'productId',
-        'stockBase',
-        'serialNumbers'
-      ],
+      ['id', 'productId', 'stockBase', 'serialNumbers'],
       bodyData
     )
 
@@ -51,7 +46,9 @@ module.exports = class EquipDomain {
       field.productId = true
       message.productId = 'Por favor informe productId.'
     } else {
-      const productBase = await Product.findByPk(bodyData.productId, { transaction })
+      const productBase = await Product.findByPk(bodyData.productId, {
+        transaction
+      })
 
       if (!productBase) {
         errors = true
@@ -118,7 +115,7 @@ module.exports = class EquipDomain {
     return equipCreated
   }
 
-  async getAll (options = {}) {
+  async getAll(options = {}) {
     const inicialOrder = {
       field: 'createdAt',
       acendent: true,
@@ -162,12 +159,7 @@ module.exports = class EquipDomain {
       ],
       offset,
       limit: newQuery.total === null ? undefined : limit,
-      order: [
-        [
-          newOrder.field,
-          newOrder.direction
-        ]
-      ],
+      order: [[newOrder.field, newOrder.direction]],
       transaction
     })
 
@@ -182,7 +174,7 @@ module.exports = class EquipDomain {
       }
     }
 
-    const formatData = R.map((equip) => {
+    const formatData = R.map(equip => {
       const resp = {
         id: equip.id,
         reserved: equip.reserved,
@@ -211,7 +203,7 @@ module.exports = class EquipDomain {
     return response
   }
 
-  async update (bodyData, options = {}) {
+  async update(bodyData, options = {}) {
     const { transaction = null } = options
 
     const equip = R.omit(['id'], bodyData)
@@ -220,11 +212,7 @@ module.exports = class EquipDomain {
 
     const newEquip = JSON.parse(JSON.stringify(oldEquip))
 
-    Object.assign(newEquip, R.omit([
-      'mark',
-      'type',
-      'model'
-    ], equip))
+    Object.assign(newEquip, R.omit(['mark', 'type', 'model'], equip))
 
     const newEquipNotHasProp = prop => R.not(R.has(prop, newEquip))
 
@@ -338,7 +326,7 @@ module.exports = class EquipDomain {
     return response
   }
 
-  async getOneBySerialNumber (serialNumber, options = {}) {
+  async getOneBySerialNumber(serialNumber, options = {}) {
     const { transaction = null, paranoid = false } = options
     const response = await Equip.findOne({
       where: { serialNumber },
@@ -348,7 +336,8 @@ module.exports = class EquipDomain {
         'deletedAt',
         'osPartId',
         'freeMarketPartId',
-        'productBaseId'
+        'productBaseId',
+        'serialNumber'
       ],
       include: [
         {
@@ -369,11 +358,7 @@ module.exports = class EquipDomain {
           include: [
             {
               model: Product,
-              attributes: [
-                'name',
-                'category',
-                'serial'
-              ]
+              attributes: ['name', 'category', 'serial']
             }
           ]
         },
@@ -397,10 +382,12 @@ module.exports = class EquipDomain {
     return response
   }
 
-  async delete (body, options = {}) {
+  async delete(body, options = {}) {
     const { transaction = null } = options
     const equip = await Equip.findByPk(body.id, { transaction })
-    const productBase = await ProductBase.findByPk(body.productBaseId, { transaction })
+    const productBase = await ProductBase.findByPk(body.productBaseId, {
+      transaction
+    })
 
     if (!productBase) {
       throw new FieldValidationError([
@@ -412,7 +399,9 @@ module.exports = class EquipDomain {
     }
 
     if (!equip) {
-      throw new FieldValidationError([{ field: { id: true }, message: { id: 'invalid id' } }])
+      throw new FieldValidationError([
+        { field: { id: true }, message: { id: 'invalid id' } }
+      ])
     } else if (equip.reserved || equip.inClient) {
       throw new FieldValidationError([
         {

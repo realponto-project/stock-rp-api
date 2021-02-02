@@ -14,7 +14,7 @@ const TypeAccount = database.model('typeAccount')
 const sessionDomain = new SessionDomain()
 
 class LoginDomain {
-  async login ({ username, password, typeAccount }, options = {}) {
+  async login({ username, password, typeAccount }, options = {}) {
     const { transaction = null } = options
 
     const login = await Login.findOne({
@@ -49,11 +49,8 @@ class LoginDomain {
         }
       ])
     }
-    // console.log(JSON.parse(JSON.stringify(login)));
 
     const session = await sessionDomain.createSession(login.id, { transaction })
-
-    // console.log(JSON.parse(JSON.stringify(session)));
 
     if (login.user.tecnico) {
       return {
@@ -99,7 +96,9 @@ class LoginDomain {
     if (user.customized) {
       const { resourceId } = user
 
-      const resourceReturn = await Resources.findByPk(resourceId, { transaction })
+      const resourceReturn = await Resources.findByPk(resourceId, {
+        transaction
+      })
 
       resource = {
         addCompany: resourceReturn.addCompany,
@@ -183,7 +182,7 @@ class LoginDomain {
     return response
   }
 
-  async logout (token, options = {}) {
+  async logout(token, options = {}) {
     const { transaction = null } = options
     await sessionDomain.turnInvalidSession(token, { transaction })
 

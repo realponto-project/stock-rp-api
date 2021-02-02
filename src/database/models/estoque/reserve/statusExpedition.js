@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize")
+const Sequelize = require('sequelize')
 
-module.exports = (sequelize) => {
-  const statusExpedition = sequelize.define("statusExpedition", {
+module.exports = sequelize => {
+  const statusExpedition = sequelize.define('statusExpedition', {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,

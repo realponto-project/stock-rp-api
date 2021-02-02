@@ -1,6 +1,6 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const entrance = queryInterface.createTable("entrance", {
+    const entrance = queryInterface.createTable('entrance', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -28,10 +28,7 @@ module.exports = {
       },
 
       stockBase: {
-        type: Sequelize.ENUM([
-          "ESTOQUE",
-          "EMPRESTIMO"
-        ]),
+        type: Sequelize.ENUM(['ESTOQUE', 'EMPRESTIMO']),
         allowNull: false
       },
       createdAt: {
@@ -51,29 +48,23 @@ module.exports = {
       productId: {
         type: Sequelize.UUID,
         references: {
-          model: "product",
-          key: "id"
+          model: 'product',
+          key: 'id'
         },
         allowNull: false
       },
       companyId: {
         type: Sequelize.UUID,
         references: {
-          model: "company",
-          key: "id"
+          model: 'company',
+          key: 'id'
         },
         allowNull: false
       }
     })
 
-    entrance.associate = (models) => {
-      entrance.belongsTo(models.product, { foreignKey: { allowNull: false } })
-
-      entrance.belongsTo(models.company, { foreignKey: { allowNull: true } })
-    }
-
     return entrance
   },
 
-  down: queryInterface => queryInterface.dropTable("entrance")
+  down: queryInterface => queryInterface.dropTable('entrance')
 }

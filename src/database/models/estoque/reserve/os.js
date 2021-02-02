@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize")
+const Sequelize = require('sequelize')
 
-module.exports = (sequelize) => {
-  const os = sequelize.define("os", {
+module.exports = sequelize => {
+  const os = sequelize.define('os', {
     id: {
       type: Sequelize.UUID,
       defaultValue: Sequelize.UUIDV4,
@@ -21,7 +21,17 @@ module.exports = (sequelize) => {
 
     cnpj: {
       type: Sequelize.STRING,
-      allowNull: false
+      allowNull: true
+    },
+
+    cpf: {
+      type: Sequelize.STRING,
+      allowNull: true
+    },
+
+    trackId: {
+      type: Sequelize.STRING,
+      allowNull: true
     },
 
     date: {
@@ -32,8 +42,10 @@ module.exports = (sequelize) => {
     }
   })
 
-  os.associate = (models) => {
-    os.belongsToMany(models.productBase, { through: "osParts" })
+  os.associate = models => {
+    // os.hasMany(models.osParts)
+    os.hasOne(models.osParts)
+    os.belongsToMany(models.productBase, { through: 'osParts' })
     os.belongsTo(models.technician, { foreignKey: { allowNull: true } })
   }
 
