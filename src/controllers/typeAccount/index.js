@@ -1,6 +1,6 @@
 const R = require('ramda')
 
-const TypeAccountDomain = require('../../domains/auth/user/typeAccount')
+const TypeAccountDomain = require('../../domains/Auth/user/typeAccount')
 const database = require('../../database')
 
 const typeAccountDomain = new TypeAccountDomain()
@@ -48,7 +48,10 @@ const getResourcesByTypeAccount = async (req, res, next) => {
       }
     }
 
-    const typeAccount = await typeAccountDomain.getResourcesByTypeAccount({ query, transaction })
+    const typeAccount = await typeAccountDomain.getResourcesByTypeAccount({
+      query,
+      transaction
+    })
 
     await transaction.commit()
     res.json(typeAccount)

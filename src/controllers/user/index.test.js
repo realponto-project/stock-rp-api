@@ -1,10 +1,10 @@
-const request = require("../../helpers/request")
+const request = require('../../helpers/request')
 
-const TypeAccount = require("../../domains/auth/user/typeAccount")
+const TypeAccount = require('../../domains/Auth/user/typeAccount')
 
 const typeAccount = new TypeAccount()
 
-describe("userController", () => {
+describe('userController', () => {
   let headers = null
   let typeAccountMock = null
   let userMock = null
@@ -12,7 +12,7 @@ describe("userController", () => {
   // eslint-disable-next-line jest/no-hooks
   beforeAll(async () => {
     typeAccountMock = {
-      typeName: "TecnicoLab",
+      typeName: 'TecnicoLab',
       addCompany: false,
       addPart: false,
       addAnalyze: true,
@@ -23,7 +23,7 @@ describe("userController", () => {
       addAccessories: false,
       addUser: false,
       addTypeAccount: false,
-      responsibleUser: "modrp",
+      responsibleUser: 'modrp',
       stock: false,
       labTec: true,
       addTec: false,
@@ -48,8 +48,8 @@ describe("userController", () => {
     await typeAccount.add(typeAccountMock)
 
     userMock = {
-      username: "matheus",
-      typeName: "TecnicoLab",
+      username: 'matheus',
+      typeName: 'TecnicoLab',
       customized: false,
       addCompany: true,
       addPart: true,
@@ -61,7 +61,7 @@ describe("userController", () => {
       addAccessories: true,
       addUser: true,
       addTypeAccount: true,
-      responsibleUser: "modrp",
+      responsibleUser: 'modrp',
       addTec: false,
       addCar: false,
       addMark: false,
@@ -81,12 +81,12 @@ describe("userController", () => {
     }
 
     const loginBody = {
-      username: "modrp",
-      password: "modrp",
+      username: 'modrp',
+      password: 'modrp',
       typeAccount: { labTec: true }
     }
 
-    const login = await request().post("/oapi/login", loginBody)
+    const login = await request().post('/oapi/login', loginBody)
 
     const { token, username } = login.body
 
@@ -96,20 +96,20 @@ describe("userController", () => {
     }
   })
 
-  it("create", async () => {
+  it('create', async () => {
     expect.hasAssertions()
-    const response = await request().post("/api/user", userMock, { headers })
+    const response = await request().post('/api/user', userMock, { headers })
 
     const { statusCode } = response
 
     expect(statusCode).toBe(200)
   })
 
-  it("getResourceByUsername", async () => {
+  it('getResourceByUsername', async () => {
     expect.hasAssertions()
     userMock = {
-      username: "alvaro",
-      typeName: "TecnicoLab",
+      username: 'alvaro',
+      typeName: 'TecnicoLab',
       customized: true,
       addCompany: false,
       addPart: false,
@@ -121,7 +121,7 @@ describe("userController", () => {
       addAccessories: true,
       addUser: false,
       addTypeAccount: false,
-      responsibleUser: "modrp",
+      responsibleUser: 'modrp',
       addTec: false,
       addCar: false,
       addMark: false,
@@ -140,10 +140,10 @@ describe("userController", () => {
       addStatus: false
     }
 
-    await request().post("/api/user", userMock, { headers })
+    await request().post('/api/user', userMock, { headers })
 
-    const params = { username: "alvaro" }
-    const response = await request().get("/api/user/getResourceByUsername", {
+    const params = { username: 'alvaro' }
+    const response = await request().get('/api/user/getResourceByUsername', {
       headers,
       params
     })
@@ -158,11 +158,15 @@ describe("userController", () => {
     expect(body.addEntry).toBe(userMock.addEntry)
   })
 
-  it("getall, query", async () => {
+  it('getall, query', async () => {
     expect.hasAssertions()
-    const params = { query: { filters: { typeAccount: { specific: { typeName: "TecnicoLab" } } } } }
+    const params = {
+      query: {
+        filters: { typeAccount: { specific: { typeName: 'TecnicoLab' } } }
+      }
+    }
 
-    const response = await request().get("/api/user/getAll", {
+    const response = await request().get('/api/user/getAll', {
       headers,
       params
     })

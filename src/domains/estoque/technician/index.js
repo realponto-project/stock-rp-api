@@ -13,7 +13,6 @@ const Kit = database.model('kit')
 const KitParts = database.model('kitParts')
 const ProductBase = database.model('productBase')
 const User = database.model('user')
-const Login = database.model('login')
 
 module.exports = class TechnicianDomain {
   async add(bodyData, options = {}) {
@@ -126,15 +125,14 @@ module.exports = class TechnicianDomain {
 
       const userFormatted = {
         ...user,
+        password,
         technicianId: technicianCreated.id,
         customized: false,
         tecnico: true,
-        responsibleUser: bodyData.responsibleUser,
-        login: { password }
+        responsibleUser: bodyData.responsibleUser
       }
 
       await User.create(userFormatted, {
-        include: [Login],
         transaction
       })
     }

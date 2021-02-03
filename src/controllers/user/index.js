@@ -1,10 +1,9 @@
-const R = require("ramda")
+const R = require('ramda')
 
-const UserDomain = require("../../domains/auth/user")
-const database = require("../../database")
+const UserDomain = require('../../domains/Auth/user')
+const database = require('../../database')
 
 const userDomain = new UserDomain()
-
 
 const add = async (req, res, next) => {
   const transaction = await database.transaction()
@@ -35,7 +34,9 @@ const update = async (req, res, next) => {
 const updatePassword = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
-    const userUpdate = await userDomain.user_PasswordUpdate(req.body, { transaction })
+    const userUpdate = await userDomain.user_PasswordUpdate(req.body, {
+      transaction
+    })
 
     await transaction.commit()
     res.json(userUpdate)
@@ -64,13 +65,12 @@ const getAll = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
     const users = await userDomain.getAll({ query, transaction })
-
 
     await transaction.commit()
     res.json(users)
