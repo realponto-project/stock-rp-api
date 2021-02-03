@@ -92,7 +92,7 @@ const getAllNames = async (req, res, next) => {
     next()
   }
 }
-
+w
 const getProductByStockBase = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
@@ -136,6 +136,15 @@ const getAllVendas = async (req, res, next) => {
   }
 }
 
+const getByIdProducts = async (req, res, next) => {
+  try{
+    const products = await productDomain.getById(req.query.id)
+    res.json(products)
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
   add,
   update,
@@ -143,5 +152,6 @@ module.exports = {
   getEquipsByEntrance,
   getAllNames,
   getProductByStockBase,
-  getAllVendas
+  getAllVendas,
+  getByIdProducts
 }
