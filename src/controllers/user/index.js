@@ -80,11 +80,11 @@ const getAll = async (req, res, next) => {
   }
 }
 
-const getById = async (req, res, next) => {
+const getByIdUser = async (req, res, next) => {
   try {
-    const user = await userDomain.getById(req.query)
+    const users = await userDomain.getById(req.query.id)
 
-    res.json(user)
+    res.json(users)
   } catch (error) {
     next(error)
   }
@@ -96,5 +96,5 @@ module.exports = {
   getResourceByUsername,
   getAll,
   updatePassword,
-  getById
+  getByIdUser
 }

@@ -6,6 +6,6 @@ router.put('', userController.update)
 router.put('/updatePassword', userController.updatePassword)
 router.get('/getResourceByUsername', userController.getResourceByUsername)
 router.get('/getAll', userController.getAll)
-router.get('/getById', userController.getById)
+router.get('/getByIdUser', userController.getByIdUser)
 
 module.exports = router

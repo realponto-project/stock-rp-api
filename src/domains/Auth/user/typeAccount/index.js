@@ -4,7 +4,7 @@ const Sequelize = require('sequelize')
 const database = require('../../../../database')
 
 const formatQuery = require('../../../../helpers/lazyLoad')
-const { FieldValidationError } = require('../../../../helpers/errors')
+const { FieldValidationError, NotFoundError } = require('../../../../helpers/errors')
 
 const TypeAccount = database.model('typeAccount')
 const Resources = database.model('resources')
@@ -514,5 +514,13 @@ module.exports = class TypeAccountDomain {
     }
 
     return response
+  }
+
+  async getById(id) {
+    const typeAccount = await TypeAccount.findByPk(id, {include: [Resources]})
+    if(!typeAccount){
+      throw new NotFoundError()
+    }
+    return typeAccount
   }
 }
