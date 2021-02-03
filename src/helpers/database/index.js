@@ -1,7 +1,7 @@
 const db = require('../../database')
 
-const TypeAccount = require('../../domains/auth/user/typeAccount')
-const UserDomain = require('../../domains/auth/user')
+const TypeAccount = require('../../domains/Auth/user/typeAccount')
+const UserDomain = require('../../domains/Auth/user')
 const StatusExpeditionDomain = require('../../domains/estoque/reserve/os/statusExpedition')
 
 const typeAccount = new TypeAccount()
