@@ -29,7 +29,7 @@ app.use(bodyParser.json())
 app.use('/oapi', loginRoute)
 app.use('/api', auth, protectRoute)
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   const formattedError = errorFormatter(err)
 
   res.status(formattedError.status || 500)
