@@ -92,7 +92,7 @@ const getAllNames = async (req, res, next) => {
     next()
   }
 }
-w
+
 const getProductByStockBase = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
