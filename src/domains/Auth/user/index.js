@@ -1,9 +1,9 @@
 const R = require('ramda')
-const Sequelize = require('sequelize')
 
 const {
   FieldValidationError,
-  UnauthorizedError
+  UnauthorizedError,
+  NotFoundError
 } = require('../../../helpers/errors')
 
 const database = require('../../../database')
@@ -12,8 +12,6 @@ const formatQuery = require('../../../helpers/lazyLoad')
 const User = database.model('user')
 const TypeAccount = database.model('typeAccount')
 const Resources = database.model('resources')
-
-const { Op: operators } = Sequelize
 
 class UserDomain {
   // eslint-disable-next-line camelcase
@@ -329,7 +327,8 @@ class UserDomain {
   async user_Update(bodyData, options = {}) {
     const { transaction = null } = options
 
-    // throw new Error()
+    console.log('bodyData1')
+    // console.log(bodyData)
 
     const userNotFormatted = bodyData
 
@@ -345,6 +344,7 @@ class UserDomain {
       include: [{ model: Resources }],
       transaction
     })
+    console.log('bodyData2')
 
     if (!typeAccountRetorned) {
       throw new FieldValidationError([
@@ -355,6 +355,7 @@ class UserDomain {
       ])
     }
 
+    console.log('bodyData3')
     userNotFormatted.typeAccountId = typeAccountRetorned.id
 
     const { responsibleUser } = bodyData
@@ -372,19 +373,24 @@ class UserDomain {
         }
       ])
     }
+    console.log('bodyData4')
 
     const { permissions } = bodyData
 
     if (userNotFormatted.customized) {
+      console.log('bodyData5')
       if (oldUser.customized) {
+        console.log('bodyData6')
         const resourceUpdate = {
           ...oldUser.resource,
           ...permissions
         }
+        console.log('bodyData7')
         const resourcesRenorned = await oldUser.resource.update(
           resourceUpdate,
           { transaction }
         )
+        console.log('bodyData8')
 
         userNotFormatted.resourceId = resourcesRenorned.id
       } else {
@@ -492,6 +498,25 @@ class UserDomain {
       rows: usersList
     }
     return response
+  }
+
+  async getById({ id }) {
+    const user = await User.findByPk(id, {
+      exclude: ['password'],
+      include: [
+        {
+          model: TypeAccount,
+          include: [Resources]
+        },
+        Resources
+      ]
+    })
+
+    if (!user) {
+      throw new NotFoundError()
+    }
+
+    return user
   }
 }
 
