@@ -8,9 +8,9 @@ class Base extends Error {
   }
 }
 
-class NotFondError extends Base {
+class NotFoundError extends Base {
   constructor() {
-    super('NotFondError', 404)
+    super('NotFoundError', 404)
     Error.captureStackTrace(this, this.constructor)
   }
 }
@@ -78,7 +78,7 @@ module.exports = {
   ValidationError,
   Base,
   FieldValidationError,
-  NotFondError,
+  NotFoundError,
   ForbridenError,
   UnauthorizedError,
   MaliciousError,
