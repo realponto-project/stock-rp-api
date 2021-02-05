@@ -716,7 +716,7 @@ module.exports = class ProductDomain {
   }
 
   async getById(id) {
-    const products = await Product.findByPk(id)
+    const products = await Product.findByPk(id, {include: [mark, productype]})
     if(!products){
       throw new NotFoundError()
     }
