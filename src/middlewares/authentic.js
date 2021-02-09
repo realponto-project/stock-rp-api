@@ -1,19 +1,13 @@
-const SessionDomain = require("../domains/auth/login/session")
+const { promisify } = require('util')
+const { verify } = require('jsonwebtoken')
 
-const { UnauthorizedError } = require("../helpers/errors")
-
-const sessionDomain = new SessionDomain()
+const { UnauthorizedError } = require('../helpers/errors')
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.get("token")
-    const username = req.get("username")
+    const token = req.get('token')
 
-    const valid = await sessionDomain.checkSessionIsValid(token, username)
-
-    if (!valid) {
-      next(new UnauthorizedError())
-    }
+    await promisify(verify)(token, process.env.APP_SECRET)
 
     next()
   } catch (error) {

@@ -427,8 +427,6 @@ module.exports = class CompanyDomain {
       message.nameContact = 'Por favor informar o nome para contato.'
     }
 
-    console.log(company)
-
     if (errors) {
       throw new FieldValidationError([{ field, message }])
     }
@@ -438,9 +436,6 @@ module.exports = class CompanyDomain {
       ...company
     }
 
-    console.log(JSON.parse(JSON.stringify(oldCompany)))
-    console.log(company)
-    console.log(newCompany)
     await oldCompany.update(newCompany, { transaction })
 
     const response = await Company.findByPk(oldCompany.id, { transaction })

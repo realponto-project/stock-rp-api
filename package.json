@@ -35,6 +35,7 @@
     "fs": "^0.0.1-security",
     "https": "^1.0.0",
     "jest": "^23.6.0",
+    "jsonwebtoken": "^8.5.1",
     "mime-db": "^1.38.0",
     "moment": "^2.23.0",
     "morgan": "^1.9.1",
@@ -52,7 +53,8 @@
     "validator": "^10.11.0",
     "web-push": "^3.4.1",
     "xlsx": "^0.16.6",
-    "yarn": "^1.12.3"
+    "yarn": "^1.12.3",
+    "yup": "^0.32.8"
   },
   "devDependencies": {
     "babel-eslint": "^9.0.0",
