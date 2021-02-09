@@ -20,8 +20,6 @@ class UserDomain {
   async user_Create(bodyData, options = {}) {
     const { transaction = null } = options
 
-    console.log(bodyData)
-
     const userNotFormatted = bodyData
 
     const { typeName } = bodyData
@@ -79,8 +77,6 @@ class UserDomain {
       ...user,
       password
     }
-
-    console.log(userFormatted)
 
     const userCreated = await User.create(userFormatted, {
       transaction

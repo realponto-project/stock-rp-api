@@ -375,8 +375,6 @@ module.exports = class OsDomain {
             transaction
           })
 
-          console.log(JSON.parse(JSON.stringify(productBase)))
-
           const equips = await Equip.findAll({
             where: { osPartId: item.id },
             transaction
@@ -890,9 +888,6 @@ module.exports = class OsDomain {
       transaction
     })
 
-    console.log(count)
-    console.log(getWhere('osParts'))
-    // console.log(getWhere('osPart'))
     const os = await Os.findAndCountAll({
       where: whereOs,
       include: [
@@ -921,8 +916,6 @@ module.exports = class OsDomain {
       paranoid,
       transaction
     })
-
-    console.log(os.count)
 
     const { rows } = os
 
@@ -1265,8 +1258,6 @@ module.exports = class OsDomain {
     ) {
       error = true
     } else {
-      console.log(body)
-
       technicianReserve = await TechnicianReserve.findByPk(
         body.technicianReserveId,
         {
@@ -1274,12 +1265,10 @@ module.exports = class OsDomain {
           transaction
         }
       )
-      console.log(technicianReserve)
       if (!technicianReserve) {
         error = true
       }
     }
-    console.log(error)
     if (error) {
       throw new FieldValidationError()
     }
@@ -1687,8 +1676,6 @@ module.exports = class OsDomain {
     }
 
     if (bodyData.serial) {
-      console.log(JSON.parse(JSON.stringify(technicianReserve)))
-
       await technicianReserve.update(
         { amountAux: technicianReserve.amountAux - 1 },
         { transaction }

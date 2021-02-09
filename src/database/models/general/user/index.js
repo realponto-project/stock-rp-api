@@ -45,7 +45,6 @@ module.exports = sequelize => {
     {
       hooks: {
         beforeSave: async user => {
-          console.log(user.password)
           if (user.password) {
             user.password = await bcrypt.hash(user.password, 10)
           }
