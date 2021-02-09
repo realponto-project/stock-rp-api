@@ -1,8 +1,8 @@
 const R = require('ramda')
-const Sequelize = require('sequelize')
 
 const {
   FieldValidationError,
+  NotFoundError,
   UnauthorizedError
 } = require('../../../helpers/errors')
 
@@ -12,8 +12,6 @@ const formatQuery = require('../../../helpers/lazyLoad')
 const User = database.model('user')
 const TypeAccount = database.model('typeAccount')
 const Resources = database.model('resources')
-
-const { Op: operators } = Sequelize
 
 class UserDomain {
   // eslint-disable-next-line camelcase
@@ -329,8 +327,6 @@ class UserDomain {
   async user_Update(bodyData, options = {}) {
     const { transaction = null } = options
 
-    // throw new Error()
-
     const userNotFormatted = bodyData
 
     const oldUser = await User.findByPk(bodyData.id, {
@@ -492,6 +488,25 @@ class UserDomain {
       rows: usersList
     }
     return response
+  }
+
+  async getById({ id }) {
+    const user = await User.findByPk(id, {
+      exclude: ['password'],
+      include: [
+        {
+          model: TypeAccount,
+          include: [Resources]
+        },
+        Resources
+      ]
+    })
+
+    if (!user) {
+      throw new NotFoundError()
+    }
+
+    return user
   }
 }
 
