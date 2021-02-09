@@ -1,9 +1,9 @@
-const R = require("ramda")
-const { FieldValidationError } = require("../../../helpers/errors")
-const database = require("../../../database")
-const formatQuery = require("../../../helpers/lazyLoad")
+const R = require('ramda')
+const { FieldValidationError } = require('../../../helpers/errors')
+const database = require('../../../database')
+const formatQuery = require('../../../helpers/lazyLoad')
 
-const Manufacturer = database.model("manufacturer")
+const Manufacturer = database.model('manufacturer')
 
 module.exports = class ManufacturerDomain {
   async create(body, options = {}) {
@@ -17,12 +17,12 @@ module.exports = class ManufacturerDomain {
 
     const field = { name: false }
 
-    const message = { name: "" }
+    const message = { name: '' }
 
-    if (notHasProp("name") || !manufacturer.name) {
+    if (notHasProp('name') || !manufacturer.name) {
       errors = true
       field.name = true
-      message.name = "name cannot null"
+      message.name = 'name cannot null'
     } else if (
       await Manufacturer.findOne({
         where: { name: manufacturer.name },
@@ -31,7 +31,7 @@ module.exports = class ManufacturerDomain {
     ) {
       errors = true
       field.name = true
-      message.name = "name already registered"
+      message.name = 'name already registered'
     }
 
     if (errors) {
@@ -51,13 +51,8 @@ module.exports = class ManufacturerDomain {
     const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery)
 
     const manufacturers = await Manufacturer.findAndCountAll({
-      where: getWhere("manufacturer"),
-      order: [
-        [
-          "createdAt",
-          "ASC"
-        ]
-      ],
+      where: getWhere('manufacturer'),
+      order: [['name', 'ASC']],
       limit,
       offset,
       transaction
@@ -84,14 +79,16 @@ module.exports = class ManufacturerDomain {
 
   async update(body, options = {}) {
     const { transaction = null } = options
-    const manufacturer = R.omit(["id"], body)
+    const manufacturer = R.omit(['id'], body)
 
-    const oldManufacturer = await Manufacturer.findByPk(body.id, { transaction })
+    const oldManufacturer = await Manufacturer.findByPk(body.id, {
+      transaction
+    })
 
     if (!oldManufacturer) {
       throw new FieldValidationError({
         field: { id: true },
-        message: { id: "invalid id" }
+        message: { id: 'invalid id' }
       })
     }
 
@@ -101,22 +98,22 @@ module.exports = class ManufacturerDomain {
 
     const field = { name: false }
 
-    const message = { name: "" }
+    const message = { name: '' }
 
-    if (notHasProp("name") || !manufacturer.name) {
+    if (notHasProp('name') || !manufacturer.name) {
       errors = true
       field.name = true
-      message.name = "name cannot null"
+      message.name = 'name cannot null'
     } else if (
       (await Manufacturer.findOne({
         where: { name: manufacturer.name },
         transaction
-      }))
-      && oldManufacturer.name !== manufacturer.name
+      })) &&
+      oldManufacturer.name !== manufacturer.name
     ) {
       errors = true
       field.name = true
-      message.name = "name already registered"
+      message.name = 'name already registered'
     }
 
     if (errors) {
