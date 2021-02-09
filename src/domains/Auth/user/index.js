@@ -2,8 +2,8 @@ const R = require('ramda')
 
 const {
   FieldValidationError,
-  UnauthorizedError,
-  NotFoundError
+  NotFoundError,
+  UnauthorizedError
 } = require('../../../helpers/errors')
 
 const database = require('../../../database')
@@ -327,9 +327,6 @@ class UserDomain {
   async user_Update(bodyData, options = {}) {
     const { transaction = null } = options
 
-    console.log('bodyData1')
-    // console.log(bodyData)
-
     const userNotFormatted = bodyData
 
     const oldUser = await User.findByPk(bodyData.id, {
@@ -344,7 +341,6 @@ class UserDomain {
       include: [{ model: Resources }],
       transaction
     })
-    console.log('bodyData2')
 
     if (!typeAccountRetorned) {
       throw new FieldValidationError([
@@ -355,7 +351,6 @@ class UserDomain {
       ])
     }
 
-    console.log('bodyData3')
     userNotFormatted.typeAccountId = typeAccountRetorned.id
 
     const { responsibleUser } = bodyData
@@ -373,24 +368,19 @@ class UserDomain {
         }
       ])
     }
-    console.log('bodyData4')
 
     const { permissions } = bodyData
 
     if (userNotFormatted.customized) {
-      console.log('bodyData5')
       if (oldUser.customized) {
-        console.log('bodyData6')
         const resourceUpdate = {
           ...oldUser.resource,
           ...permissions
         }
-        console.log('bodyData7')
         const resourcesRenorned = await oldUser.resource.update(
           resourceUpdate,
           { transaction }
         )
-        console.log('bodyData8')
 
         userNotFormatted.resourceId = resourcesRenorned.id
       } else {
