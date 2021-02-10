@@ -504,7 +504,7 @@ module.exports = class TechnicianDomain {
     return technician
   }
 
-  async getById({ id }) {
+  async getById(id) {
     const technician = await Technician.findByPk(id, {
       include: [Car]
     })

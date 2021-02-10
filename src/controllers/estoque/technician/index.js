@@ -76,7 +76,7 @@ const getAllTechnician = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
-    const user = await technicianDomain.getById(req.query)
+    const user = await technicianDomain.getById(req.query.id)
 
     res.json(user)
   } catch (error) {
