@@ -5,7 +5,10 @@ const moment = require('moment')
 const formatQuery = require('../../../helpers/lazyLoad')
 const database = require('../../../database')
 
-const { FieldValidationError } = require('../../../helpers/errors')
+const {
+  FieldValidationError,
+  NotFoundError
+} = require('../../../helpers/errors')
 
 const Car = database.model('car')
 const Technician = database.model('technician')
@@ -385,20 +388,7 @@ module.exports = class TechnicianDomain {
       ...technician
     }
 
-    const formatUsername = R.evolve({ username: R.pipe(R.toLower(), R.trim()) })
-
-    const userTechnician = await User.findOne({
-      where: formatUsername({
-        username: oldTechnician.name.replace(/\W/gi, '')
-      }),
-      transaction
-    })
-
     await oldTechnician.update(newTechnician, { transaction })
-    await userTechnician.update(
-      formatUsername({ username: newTechnician.name.replace(/\W/gi, '') }),
-      { transaction }
-    )
 
     const response = await Technician.findByPk(bodyData.id, {
       include: [{ model: Car }],
@@ -510,6 +500,18 @@ module.exports = class TechnicianDomain {
       order: [['name', 'ASC']],
       transaction
     })
+
+    return technician
+  }
+
+  async getById(id) {
+    const technician = await Technician.findByPk(id, {
+      include: [Car]
+    })
+
+    if (!technician) {
+      throw new NotFoundError()
+    }
 
     return technician
   }

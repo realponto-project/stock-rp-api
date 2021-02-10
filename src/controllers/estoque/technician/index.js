@@ -1,7 +1,7 @@
-const R = require("ramda")
+const R = require('ramda')
 
-const TechnicianDomain = require("../../../domains/estoque/technician")
-const database = require("../../../database")
+const TechnicianDomain = require('../../../domains/estoque/technician')
+const database = require('../../../database')
 
 const technicianDomain = new TechnicianDomain()
 
@@ -35,8 +35,8 @@ const getAll = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -55,8 +55,8 @@ const getAllTechnician = async (req, res, next) => {
   const transaction = await database.transaction()
   try {
     let query
-    if (R.has("query", req)) {
-      if (R.has("query", req.query)) {
+    if (R.has('query', req)) {
+      if (R.has('query', req.query)) {
         query = JSON.parse(req.query.query)
       }
     }
@@ -74,9 +74,20 @@ const getAllTechnician = async (req, res, next) => {
   }
 }
 
+const getById = async (req, res, next) => {
+  try {
+    const user = await technicianDomain.getById(req.query.id)
+
+    res.json(user)
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
   add,
   update,
   getAll,
-  getAllTechnician
+  getAllTechnician,
+  getById
 }
