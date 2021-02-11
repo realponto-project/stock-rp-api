@@ -5,7 +5,7 @@ const Sequelize = require('sequelize')
 const formatQuery = require('../../../helpers/lazyLoad')
 const database = require('../../../database')
 
-const { FieldValidationError } = require('../../../helpers/errors')
+const { FieldValidationError, NotFoundError } = require('../../../helpers/errors')
 
 const Equip = database.model('equip')
 const EquipType = database.model('equipType')
@@ -712,5 +712,14 @@ module.exports = class ProductDomain {
       count,
       rows: productsList
     }
+    
+  }
+
+  async getById(id) {
+    const products = await Product.findByPk(id, {include: [Mark, EquipType]})
+    if(!products){
+      throw new NotFoundError()
+    }
+    return products
   }
 }
