@@ -6,16 +6,12 @@
   "author": "joannisbs <joannisbs@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start:cleanDb": "node ./src/tests/wakeUpDbClean",
-    "start:dev": "nodemon ./src/server.js",
     "start": "node ./src/server.js",
-    "start:stage": "./scripts/createTable && node ./src/server.js",
-    "test": "jest",
-    "lint": "eslint './**/*.js'",
-    "lint-fix": "eslint './**/*.js' --fix",
-    "heroku-postbuild": "npm install --production",
-    "db:migrate": "npx sequelize-cli db:migrate",
-    "db:seed:all": "npx sequelize-cli db:seed:all"
+    "migrate": "npx sequelize-cli db:migrate",
+    "seeders": "npx sequelize-cli db:seed:all",
+    "seeders:undo:all": "sequelize db:seed:all",
+    "migrate:undo:all": "sequelize db:migrate:undo:all",
+    "build": "npm run migrate && npm run seeders"
   },
   "dependencies": {
     "@fnando/cnpj": "^1.0.1",
@@ -71,5 +67,9 @@
     "nodemon": "^2.0.6",
     "prettier": "2.2.1",
     "prettier-config-standard": "^1.0.1"
+  },
+  "engine": {
+    "node": "10.19.0",
+    "yarn": "1.22.5"
   }
 }
