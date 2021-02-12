@@ -37,7 +37,7 @@ app.use((err, req, res, next) => {
 })
 
 database.authenticate().then(() => {
-  const { PORT } = process.env
+  const { PORT } = process.env || 1337
 
   app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`)
