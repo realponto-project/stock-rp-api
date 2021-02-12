@@ -138,7 +138,7 @@ const getAllVendas = async (req, res, next) => {
 
 const getByIdProducts = async (req, res, next) => {
   try{
-    const products = await productDomain.getById(req.query.id)
+    const products = await productDomain.getById(req.params.id)
     res.json(products)
   } catch (error) {
     next(error)
