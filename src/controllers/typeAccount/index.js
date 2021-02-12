@@ -63,15 +63,6 @@ const getResourcesByTypeAccount = async (req, res, next) => {
 
 const getByIdTypeAccount = async (req, res, next) => {
   try {
-    const typeAccount = await typeAccountDomain.getById(req.query.id);
-    res.json(typeAccount);
-  } catch (error) {
-    next(error);
-  }
-};
-
-const getByIdTypeAccount = async (req, res, next) => {
-  try {
     const typeAccount = await typeAccountDomain.getByIdTypeAccount(req.params.id);
     res.json(typeAccount);
   } catch (error) {
