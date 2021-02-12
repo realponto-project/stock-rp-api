@@ -5,6 +5,6 @@ router.post('', technicianController.add)
 router.put('', technicianController.update)
 router.get('', technicianController.getAll)
 router.get('/getAllTechnician', technicianController.getAllTechnician)
-router.get('/getById', technicianController.getById)
+router.get('/getByIdTechnician/:id', technicianController.getByIdTechnician)
 
 module.exports = router

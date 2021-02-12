@@ -82,7 +82,7 @@ const getAll = async (req, res, next) => {
 
 const getByIdUser = async (req, res, next) => {
   try {
-    const users = await userDomain.getById(req.query.id)
+    const users = await userDomain.getById(req.params.id)
 
     res.json(users)
   } catch (error) {
