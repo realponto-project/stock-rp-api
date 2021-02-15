@@ -1,17 +1,17 @@
-const R = require("ramda")
+const R = require('ramda')
 
-const database = require("../../../../database")
+const database = require('../../../../database')
 
-const formatQuery = require("../../../../helpers/lazyLoad")
-const { FieldValidationError } = require("../../../../helpers/errors")
+const formatQuery = require('../../../../helpers/lazyLoad')
+const { FieldValidationError } = require('../../../../helpers/errors')
 
-const Mark = database.model("mark")
+const Mark = database.model('mark')
 
 module.exports = class MarkDomain {
   async add(bodyData, options = {}) {
     const { transaction = null } = options
 
-    const mark = R.omit(["id"], bodyData)
+    const mark = R.omit(['id'], bodyData)
 
     const markNotHasProp = prop => R.not(R.has(prop, mark))
 
@@ -20,16 +20,16 @@ module.exports = class MarkDomain {
       responsibleUser: false
     }
     const message = {
-      mark: "",
-      responsibleUser: ""
+      mark: '',
+      responsibleUser: ''
     }
 
     let errors = false
 
-    if (markNotHasProp("mark") || !mark.mark) {
+    if (markNotHasProp('mark') || !mark.mark) {
       errors = true
       field.newMarca = true
-      message.newMarca = "Por favor informar a marca do markamento."
+      message.newMarca = 'Por favor informar a marca do markamento.'
     }
 
     const markHasExist = await Mark.findOne({
@@ -40,7 +40,7 @@ module.exports = class MarkDomain {
     if (markHasExist) {
       errors = true
       field.newMarca = true
-      message.newMarca = "Marca já está cadastrada."
+      message.newMarca = 'Marca já está cadastrada.'
     }
 
     if (errors) {
@@ -59,24 +59,34 @@ module.exports = class MarkDomain {
 
     const newQuery = Object.assign({}, query)
 
-    const { getWhere } = formatQuery(newQuery)
+    const { limit, offset, pageResponse, getWhere } = formatQuery(newQuery)
 
-    const marks = await Mark.findAll({
-      where: getWhere("mark"),
-      limit: 30,
-      attributes: ["mark"],
-      order: [
-        [
-          "mark",
-          "ASC"
-        ]
-      ],
+    const marks = await Mark.findAndCountAll({
+      attributes: ['mark'],
+      limit: query.total === null ? undefined : limit,
+      order: [['mark', 'ASC']],
+      offset,
+      where: getWhere('mark'),
       transaction
     })
 
-    if (marks.length === 0) return []
+    const { rows, count } = marks
 
-    const response = marks.map(item => ({ mark: item.mark }))
+    if (rows.length === 0) {
+      return {
+        page: null,
+        show: 0,
+        count,
+        rows: []
+      }
+    }
+
+    const response = {
+      page: pageResponse,
+      show: R.min(limit, count),
+      count,
+      rows
+    }
 
     return response
   }
