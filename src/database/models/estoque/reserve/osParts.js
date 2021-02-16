@@ -50,6 +50,12 @@ module.exports = (sequelize) => {
     serialNumbers: {
       type: Sequelize.ARRAY(Sequelize.STRING),
       allowNull: true
+    },
+
+    accessSecurity:{
+      type: Sequelize.STRING,
+      allowNull: true,
+      defaultValue: null
     }
   })
 
