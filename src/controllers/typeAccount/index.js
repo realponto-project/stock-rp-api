@@ -73,6 +73,6 @@ const getByIdTypeAccount = async (req, res, next) => {
 module.exports = {
   add,
   getAll,
-  getResourcesByTypeAccount,
-  getByIdTypeAccount
+  getByIdTypeAccount,
+  getResourcesByTypeAccount
 }

@@ -54,8 +54,18 @@ const update = async (req, res, next) => {
   }
 }
 
+const getByIdProvider = async (req, res, next) => {
+  try{
+    const products = await supProviderDomain.getById(req.params.id)
+    res.json(products)
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
   create,
   getAll,
-  update
+  getByIdProvider,
+  update,
 }

@@ -4,5 +4,6 @@ const providerController = require("../../../../controllers/suprimentos/provider
 router.post("", providerController.create)
 router.put("", providerController.update)
 router.get("", providerController.getAll)
+router.get("/getByIdProvider/:id", providerController.getByIdProvider)
 
 module.exports = router
