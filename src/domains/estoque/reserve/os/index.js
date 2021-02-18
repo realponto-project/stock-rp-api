@@ -888,6 +888,22 @@ module.exports = class OsDomain {
       transaction
     })
 
+    const include = [
+      {
+        model: Product,
+        where: getWhere('product'),
+        required: R.isEmpty(getWhere('equip'))
+      }
+    ]
+
+    if (!R.isEmpty(getWhere('equip'))) {
+      include.push({
+        model: Equip,
+        where: getWhere('equip'),
+        required: !R.isEmpty(getWhere('equip'))
+      })
+    }
+
     const os = await Os.findAndCountAll({
       where: whereOs,
       include: [
@@ -898,12 +914,7 @@ module.exports = class OsDomain {
         {
           model: ProductBase,
           required: false,
-          include: [
-            {
-              model: Product,
-              where: getWhere('product')
-            }
-          ],
+          include,
           through: {
             paranoid,
             where: getWhere('osParts')
