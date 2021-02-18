@@ -25,6 +25,8 @@ class SessionDomain {
       include: [{ model: TypeAccount, include: [Resources] }, Resources]
     })
 
+    console.log(JSON.parse(JSON.stringify(user)))
+
     if (!user) throw new Error('User not found')
 
     if (!(await user.checkPassword(password))) {
