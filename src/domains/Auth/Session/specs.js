@@ -6,6 +6,7 @@ const responseSigInSpec = applySpec({
   technicianId: path(['technicianId']),
   username: path(['username']),
   tecnico: path(['tecnico']),
+  typeAccount: path(['typeAccount']),
   permissions: pipe(
     ifElse(
       path(['tecnico']),

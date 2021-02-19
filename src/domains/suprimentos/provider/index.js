@@ -374,4 +374,16 @@ module.exports = class SupProviderDomain {
 
     return response
   }
+
+  async getByIdProvider(id) {
+    const provider = await SupProvider.findByPk(id, {
+      include: [SupContact]
+    })
+
+    if (!provider) {
+      throw new NotFoundError()
+    }
+
+    return provider
+  }
 }
