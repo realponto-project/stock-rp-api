@@ -1,4 +1,7 @@
 const R = require('ramda')
+const { pathOr, isEmpty, isNil } = require('ramda')
+const bcrypt = require('bcrypt')
+
 const moment = require('moment')
 const Sequelize = require('sequelize')
 const database = require('../../../../database')
@@ -21,87 +24,79 @@ const { Op } = Sequelize
 
 class ReservaTecnicoDomain {
   async create(body, options = {}) {
+    let fieldsError = []
     const { transaction = null } = options
-
-    const reservaTecnicoNotHasProp = prop => R.not(R.has(prop, body))
-
-    const field = { technician: false }
-
-    const message = { technician: '' }
-
-    let errors = false
-
-    let technicianId = ''
-
-    if (reservaTecnicoNotHasProp('data')) {
-      field.data = true
-      message.data = 'data cannot undefined'
-      errors = true
+    const payload = {
+      technician: pathOr(null, ['technician'], body),
+      rows: pathOr(null, ['rows'], body),
+      data: pathOr(null, ['data'], body),
+      accessSecurity: pathOr(null, ['accessSecurity'], body),
+    }
+    
+    for ( let key in payload) {
+      if (!payload[key]) {
+        fieldsError = [
+          ...fieldsError,
+          {
+            field: key,
+            message: `${key} cannot be null or undefined, field is required!`,
+          }
+        ]
+      }
     }
 
-    if (reservaTecnicoNotHasProp('technician') || !body.technician) {
-      field.technician = true
-      message.technician = 'technician cannot null'
-      errors = true
-    } else {
-      const tecnico = await Technician.findOne({
-        where: { name: body.technician },
-        transaction
-      })
+    await payload.rows.forEach(async item => {
+      const product = pathOr(null, ['produto'], item)
+      const serial = pathOr(null, ['serial'], item)
+      const amount = pathOr(null, ['amount'], item) 
+      
+      if (isNil(product)) {
+        fieldsError = [
+          ...fieldsError,
+          {
+            field: 'product',
+            message: 'product cannot be null or undefined!',
+          }
+        ]
+      }
 
+      if (isNil(serial)) {
+        fieldsError = [
+          ...fieldsError,
+          {
+            field: 'serial',
+            message: 'serial cannot be null or undefined!',
+          }
+        ]
+      }
+
+      if (isNil(amount)) {
+        fieldsError = [
+          ...fieldsError,
+          {
+            field: 'amount',
+            message: 'amount cannot be null or undefined!',
+          }
+        ]
+      }
+
+      const tecnico = await Technician.findOne({ where: { name: payload.technician }})
+      const produto = await Product.findOne({ where: { name: product }})
+     
       if (!tecnico) {
-        field.technician = true
-        message.technician = 'técnico inválido'
-        errors = true
-      } else {
-        technicianId = tecnico.id
-      }
-    }
+        fieldsError = [
+          ...fieldsError,
+          {
+            field: 'technician',
+            message: 'cannot find technician!',
+          }
+        ]
+      } 
 
-    if (reservaTecnicoNotHasProp('rows') || !body.rows) {
-      field.rows = true
-      message.rows = 'rows cannot null'
-      errors = true
-    }
-
-    if (errors) {
-      throw new FieldValidationError([{ field, message }])
-    }
-
-    const { rows } = body
-
-    for (let index = 0; index < rows.length; index++) {
-      const rowNotHasProp = prop => R.not(R.has(prop, rows[index]))
-
-      let productId = ''
-
-      if (rowNotHasProp('produto') || !rows[index].produto) {
-        throw new FieldValidationError([{ field, message }])
-      } else {
-        const produto = await Product.findOne({
-          where: { name: rows[index].produto },
-          transaction
-        })
-
-        if (produto) {
-          productId = produto.id
-        } else {
-          throw new FieldValidationError([{ field, message }])
-        }
-      }
-
-      if (rowNotHasProp('amount') || !rows[index].amount) {
-        throw new FieldValidationError([{ field, message }])
-      }
-
-      if (rowNotHasProp('serial')) {
-        throw new FieldValidationError([{ field, message }])
-      }
-
-      const technicianReserve = await TechnicianReserve.findOne({
+      technicianReserve = await TechnicianReserve.findOne({
         where: {
-          productId,
-          technicianId,
+          productId: produto.id,
+          technicianId: tecnico.id,
           data:
             body.technician !== 'LABORATORIO'
               ? {
@@ -111,83 +106,75 @@ class ReservaTecnicoDomain {
               : { [Op.eq]: null }
         },
         paranoid: false,
-        transaction
       })
 
       let technicianReserveId = null
-
       if (technicianReserve) {
         technicianReserveId = technicianReserve.id
 
         await technicianReserve.update(
           {
-            amount: technicianReserve.amount + rows[index].amount,
-            amountAux: technicianReserve.amountAux + rows[index].amount
-          },
-          { transaction }
+            amount: technicianReserve.amount + item.amount,
+            amountAux: technicianReserve.amountAux + item.amount
+          }, { transaction }
         )
       } else {
+      
         const technicianReserveCreated = await TechnicianReserve.create(
           {
-            productId,
-            technicianId,
-            data: body.technician !== 'LABORATORIO' ? body.data : null,
-            amount: rows[index].amount,
-            amountAux: rows[index].amount
-          },
-          { transaction }
+            productId: produto.id,
+            technicianId: tecnico.id,
+            data: payload.technician !== 'LABORATORIO' ? payload.data : null,
+            amount: item.amount,
+            amountAux: item.amount
+          }, { transaction }
         )
 
-        technicianReserveId = technicianReserveCreated.id
+        technicianReserveId = technicianReserveCreated.id       
       }
 
-      await Promise.all(
-        rows[index].osPartisIdArray.map(async id => {
-          const osPart = await OsParts.findByPk(id, { transaction })
-
-          if (
-            osPart.technicianReserveId &&
-            osPart.technicianReserveId !== technicianReserveId
-          ) {
-            throw new FieldValidationError([{ field, message }])
-          }
-
-          await osPart.update({ technicianReserveId }, { transaction })
-        })
+      const accessSecurity = (
+        await bcrypt.hash(
+          `{ "name": ${payload.technician}, "accessSecurity": ${payload.accessSecurity}, "createdAt":${moment()} }`, 10
+        )
       )
+      
+      await Promise.all(item.osPartisIdArray.map(async (osPartItem) => {
+        const osPartItemFound = await OsParts.findByPk(osPartItem)
+        await osPartItemFound.update({
+          prevAction: 'saida',
+          technicianReserveId,
+          reserved: true,
+          accessSecurity,
+        }, { transaction })
 
-      if (rows[index].serial) {
-        if (!rowNotHasProp('serialNumbers')) {
-          if (rows[index].serialNumbers) {
-            await Promise.all(
-              rows[index].serialNumbers.map(async item => {
-                const { serialNumber } = item
+        osPartItemFound.reload()
+        return osPartItemFound
+      }))
 
-                const equip = await Equip.findOne({
-                  where: { serialNumber },
-                  transaction
-                })
+     if (item.serial) {
+      await Promise.all(item.serialNumbers.map(async (serialNumberItem) => {
+        const serialNumberItemFound = await Equip.findOne({ where: { serialNumber }})
+        await serialNumberItemFound.update({
+          prevAction: 'saida',
+          technicianReserveId,
+          reserved: true
+        }, { transaction })
 
-                if (!equip) {
-                  throw new FieldValidationError([{ field, message }])
-                }
-
-                await equip.update(
-                  {
-                    prevAction: 'saida',
-                    technicianReserveId,
-                    reserved: true
-                  },
-                  { transaction }
-                )
-              })
-            )
-          } else {
-            throw new FieldValidationError([{ field, message }])
-          }
-        }
-      }
+        serialNumberItemFound.reload()
+        return serialNumberItemFound
+      }))
+     }
+    })
+    
+    if (!isEmpty(fieldsError)) {
+      throw new FieldValidationError(fieldsError)
     }
+
+    return ({
+      statusCode: 200,
+      message: 'reserva criada com sucesso!!!'
+    })
   }
 
   async getAll(options = {}) {
