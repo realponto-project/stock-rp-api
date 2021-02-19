@@ -15,5 +15,3 @@ xlxs.js
 dump_*
 
 /src/fixDb.js
-
-/src/database/seeders
