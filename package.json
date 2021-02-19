@@ -11,8 +11,7 @@
     "migrate": "npx sequelize-cli db:migrate",
     "seeders": "npx sequelize-cli db:seed:all",
     "seeders:undo:all": "sequelize db:seed:all",
-    "migrate:undo:all": "sequelize db:migrate:undo:all",
-    "build": "yarn migrate && yarn seeders"
+    "migrate:undo:all": "sequelize db:migrate:undo:all"
   },
   "dependencies": {
     "@fnando/cnpj": "1.0.1",
