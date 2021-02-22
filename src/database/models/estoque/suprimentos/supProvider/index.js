@@ -46,6 +46,8 @@ module.exports = (sequelize) => {
       allowNull: false
     },
 
+    referencePoint:{ type: Sequelize.STRING },
+
     zipCode: {
       type: Sequelize.STRING,
       allowNull: false,
