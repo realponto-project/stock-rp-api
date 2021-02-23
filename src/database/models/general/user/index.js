@@ -22,6 +22,10 @@ module.exports = sequelize => {
         allowNull: false
         // defaultValue: false,
       },
+      cardId: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
       modulo: {
         type: Sequelize.BOOLEAN,
         defaultValue: false
