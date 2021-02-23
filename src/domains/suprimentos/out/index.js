@@ -176,7 +176,7 @@ module.exports = class SupOutDomain {
     const supOuts = await SupOut.findAndCountAll({
       where: getWhere('supOut'),
       include: [{ model: SupProduct, where: getWhere('supProduct') }],
-      order: [['createdAt', 'ASC']],
+      order: [['createdAt', 'DESC']],
       limit,
       offset,
       transaction

@@ -490,7 +490,7 @@ class UserDomain {
     return response
   }
 
-  async getById({ id }) {
+  async getById( id ) {
     const user = await User.findByPk(id, {
       exclude: ['password'],
       include: [

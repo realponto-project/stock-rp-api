@@ -516,7 +516,7 @@ module.exports = class TypeAccountDomain {
     return response
   }
 
-  async getById(id) {
+  async getByIdTypeAccount(id) {
     const typeAccount = await TypeAccount.findByPk(id, {include: [Resources]})
     if(!typeAccount){
       throw new NotFoundError()

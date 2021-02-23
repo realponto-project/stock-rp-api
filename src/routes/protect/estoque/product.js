@@ -8,6 +8,6 @@ router.get("/getEquipsByEntrance", productController.getEquipsByEntrance)
 router.get("/getAllNames", productController.getAllNames)
 router.get("/getProductByStockBase", productController.getProductByStockBase)
 router.get("/getAllVendas", productController.getAllVendas)
-router.get("/getByIdProducts", productController.getByIdProducts)
+router.get("/getByIdProducts/:id", productController.getByIdProducts)
 
 module.exports = router

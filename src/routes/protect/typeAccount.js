@@ -7,5 +7,6 @@ router.get(
   "/getResourcesByTypeAccount",
   typeAccountController.getResourcesByTypeAccount
 )
+router.get("/getByIdTypeAccount/:id", typeAccountController.getByIdTypeAccount)
 
 module.exports = router

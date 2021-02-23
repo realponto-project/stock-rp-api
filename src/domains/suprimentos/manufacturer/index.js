@@ -53,7 +53,7 @@ module.exports = class ManufacturerDomain {
     const manufacturers = await Manufacturer.findAndCountAll({
       where: getWhere('manufacturer'),
       order: [['name', 'ASC']],
-      limit,
+      limit: query.total === null ? undefined : limit,
       offset,
       transaction
     })
