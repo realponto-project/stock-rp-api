@@ -16,7 +16,7 @@ module.exports = class SupProviderDomain {
   async create(body, options = {}) {
     const { transaction = null } = options
 
-    const supProvider = body
+    const supProvider = R.omit(['id'], body)
 
     const notHasProp = prop => R.not(R.has(prop, supProvider))
 
@@ -173,7 +173,9 @@ module.exports = class SupProviderDomain {
 
     const { getWhere, limit, offset, pageResponse } = formatQuery(newQuery)
 
-    const supProviders = await SupProvider.findAndCountAll({
+    const count = await SupProvider.count()
+
+    const rows = await SupProvider.findAll({
       where: getWhere('supProvider'),
       include: [{ model: SupContact }],
       order: [['createdAt', 'ASC']],
@@ -181,8 +183,6 @@ module.exports = class SupProviderDomain {
       offset,
       transaction
     })
-
-    const { rows, count } = supProviders
 
     if (rows.length === 0) {
       return {
